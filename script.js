@@ -204,6 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (previewAvatar) {
     previewAvatar.addEventListener('error', () => {
       console.error("Avatar failed to load. Configured src URL was:", previewAvatar.src);
+      showToast("Avatar Load Failed", "Failed to load: " + previewAvatar.src, true);
     });
   }
 
@@ -664,13 +665,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Helper to upload base64 image to Cloudinary using signed or unsigned upload
   async function uploadToCloudinary(base64Data) {
     const env = window.ENV || {};
-    const cloudName = env.CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = env.CLOUDINARY_UPLOAD_PRESET;
+    const cloudName = env.CLOUDINARY_CLOUD_NAME || 'dorjgyfdl';
+    const uploadPreset = env.CLOUDINARY_UPLOAD_PRESET || 'lms-form';
     const apiKey = env.CLOUDINARY_API_KEY;
     const apiSecret = env.CLOUDINARY_API_SECRET;
 
     if (!cloudName) {
-      throw new Error('Cloudinary cloud name is not configured in env.js');
+      throw new Error('Cloudinary cloud name is not configured');
     }
 
     const formData = new FormData();
@@ -709,11 +710,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return result.secure_url;
   }
 
-  // Extract path of a Cloudinary secure URL (including version prefix) to minimize URL footprint while ensuring reliable CDN delivery
+  // Extract path of a Cloudinary secure URL and prefix with 'c:' marker for reliable detection
   function getCloudinaryPath(url) {
     if (!url) return '';
     const match = url.match(/\/image\/upload\/(.+)$/);
-    return match ? match[1] : url;
+    return match ? 'c:' + match[1] : 'c:' + url;
   }
 
   // Custom Toast helper
@@ -1685,12 +1686,20 @@ document.addEventListener('DOMContentLoaded', () => {
           if (previewAvatar) {
             console.log("checkSharedLink: Raw avatar data from payload =", decodedData.av);
             let avatarSrc = decodedData.av;
-            // Decode backward compatible raw base64 or construct secure Cloudinary CDN url
-            if (!avatarSrc.startsWith('http://') && !avatarSrc.startsWith('https://') && !avatarSrc.includes('lms_avatars/') && !avatarSrc.includes('lms-avatars/')) {
-              avatarSrc = 'data:image/jpeg;base64,' + avatarSrc;
-            } else if (!avatarSrc.startsWith('http://') && !avatarSrc.startsWith('https://')) {
+            // Detect Cloudinary paths by 'c:' prefix, full URLs, or legacy folder patterns
+            if (avatarSrc.startsWith('c:')) {
+              // New format: 'c:' prefixed Cloudinary path
+              const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
+              avatarSrc = `https://res.cloudinary.com/${cloudName}/image/upload/${avatarSrc.substring(2)}`;
+            } else if (avatarSrc.startsWith('http://') || avatarSrc.startsWith('https://')) {
+              // Already a full URL, use as-is
+            } else if (avatarSrc.includes('lms_avatars/') || avatarSrc.includes('lms-avatars/')) {
+              // Legacy format: folder-based Cloudinary path without prefix
               const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
               avatarSrc = `https://res.cloudinary.com/${cloudName}/image/upload/${avatarSrc}`;
+            } else {
+              // Raw base64 data
+              avatarSrc = 'data:image/jpeg;base64,' + avatarSrc;
             }
             console.log("checkSharedLink: Final constructed avatar URL =", avatarSrc);
             previewAvatar.src = avatarSrc;
@@ -1996,11 +2005,16 @@ document.addEventListener('DOMContentLoaded', () => {
         let avatarHtml = `<i data-lucide="user" class="card-avatar-placeholder" style="color: var(--text-muted); font-size: 1.1rem;"></i>`;
         if (m.av) {
           let src = m.av;
-          if (!src.startsWith('http://') && !src.startsWith('https://') && !src.includes('lms_avatars/') && !src.includes('lms-avatars/')) {
-            src = 'data:image/jpeg;base64,' + src;
-          } else if (!src.startsWith('http://') && !src.startsWith('https://')) {
+          if (src.startsWith('c:')) {
+            const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
+            src = `https://res.cloudinary.com/${cloudName}/image/upload/${src.substring(2)}`;
+          } else if (src.startsWith('http://') || src.startsWith('https://')) {
+            // full URL, use as-is
+          } else if (src.includes('lms_avatars/') || src.includes('lms-avatars/')) {
             const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
             src = `https://res.cloudinary.com/${cloudName}/image/upload/${src}`;
+          } else {
+            src = 'data:image/jpeg;base64,' + src;
           }
           avatarHtml = `<img src="${src}" alt="${m.n}" style="width: 100%; height: 100%; object-fit: cover;">`;
         }
