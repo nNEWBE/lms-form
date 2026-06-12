@@ -814,6 +814,42 @@
     </div>
   </div>
 
+  <!-- Registration Success Modal -->
+  <div class="success-modal-overlay" id="success-modal">
+    <div class="success-modal-content">
+      <div class="success-modal-icon-wrapper">
+        <div class="success-modal-pulse-ring"></div>
+        <i data-lucide="party-popper" class="success-modal-icon"></i>
+      </div>
+      
+      <h3 class="success-modal-title">Registration Complete!</h3>
+      <p class="success-modal-desc">The library membership card has been successfully generated and compiled into the central directory.</p>
+      
+      <div class="success-member-summary">
+        <div class="summary-field">
+          <span class="summary-label">Name:</span>
+          <span class="summary-value" id="success-summary-name">Member Name</span>
+        </div>
+        <div class="summary-field">
+          <span class="summary-label">Tier:</span>
+          <span class="summary-value" id="success-summary-tier">Standard</span>
+        </div>
+        <div class="summary-field">
+          <span class="summary-label">Access Key:</span>
+          <span class="summary-value" id="success-summary-key">LMS-0000-00A</span>
+        </div>
+      </div>
+      
+      <div class="success-modal-actions">
+        <button type="button" class="btn btn-secondary" id="btn-success-close">Dismiss</button>
+        <button type="button" class="btn btn-primary" id="btn-success-view">
+          <i data-lucide="eye"></i>
+          <span>View Card</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>

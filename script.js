@@ -27,6 +27,142 @@ document.addEventListener('DOMContentLoaded', () => {
     return hash && decodeURIComponent(hash).startsWith('#share=');
   }
 
+  // Helper to compress and generate the share payload
+  function getSharePayload() {
+    const deptValText = document.getElementById('custom-select-value-dept') ? document.getElementById('custom-select-value-dept').textContent : 'DEPT';
+    const semValText = document.getElementById('custom-select-value-semester') ? document.getElementById('custom-select-value-semester').textContent : 'SEMESTER';
+    
+    const semMap = {
+      '1st Sem': '1', '2nd Sem': '2', '3rd Sem': '3', '4th Sem': '4', '5th Sem': '5',
+      '6th Sem': '6', '7th Sem': '7', '8th Sem': '8', '9th Sem': '9', '10th Sem': '10'
+    };
+    const tierMap = { 'Standard': 'S', 'Premium': 'P', 'VIP': 'V' };
+
+    // Compress URL payload by omitting defaults/placeholders and using a joined control-character separator
+    const nameVal = previewName.textContent === DEFAULTS.name ? "" : previewName.textContent;
+    const deptVal = (deptValText === 'DEPT' || deptValText === 'Select Department') ? "" : deptValText;
+    const batchValText = inputBatch ? inputBatch.value : 'Batch 60';
+    const batchVal = batchValText === 'Batch 60' ? "" : batchValText.replace(/Batch\s+/i, '');
+    const semVal = (semValText === 'SEMESTER' || semValText === 'Select Semester') ? "" : (semMap[semValText] || semValText);
+    const emailVal = previewEmail.textContent === DEFAULTS.email ? "" : previewEmail.textContent;
+    const phoneVal = previewPhone.textContent === DEFAULTS.phone ? "" : previewPhone.textContent;
+    const limitValText = previewLimit.textContent;
+    const limitDigits = limitValText.match(/\d+/);
+    const limitVal = (limitDigits && limitDigits[0] === String(DEFAULTS.limit)) ? "" : (limitDigits ? limitDigits[0] : "");
+    const termVal = previewTerm.textContent === DEFAULTS.term ? "" : previewTerm.textContent;
+    const keyValText = previewCardKey.textContent;
+    const keyVal = keyValText.startsWith('LMS-') ? keyValText.replace('LMS-', '') : keyValText;
+    const themeValText = libraryCard.style.getPropertyValue('--user-card-theme') || DEFAULTS.theme;
+    const themeVal = themeValText === DEFAULTS.theme ? "" : themeValText.replace('#', '');
+    const addrText = document.getElementById('preview-address') ? document.getElementById('preview-address').textContent : '';
+    const addrVal = (addrText === '' || addrText === 'No specific special clearances or address declared.') ? "" : addrText;
+    const tierText = previewTier.querySelector('span') ? previewTier.querySelector('span').textContent : 'Standard';
+    const tierVal = tierText === DEFAULTS.tier ? "" : (tierMap[tierText] || tierText);
+
+    const cardDataArray = [
+      nameVal,
+      deptVal,
+      batchVal,
+      semVal,
+      emailVal,
+      phoneVal,
+      limitVal,
+      termVal,
+      keyVal,
+      themeVal,
+      addrVal,
+      tierVal,
+      compressedAvatarBase64
+    ];
+
+    // Join with ASCII Unit Separator control character (impossible to be input by users)
+    const rawString = cardDataArray.join('\u001f');
+    return btoa(unescape(encodeURIComponent(rawString))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  // Canvas-based Confetti celebration animation
+  function triggerConfetti() {
+    const canvas = document.createElement('canvas');
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100vw';
+    canvas.style.height = '100vh';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = '9999';
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    const resizeHandler = () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', resizeHandler);
+
+    const colors = ['#8b5cf6', '#06b6d4', '#ec4899', '#eab308', '#22c55e', '#3b82f6'];
+    const particles = [];
+
+    // Shoot from bottom corners
+    const particleCount = 120;
+    for (let i = 0; i < particleCount; i++) {
+      const isLeft = i < particleCount / 2;
+      particles.push({
+        x: isLeft ? 0 : width,
+        y: height * 0.85,
+        vx: isLeft ? (6 + Math.random() * 12) : -(6 + Math.random() * 12),
+        vy: -14 - Math.random() * 14,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: 6 + Math.random() * 6,
+        rotation: Math.random() * 360,
+        rotationSpeed: -6 + Math.random() * 12,
+        opacity: 1,
+        gravity: 0.35,
+        drag: 0.975
+      });
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+
+      let alive = false;
+      particles.forEach(p => {
+        p.vy += p.gravity;
+        p.vx *= p.drag;
+        p.vy *= p.drag;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rotation += p.rotationSpeed;
+
+        if (p.y < height && p.opacity > 0 && p.x >= 0 && p.x <= width) {
+          alive = true;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rotation * Math.PI / 180);
+          ctx.globalAlpha = p.opacity;
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+          
+          if (p.vy > 0) {
+            p.opacity -= 0.012;
+          }
+        }
+      });
+
+      if (alive) {
+        requestAnimationFrame(animate);
+      } else {
+        window.removeEventListener('resize', resizeHandler);
+        canvas.remove();
+      }
+    }
+
+    animate();
+  }
+
   // Elements - Form Inputs
   const form = document.getElementById('library-member-form');
   const inputName = document.getElementById('full_name');
@@ -516,7 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      const maxDim = 80;
+      const maxDim = 150;
       let w = img.width;
       let h = img.height;
       if (w > h) {
@@ -533,8 +669,13 @@ document.addEventListener('DOMContentLoaded', () => {
       canvas.width = w;
       canvas.height = h;
       const ctx = canvas.getContext('2d');
+      
+      // Enable high quality image scaling
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      
       ctx.drawImage(img, 0, 0, w, h);
-      const compressedUrl = canvas.toDataURL('image/jpeg', 0.4);
+      const compressedUrl = canvas.toDataURL('image/jpeg', 0.7);
       const base64Data = compressedUrl.split(',')[1];
       callback(base64Data);
     };
@@ -779,18 +920,49 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       btnSubmit.classList.remove('is-loading');
       
-      // Setup success toast info
       const nameVal = inputName.value.trim() || 'Member';
-      toastMessage.textContent = `${nameVal} has been successfully added to the Central Database.`;
+      const tierVal = document.querySelector('input[name="tier"]:checked')?.value || 'Standard';
+      const keyVal = previewCardKey.textContent;
       
-      // Show Success Toast Notification
-      successToast.classList.add('show');
-      setTimeout(() => {
-        successToast.classList.remove('show');
-      }, 4000);
+      // Update success modal summary fields
+      document.getElementById('success-summary-name').textContent = nameVal;
+      document.getElementById('success-summary-tier').textContent = tierVal;
+      document.getElementById('success-summary-key').textContent = keyVal;
       
-      // Trigger a clean reset of the form
-      btnReset.click();
+      // Keep a reference to the payload before resetting form
+      const payload = getSharePayload();
+      
+      // Trigger success modal
+      const successModal = document.getElementById('success-modal');
+      if (successModal) {
+        successModal.classList.add('open');
+      }
+      
+      // Trigger confetti animation!
+      triggerConfetti();
+
+      // View Card click handler inside success modal
+      const btnSuccessView = document.getElementById('btn-success-view');
+      if (btnSuccessView) {
+        btnSuccessView.onclick = () => {
+          successModal.classList.remove('open');
+          // Update URL hash to view the card in shared viewer mode
+          window.location.hash = `share=${payload}`;
+          
+          // Reset form fields
+          btnReset.click();
+        };
+      }
+
+      // Close / Dismiss click handler inside success modal
+      const btnSuccessClose = document.getElementById('btn-success-close');
+      if (btnSuccessClose) {
+        btnSuccessClose.onclick = () => {
+          successModal.classList.remove('open');
+          // Reset form fields
+          btnReset.click();
+        };
+      }
     }, 1600);
   });
 
@@ -1107,55 +1279,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnShare && shareModal) {
     btnShare.addEventListener('click', () => {
-      const deptValText = document.getElementById('custom-select-value-dept') ? document.getElementById('custom-select-value-dept').textContent : 'DEPT';
-      const semValText = document.getElementById('custom-select-value-semester') ? document.getElementById('custom-select-value-semester').textContent : 'SEMESTER';
-      
-      const semMap = {
-        '1st Sem': '1', '2nd Sem': '2', '3rd Sem': '3', '4th Sem': '4', '5th Sem': '5',
-        '6th Sem': '6', '7th Sem': '7', '8th Sem': '8', '9th Sem': '9', '10th Sem': '10'
-      };
-      const tierMap = { 'Standard': 'S', 'Premium': 'P', 'VIP': 'V' };
-
-      // Compress URL payload by omitting defaults/placeholders and using a joined control-character separator
-      const nameVal = previewName.textContent === DEFAULTS.name ? "" : previewName.textContent;
-      const deptVal = (deptValText === 'DEPT' || deptValText === 'Select Department') ? "" : deptValText;
-      const batchValText = inputBatch ? inputBatch.value : 'Batch 60';
-      const batchVal = batchValText === 'Batch 60' ? "" : batchValText.replace(/Batch\s+/i, '');
-      const semVal = (semValText === 'SEMESTER' || semValText === 'Select Semester') ? "" : (semMap[semValText] || semValText);
-      const emailVal = previewEmail.textContent === DEFAULTS.email ? "" : previewEmail.textContent;
-      const phoneVal = previewPhone.textContent === DEFAULTS.phone ? "" : previewPhone.textContent;
-      const limitValText = previewLimit.textContent;
-      const limitDigits = limitValText.match(/\d+/);
-      const limitVal = (limitDigits && limitDigits[0] === String(DEFAULTS.limit)) ? "" : (limitDigits ? limitDigits[0] : "");
-      const termVal = previewTerm.textContent === DEFAULTS.term ? "" : previewTerm.textContent;
-      const keyValText = previewCardKey.textContent;
-      const keyVal = keyValText.startsWith('LMS-') ? keyValText.replace('LMS-', '') : keyValText;
-      const themeValText = libraryCard.style.getPropertyValue('--user-card-theme') || DEFAULTS.theme;
-      const themeVal = themeValText === DEFAULTS.theme ? "" : themeValText.replace('#', '');
-      const addrText = document.getElementById('preview-address') ? document.getElementById('preview-address').textContent : '';
-      const addrVal = (addrText === '' || addrText === 'No specific special clearances or address declared.') ? "" : addrText;
-      const tierText = previewTier.querySelector('span') ? previewTier.querySelector('span').textContent : 'Standard';
-      const tierVal = tierText === DEFAULTS.tier ? "" : (tierMap[tierText] || tierText);
-
-      const cardDataArray = [
-        nameVal,
-        deptVal,
-        batchVal,
-        semVal,
-        emailVal,
-        phoneVal,
-        limitVal,
-        termVal,
-        keyVal,
-        themeVal,
-        addrVal,
-        tierVal,
-        compressedAvatarBase64
-      ];
-
-      // Join with ASCII Unit Separator control character (impossible to be input by users)
-      const rawString = cardDataArray.join('\u001f');
-      const payload = btoa(unescape(encodeURIComponent(rawString))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      const payload = getSharePayload();
       const currentUrl = window.location.href.split('#')[0];
       const finalShareUrl = `${currentUrl}#share=${payload}`;
 
