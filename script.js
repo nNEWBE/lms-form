@@ -42,8 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const labelLimitValue = document.getElementById('borrow-limit-val');
   const ticksElements = document.querySelectorAll('.slider-scale-ticks .tick');
   const inputBatch = document.getElementById('batch');
-  const inputSearch = document.getElementById('search_interests');
-  const genreCheckboxes = document.querySelectorAll('#genre-checkbox-container input[type="checkbox"]');
+
   const inputAddress = document.getElementById('address');
   const inputAgree = document.getElementById('agree_terms');
 
@@ -68,6 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
     optionsContainerId,
     hiddenSelectId,
     defaultValue,
+    hasSearch,
+    searchPlaceholder,
     onChange
   }) {
     const wrapper = document.getElementById(wrapperId);
@@ -81,11 +82,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const options = optionsContainer.querySelectorAll('.custom-option');
     let currentValue = defaultValue || hiddenSelect.value;
     
+    let searchInput = null;
+    if (hasSearch) {
+      const searchContainer = document.createElement('div');
+      searchContainer.className = 'select-search-container';
+      searchContainer.innerHTML = `
+        <i data-lucide="search" class="select-search-icon"></i>
+        <input type="text" class="select-search-input" placeholder="${searchPlaceholder || 'Search...'}">
+      `;
+      optionsContainer.insertBefore(searchContainer, optionsContainer.firstChild);
+
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+
+      searchInput = searchContainer.querySelector('.select-search-input');
+      
+      // Prevent clicking the search box from propagating and closing dropdown
+      searchInput.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+
+      // Filter options on text input
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        options.forEach(option => {
+          const text = option.textContent.toLowerCase();
+          if (text.includes(query)) {
+            option.style.display = '';
+          } else {
+            option.style.display = 'none';
+          }
+        });
+      });
+    }
+    
     trigger.addEventListener('click', (e) => {
       e.stopPropagation();
       const isOpen = wrapper.classList.contains('open');
       closeAllDropdowns();
-      if (!isOpen) wrapper.classList.add('open');
+      if (!isOpen) {
+        wrapper.classList.add('open');
+        if (searchInput) {
+          searchInput.value = '';
+          options.forEach(o => o.style.display = '');
+          setTimeout(() => searchInput.focus(), 50);
+        }
+      }
     });
     
     options.forEach(option => {
@@ -126,6 +169,10 @@ document.addEventListener('DOMContentLoaded', () => {
             o.classList.remove('selected');
           }
         });
+        if (searchInput) {
+          searchInput.value = '';
+          options.forEach(o => o.style.display = '');
+        }
       },
       setValue: (val) => {
         options.forEach(o => {
@@ -316,6 +363,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const randChar = chars[Math.floor(Math.random() * chars.length)];
     const key = `LMS-${randPart1}-${randPart2}${randChar}`;
     previewCardKey.textContent = key;
+
+    // Also update QR Code!
+    const qrImage = document.getElementById('preview-qr');
+    if (qrImage) {
+      qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(key)}&color=ffffff&bgcolor=12131a`;
+    }
   }
   generateCardKey();
 
@@ -336,7 +389,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const radioTiers = document.querySelectorAll('input[name="tier"]');
   const tierMap = {
     'Standard': { icon: 'shield', label: 'Standard', class: 'tier-standard' },
-    'Faculty': { icon: 'graduation-cap', label: 'Faculty', class: 'tier-faculty' },
     'Premium': { icon: 'zap', label: 'Premium', class: 'tier-premium' },
     'VIP': { icon: 'crown', label: 'VIP', class: 'tier-vip' }
   };
@@ -458,24 +510,6 @@ document.addEventListener('DOMContentLoaded', () => {
     labelFile.textContent = 'Choose image or drag here';
   }
 
-  // Genre Category Live Filter Tag Search
-  inputSearch.addEventListener('input', (e) => {
-    const filter = e.target.value.toLowerCase().trim();
-    genreCheckboxes.forEach(checkbox => {
-      const parentLabel = checkbox.closest('.custom-checkbox');
-      const labelText = parentLabel.querySelector('span:not(.checkmark)').textContent.toLowerCase();
-      
-      if (labelText.includes(filter)) {
-        parentLabel.style.opacity = '1';
-        parentLabel.style.transform = 'scale(1)';
-        parentLabel.style.pointerEvents = 'auto';
-      } else {
-        parentLabel.style.opacity = '0.35';
-        parentLabel.style.transform = 'scale(0.95)';
-        parentLabel.style.pointerEvents = 'none';
-      }
-    });
-  });
 
   // Drag and drop event listeners for avatar dropzone
   ['dragenter', 'dragover'].forEach(eventName => {
@@ -506,8 +540,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Immersive 3D Tilt & Holographic reflection card calculations
-  cardPerspective.addEventListener('mousemove', (e) => {
-    const cardRect = cardPerspective.getBoundingClientRect();
+  const handleTiltMove = (e, container) => {
+    const cardRect = container.getBoundingClientRect();
     
     // Mouse coords relative to card
     const x = e.clientX - cardRect.left;
@@ -517,27 +551,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const px = (x / cardRect.width) - 0.5;
     const py = (y / cardRect.height) - 0.5;
     
-    // Rotational angles (maximum 15deg tilt)
+    // Rotational angles (maximum 20deg tilt)
     const rotateY = px * 20;
     const rotateX = -py * 20;
     
-    libraryCard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    const isFlipped = libraryCard.classList.contains('flipped');
+    const baseRotationY = isFlipped ? 180 : 0;
+    
+    libraryCard.style.transform = `rotateX(${rotateX}deg) rotateY(${baseRotationY + rotateY}deg)`;
     
     // Holographic shine translation
     const glowAngle = Math.atan2(y - cardRect.height / 2, x - cardRect.width / 2) * (180 / Math.PI);
     libraryCard.style.setProperty('--hologram-pos', `${x / cardRect.width * 100}% ${y / cardRect.height * 100}%`);
     
     // Modify shine overlay dynamically
-    const shineOverlay = libraryCard.querySelector('.library-card-glow');
-    shineOverlay.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255, 255, 255, 0.15) 0%, transparent 60%)`;
-  });
+    const shineOverlays = libraryCard.querySelectorAll('.library-card-glow');
+    shineOverlays.forEach(overlay => {
+      overlay.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255, 255, 255, 0.15) 0%, transparent 60%)`;
+    });
+  };
 
-  cardPerspective.addEventListener('mouseleave', () => {
+  const handleTiltLeave = () => {
     // Reset rotations smoothly
-    libraryCard.style.transform = 'rotateX(0deg) rotateY(0deg)';
-    const shineOverlay = libraryCard.querySelector('.library-card-glow');
-    shineOverlay.style.background = `radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)`;
-  });
+    const isFlipped = libraryCard.classList.contains('flipped');
+    libraryCard.style.transform = `rotateX(0deg) rotateY(${isFlipped ? 180 : 0}deg)`;
+    const shineOverlays = libraryCard.querySelectorAll('.library-card-glow');
+    shineOverlays.forEach(overlay => {
+      overlay.style.background = `radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)`;
+    });
+  };
+
+  if (cardPerspective) {
+    cardPerspective.addEventListener('mousemove', (e) => handleTiltMove(e, cardPerspective));
+    cardPerspective.addEventListener('mouseleave', handleTiltLeave);
+  }
+
+  const viewerCardPlacement = document.getElementById('viewer-card-placement');
+  if (viewerCardPlacement) {
+    viewerCardPlacement.addEventListener('mousemove', (e) => handleTiltMove(e, viewerCardPlacement));
+    viewerCardPlacement.addEventListener('mouseleave', handleTiltLeave);
+  }
 
   // Form Reset handler
   btnReset.addEventListener('click', () => {
@@ -570,13 +623,6 @@ document.addEventListener('DOMContentLoaded', () => {
         control.style.boxShadow = '';
       });
       
-      // Reset genre selection states
-      genreCheckboxes.forEach(checkbox => {
-        const parentLabel = checkbox.closest('.custom-checkbox');
-        parentLabel.style.opacity = '1';
-        parentLabel.style.transform = 'scale(1)';
-        parentLabel.style.pointerEvents = 'auto';
-      });
 
       // Reset custom selects
       if (deptSelect) deptSelect.reset();
@@ -689,6 +735,8 @@ document.addEventListener('DOMContentLoaded', () => {
     optionsContainerId: 'custom-select-options-dept',
     hiddenSelectId: 'department',
     defaultValue: 'CSE',
+    hasSearch: true,
+    searchPlaceholder: 'Search department...',
     onChange: (val) => {
       const el = document.getElementById('preview-dept');
       if (el) el.textContent = val;
@@ -702,6 +750,8 @@ document.addEventListener('DOMContentLoaded', () => {
     optionsContainerId: 'custom-select-options-semester',
     hiddenSelectId: 'semester',
     defaultValue: '8th Sem',
+    hasSearch: true,
+    searchPlaceholder: 'Search semester...',
     onChange: (val) => {
       const el = document.getElementById('preview-semester');
       if (el) el.textContent = val.toUpperCase();
@@ -772,6 +822,453 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  // ---- Dynamic Back-card Address / Clearance Notes Sync ----
+  if (inputAddress) {
+    inputAddress.addEventListener('input', (e) => {
+      const el = document.getElementById('preview-address');
+      if (el) el.textContent = e.target.value.trim() || 'No specific special clearances or address declared.';
+    });
+  }
+
+  // ---- 3D Card Flipping Event Listeners ----
+  const cardElement = document.getElementById('library-id-card');
+  const btnFlip = document.getElementById('btn-flip-card');
+  const btnViewerFlip = document.getElementById('btn-viewer-flip');
+
+  function toggleCardFlip() {
+    if (cardElement) {
+      cardElement.classList.toggle('flipped');
+      const isFlipped = cardElement.classList.contains('flipped');
+      cardElement.style.transform = `rotateX(0deg) rotateY(${isFlipped ? 180 : 0}deg)`;
+    }
+  }
+
+  if (cardElement) {
+    cardElement.addEventListener('click', toggleCardFlip);
+  }
+  if (btnFlip) {
+    btnFlip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleCardFlip();
+    });
+  }
+  if (btnViewerFlip) {
+    btnViewerFlip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleCardFlip();
+    });
+  }
+
+  // ---- PNG Image Export handler ----
+  const btnDownloadImg = document.getElementById('btn-download-img');
+  if (btnDownloadImg) {
+    btnDownloadImg.addEventListener('click', () => {
+      const frontSide = document.querySelector('.card-front');
+      const backSide = document.querySelector('.card-back');
+      if (!frontSide || !backSide) return;
+
+      btnDownloadImg.style.opacity = '0.5';
+      btnDownloadImg.style.pointerEvents = 'none';
+
+      const renderOpts = {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null,
+        logging: false
+      };
+
+      function downloadURI(uri, name) {
+        const link = document.createElement("a");
+        link.download = name;
+        link.href = uri;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // Render and download front side
+      html2canvas(frontSide, renderOpts).then(canvas => {
+        downloadURI(canvas.toDataURL('image/png'), 'AETHER-LMS-Card-Front.png');
+        
+        // Render and download back side after a brief pause
+        setTimeout(() => {
+          html2canvas(backSide, renderOpts).then(canvasBack => {
+            downloadURI(canvasBack.toDataURL('image/png'), 'AETHER-LMS-Card-Back.png');
+            btnDownloadImg.style.opacity = '';
+            btnDownloadImg.style.pointerEvents = '';
+          });
+        }, 500);
+      }).catch(err => {
+        console.error('Image rendering failed:', err);
+        btnDownloadImg.style.opacity = '';
+        btnDownloadImg.style.pointerEvents = '';
+      });
+    });
+  }
+
+  // ---- PDF Document Export handler ----
+  const btnDownloadPdf = document.getElementById('btn-download-pdf');
+  if (btnDownloadPdf) {
+    btnDownloadPdf.addEventListener('click', () => {
+      const frontSide = document.querySelector('.card-front');
+      const backSide = document.querySelector('.card-back');
+      if (!frontSide || !backSide) return;
+
+      btnDownloadPdf.style.opacity = '0.5';
+      btnDownloadPdf.style.pointerEvents = 'none';
+
+      const renderOpts = {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null,
+        logging: false
+      };
+
+      html2canvas(frontSide, renderOpts).then(frontCanvas => {
+        const frontImg = frontCanvas.toDataURL('image/png');
+        
+        setTimeout(() => {
+          html2canvas(backSide, renderOpts).then(backCanvas => {
+            const backImg = backCanvas.toDataURL('image/png');
+            
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+              orientation: 'landscape',
+              unit: 'mm',
+              format: 'a4'
+            });
+            
+            // Standard dimensions of CR80 card centered on landscape A4 (297mm x 210mm)
+            const cardW = 150;
+            const cardH = 94.5;
+            const x = (297 - cardW) / 2;
+            const y = (210 - cardH) / 2;
+            
+            pdf.addImage(frontImg, 'PNG', x, y, cardW, cardH);
+            pdf.addPage();
+            pdf.addImage(backImg, 'PNG', x, y, cardW, cardH);
+            
+            pdf.save('AETHER-LMS-Card.pdf');
+            btnDownloadPdf.style.opacity = '';
+            btnDownloadPdf.style.pointerEvents = '';
+          });
+        }, 500);
+      }).catch(err => {
+        console.error('PDF generation failed:', err);
+        btnDownloadPdf.style.opacity = '';
+        btnDownloadPdf.style.pointerEvents = '';
+      });
+    });
+  }
+
+  // ---- Link Sharing Modal & Social Media Share generator ----
+  const btnShare = document.getElementById('btn-share-card');
+  const shareModal = document.getElementById('share-modal');
+  const btnCloseShareModal = document.getElementById('btn-close-share-modal');
+  const shareLinkUrl = document.getElementById('share-link-url');
+  const btnCopyShareLink = document.getElementById('btn-copy-share-link');
+  const shareCaption = document.getElementById('share-caption');
+
+  const shareFb = document.getElementById('share-fb');
+  const shareTw = document.getElementById('share-tw');
+  const shareLn = document.getElementById('share-ln');
+  const shareWa = document.getElementById('share-wa');
+  const shareMsg = document.getElementById('share-msg');
+  const shareDiscord = document.getElementById('share-discord');
+
+  // Fix OG image meta tags to use absolute URL at runtime (needed for GitHub Pages)
+  (function fixOgImageUrls() {
+    const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
+    const ogImage = document.getElementById('og-image');
+    const twImage = document.getElementById('twitter-image');
+    if (ogImage && !ogImage.content.startsWith('http')) {
+      ogImage.content = baseUrl + ogImage.content;
+    }
+    if (twImage && !twImage.content.startsWith('http')) {
+      twImage.content = baseUrl + twImage.content;
+    }
+  })();
+
+  // Helper to update all social share URLs based on current caption and link
+  function updateSocialShareUrls(shareUrl, captionText) {
+    const encodedUrl = encodeURIComponent(shareUrl);
+    const encodedCaption = encodeURIComponent(captionText);
+    const fullMessage = encodeURIComponent(captionText + '\n\n' + shareUrl);
+
+    if (shareFb) shareFb.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedCaption}`;
+    if (shareTw) shareTw.href = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedCaption}`;
+    if (shareLn) shareLn.href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+    if (shareWa) shareWa.href = `https://api.whatsapp.com/send?text=${fullMessage}`;
+    if (shareMsg) shareMsg.href = `https://www.facebook.com/dialog/send?link=${encodedUrl}&app_id=966242223397117&redirect_uri=${encodedUrl}`;
+    if (shareDiscord) shareDiscord.href = `https://discord.com/channels/@me`;
+  }
+
+  if (btnShare && shareModal) {
+    btnShare.addEventListener('click', () => {
+      const deptVal = document.getElementById('custom-select-value-dept') ? document.getElementById('custom-select-value-dept').textContent : 'CSE';
+      const semVal = document.getElementById('custom-select-value-semester') ? document.getElementById('custom-select-value-semester').textContent : '8th Sem';
+      
+      // Pack payload metadata (excluding huge local avatar binary to fit standard URL limits)
+      const cardData = {
+        n: previewName.textContent,
+        d: deptVal,
+        b: inputBatch ? inputBatch.value : 'Batch 60',
+        s: semVal,
+        e: previewEmail.textContent,
+        p: previewPhone.textContent,
+        l: previewLimit.textContent,
+        t: previewTerm.textContent,
+        k: previewCardKey.textContent,
+        th: libraryCard.style.getPropertyValue('--user-card-theme') || DEFAULTS.theme,
+        a: document.getElementById('preview-address') ? document.getElementById('preview-address').textContent : '',
+        tr: previewTier.querySelector('span') ? previewTier.querySelector('span').textContent : 'Standard'
+      };
+
+      const payload = btoa(unescape(encodeURIComponent(JSON.stringify(cardData))));
+      const currentUrl = window.location.href.split('#')[0];
+      const finalShareUrl = `${currentUrl}#share=${payload}`;
+
+      shareLinkUrl.value = finalShareUrl;
+
+      // Auto-populate caption with member details
+      const memberName = previewName.textContent || 'Member';
+      const tierVal = previewTier.querySelector('span') ? previewTier.querySelector('span').textContent : 'Standard';
+      const defaultCaption = `🎓 Check out my AETHER LMS Digital Library Card!\n\n👤 ${memberName} | ${deptVal} | ${tierVal} Member\n📚 Borrow Limit: ${previewLimit.textContent} | Valid: ${previewTerm.textContent}\n🔑 Card Key: ${previewCardKey.textContent}`;
+      
+      if (shareCaption) {
+        shareCaption.value = defaultCaption;
+      }
+
+      // Build initial social URLs
+      updateSocialShareUrls(finalShareUrl, defaultCaption);
+
+      // Open Modal
+      shareModal.classList.add('open');
+    });
+  }
+
+  // Update social URLs live when caption is edited
+  if (shareCaption) {
+    shareCaption.addEventListener('input', () => {
+      const currentLink = shareLinkUrl.value;
+      const currentCaption = shareCaption.value;
+      updateSocialShareUrls(currentLink, currentCaption);
+    });
+  }
+
+  if (btnCloseShareModal) {
+    btnCloseShareModal.addEventListener('click', () => {
+      shareModal.classList.remove('open');
+    });
+  }
+
+  if (shareModal) {
+    shareModal.addEventListener('click', (e) => {
+      if (e.target === shareModal) {
+        shareModal.classList.remove('open');
+      }
+    });
+  }
+
+  if (btnCopyShareLink) {
+    btnCopyShareLink.addEventListener('click', () => {
+      // Copy caption + link together for a complete sharing experience
+      const captionText = shareCaption ? shareCaption.value : '';
+      const linkText = shareLinkUrl.value;
+      const fullCopyText = captionText ? `${captionText}\n\n${linkText}` : linkText;
+
+      navigator.clipboard.writeText(fullCopyText).then(() => {
+        btnCopyShareLink.innerHTML = `<i data-lucide="check"></i><span>Copied!</span>`;
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+        
+        setTimeout(() => {
+          btnCopyShareLink.innerHTML = `<i data-lucide="copy" id="copy-icon"></i><span id="copy-btn-text">Copy</span>`;
+          if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+          }
+        }, 2000);
+      });
+    });
+  }
+
+  if (shareDiscord) {
+    shareDiscord.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      const captionText = shareCaption ? shareCaption.value : '';
+      const linkText = shareLinkUrl.value;
+      const fullCopyText = captionText ? `${captionText}\n\n${linkText}` : linkText;
+
+      navigator.clipboard.writeText(fullCopyText).then(() => {
+        // Show Success Toast Notification for copy confirmation
+        if (successToast && toastMessage) {
+          toastMessage.textContent = "Share link & details copied! Opening Discord...";
+          successToast.classList.add('show');
+          setTimeout(() => {
+            successToast.classList.remove('show');
+          }, 4000);
+        }
+        
+        // Open Discord channels page in a new window/tab after copying
+        setTimeout(() => {
+          window.open('https://discord.com/channels/@me', '_blank');
+        }, 800);
+      }).catch(err => {
+        console.error('Failed to copy text for Discord:', err);
+        window.open('https://discord.com/channels/@me', '_blank');
+      });
+    });
+  }
+
+  // ---- Hashed URL Parser for Shared Card View Mode ----
+  const formCardPlacement = document.getElementById('card-perspective');
+  const mainNavbar = document.getElementById('main-navbar');
+  const beamContainer = document.querySelector('.beam-container');
+  const skelRails = document.querySelectorAll('.skel-rail');
+
+  function checkSharedLink() {
+    const hash = window.location.hash;
+    const appWrapper = document.querySelector('.app-wrapper');
+    const sharedViewerMode = document.getElementById('shared-viewer-mode');
+
+    if (hash && hash.startsWith('#share=')) {
+      const sharePayload = hash.replace('#share=', '');
+      try {
+        const decodedData = JSON.parse(decodeURIComponent(escape(atob(sharePayload))));
+        
+        // Populate front card values
+        if (previewName) previewName.textContent = decodedData.n;
+        if (document.getElementById('preview-dept')) document.getElementById('preview-dept').textContent = decodedData.d;
+        if (document.getElementById('preview-batch')) document.getElementById('preview-batch').textContent = decodedData.b.toUpperCase();
+        if (document.getElementById('preview-semester')) document.getElementById('preview-semester').textContent = decodedData.s.toUpperCase();
+        if (previewEmail) previewEmail.textContent = decodedData.e;
+        if (previewPhone) previewPhone.textContent = decodedData.p;
+        if (previewLimit) previewLimit.textContent = decodedData.l;
+        if (previewTerm) previewTerm.textContent = decodedData.t;
+        if (previewCardKey) previewCardKey.textContent = decodedData.k;
+        
+        // Populate address on back
+        const previewAddr = document.getElementById('preview-address');
+        if (previewAddr) previewAddr.textContent = decodedData.a || 'No specific special clearances or address declared.';
+
+        // Populate tier badge with icon
+        if (previewTier) {
+          previewTier.className = 'card-type'; // reset
+          const tierVal = decodedData.tr || 'Standard';
+          let iconName = 'shield';
+          let tierClass = 'tier-standard';
+          if (tierVal === 'Premium') {
+            iconName = 'zap';
+            tierClass = 'tier-premium';
+          } else if (tierVal === 'VIP') {
+            iconName = 'crown';
+            tierClass = 'tier-vip';
+          }
+          previewTier.classList.add(tierClass);
+          previewTier.innerHTML = `<i data-lucide="${iconName}"></i><span>${tierVal}</span>`;
+        }
+
+        // Apply theme color
+        if (libraryCard) {
+          libraryCard.style.setProperty('--user-card-theme', decodedData.th);
+        }
+        document.documentElement.style.setProperty('--accent-primary', decodedData.th);
+
+        // Update QR code on back
+        const qrImage = document.getElementById('preview-qr');
+        if (qrImage) {
+          qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(decodedData.k)}&color=ffffff&bgcolor=12131a`;
+        }
+
+        // Reset card to front side before showing
+        if (libraryCard && libraryCard.classList.contains('flipped')) {
+          libraryCard.classList.remove('flipped');
+          libraryCard.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        }
+
+        // Move the card to shared viewer placement
+        const viewerCardPlacement = document.getElementById('viewer-card-placement');
+        if (viewerCardPlacement && libraryCard) {
+          viewerCardPlacement.appendChild(libraryCard);
+        }
+
+        // Hide registration form panel, navbar, and background elements - show viewer panel
+        if (appWrapper) appWrapper.style.display = 'none';
+        if (mainNavbar) mainNavbar.style.display = 'none';
+        if (beamContainer) beamContainer.style.display = 'none';
+        skelRails.forEach(rail => rail.style.display = 'none');
+        if (sharedViewerMode) sharedViewerMode.style.display = 'flex';
+
+        // Reinitialize icons in newly loaded card elements
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      } catch (err) {
+        console.error('Failed to parse shared preview link:', err);
+      }
+    } else {
+      // Restore page back to registration form state when hash is cleared
+      if (sharedViewerMode) sharedViewerMode.style.display = 'none';
+      if (appWrapper) appWrapper.style.display = '';
+      if (mainNavbar) mainNavbar.style.display = '';
+      if (beamContainer) beamContainer.style.display = '';
+      skelRails.forEach(rail => rail.style.display = '');
+
+      // Move card back to form preview placement if it is currently inside the viewer
+      if (formCardPlacement && libraryCard && libraryCard.parentElement !== formCardPlacement) {
+        formCardPlacement.appendChild(libraryCard);
+
+        // Reset card to front side
+        if (libraryCard.classList.contains('flipped')) {
+          libraryCard.classList.remove('flipped');
+          libraryCard.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        }
+      }
+
+      // Re-trigger visual sync from input fields to card preview
+      if (inputName) inputName.dispatchEvent(new Event('input'));
+      if (inputEmail) inputEmail.dispatchEvent(new Event('input'));
+      if (inputPhone) inputPhone.dispatchEvent(new Event('input'));
+      if (inputBatch) inputBatch.dispatchEvent(new Event('input'));
+      if (inputAddress) inputAddress.dispatchEvent(new Event('input'));
+      if (inputBorrowLimit) inputBorrowLimit.dispatchEvent(new Event('input'));
+      if (inputMembershipExpiry) inputMembershipExpiry.dispatchEvent(new Event('input'));
+
+      // Sync theme color
+      if (inputCardTheme) {
+        inputCardTheme.dispatchEvent(new Event('input'));
+      }
+
+      // Sync tier
+      const activeRadio = document.querySelector('input[name="tier"]:checked');
+      if (activeRadio) {
+        activeRadio.dispatchEvent(new Event('change'));
+      }
+
+      // Reinitialize icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+  }
+
+  // Handle "Create Your Own Card" button — clean URL hash navigation
+  const btnViewerCreate = document.getElementById('btn-viewer-create');
+  if (btnViewerCreate) {
+    btnViewerCreate.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Remove hash cleanly without adding a history entry
+      history.replaceState(null, '', window.location.pathname);
+      checkSharedLink();
+    });
+  }
+
+  // Bind hashchange listener to support dynamic hash navigation without reload
+  window.addEventListener('hashchange', checkSharedLink);
+  checkSharedLink();
 });
 
 // Dynamic keyframe injection for invalid shake animations
