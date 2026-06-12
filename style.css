@@ -3570,3 +3570,47 @@ body.light-mode .success-member-summary {
 body.light-mode .summary-value {
   color: #1a1a2e;
 }
+
+/* ==========================================================================
+   Admin Member Directory Card Styling
+   ========================================================================== */
+.member-directory-card {
+  background: rgba(22, 22, 38, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+}
+
+.member-directory-card:hover {
+  border-color: var(--member-theme);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 24px rgba(0, 0, 0, 0.45), 
+    0 0 15px color-mix(in srgb, var(--member-theme) 12%, transparent);
+}
+
+/* Light mode overrides for member-directory-card */
+body.light-mode .member-directory-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-mode .member-directory-card:hover {
+  border-color: var(--member-theme);
+  box-shadow: 
+    0 12px 24px rgba(0, 0, 0, 0.06), 
+    0 0 15px color-mix(in srgb, var(--member-theme) 12%, transparent);
+}
+
+body.light-mode .member-directory-card h4 {
+  color: #1a1a2e !important;
+}
+
+body.light-mode .member-directory-card strong {
+  color: #4b5563;
+}

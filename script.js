@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function getSharePayload() {
     const deptValText = document.getElementById('custom-select-value-dept') ? document.getElementById('custom-select-value-dept').textContent : 'DEPT';
     const semValText = document.getElementById('custom-select-value-semester') ? document.getElementById('custom-select-value-semester').textContent : 'SEMESTER';
-    
+
     const semMap = {
       '1st Sem': '1', '2nd Sem': '2', '3rd Sem': '3', '4th Sem': '4', '5th Sem': '5',
       '6th Sem': '6', '7th Sem': '7', '8th Sem': '8', '9th Sem': '9', '10th Sem': '10'
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
       themeVal,
       addrVal,
       tierVal,
-      compressedAvatarBase64
+      cloudinaryAvatarUrl ? getCloudinaryPath(cloudinaryAvatarUrl) : compressedAvatarBase64
     ];
 
     // Join with ASCII Unit Separator control character (impossible to be input by users)
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ctx.fillStyle = p.color;
           ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
           ctx.restore();
-          
+
           if (p.vy > 0) {
             p.opacity -= 0.012;
           }
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const dropzoneAvatar = document.getElementById('avatar-dropzone');
   const labelFile = document.getElementById('file-label');
   const inputProfileUrl = document.getElementById('profile_url');
-  
+
   const inputDob = document.getElementById('dob');
   const inputMembershipStart = document.getElementById('membership_start');
   const inputMembershipExpiry = document.getElementById('membership_expiry');
@@ -219,12 +219,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const displayValue = document.getElementById(valueId);
     const optionsContainer = document.getElementById(optionsContainerId);
     const hiddenSelect = document.getElementById(hiddenSelectId);
-    
+
     if (!wrapper || !trigger || !displayValue || !optionsContainer || !hiddenSelect) return null;
-    
+
     const options = optionsContainer.querySelectorAll('.custom-option');
     let currentValue = defaultValue !== undefined ? defaultValue : hiddenSelect.value;
-    
+
     function updateStyle() {
       if (hiddenSelect.value === '') {
         displayValue.classList.add('placeholder-style');
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
         displayValue.classList.remove('placeholder-style');
       }
     }
-    
+
     let searchInput = null;
     if (hasSearch) {
       const searchContainer = document.createElement('div');
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       searchInput = searchContainer.querySelector('.select-search-input');
-      
+
       // Prevent clicking the search box from propagating and closing dropdown
       searchInput.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
     }
-    
+
     trigger.addEventListener('click', (e) => {
       e.stopPropagation();
       const isOpen = wrapper.classList.contains('open');
@@ -281,13 +281,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     });
-    
+
     // Listen to changes on the hidden select to update the custom UI dynamically
     hiddenSelect.addEventListener('change', () => {
       const val = hiddenSelect.value;
       currentValue = val;
       updateStyle();
-      
+
       let text = placeholderText || 'Select';
       if (val === '') {
         displayValue.textContent = text;
@@ -308,18 +308,18 @@ document.addEventListener('DOMContentLoaded', () => {
       option.addEventListener('click', (e) => {
         e.stopPropagation();
         const val = option.getAttribute('data-value');
-        
+
         hiddenSelect.value = val;
         hiddenSelect.dispatchEvent(new Event('change'));
         hiddenSelect.dispatchEvent(new Event('input'));
-        
+
         wrapper.classList.remove('open');
       });
     });
-    
+
     // Trigger initial sync
     hiddenSelect.dispatchEvent(new Event('change'));
-    
+
     return {
       getWrapper: () => wrapper,
       getValue: () => currentValue,
@@ -408,16 +408,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const cellDate = new Date(year, month, day);
 
-        if (cellDate.getDate() === today.getDate() && 
-            cellDate.getMonth() === today.getMonth() && 
-            cellDate.getFullYear() === today.getFullYear()) {
+        if (cellDate.getDate() === today.getDate() &&
+          cellDate.getMonth() === today.getMonth() &&
+          cellDate.getFullYear() === today.getFullYear()) {
           cell.classList.add('today');
         }
 
-        if (selectedDate && 
-            cellDate.getDate() === selectedDate.getDate() && 
-            cellDate.getMonth() === selectedDate.getMonth() && 
-            cellDate.getFullYear() === selectedDate.getFullYear()) {
+        if (selectedDate &&
+          cellDate.getDate() === selectedDate.getDate() &&
+          cellDate.getMonth() === selectedDate.getMonth() &&
+          cellDate.getFullYear() === selectedDate.getFullYear()) {
           cell.classList.add('selected');
         }
 
@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function selectDate(date) {
       selectedDate = new Date(date);
-      
+
       const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
       const dd = String(selectedDate.getDate()).padStart(2, '0');
       const yyyy = selectedDate.getFullYear();
@@ -493,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectDate: (date) => selectDate(date)
     };
   }
-  
+
   // Buttons & Notifications
   const btnReset = document.getElementById('reset-form-btn');
   const btnSubmit = document.getElementById('submit-form-btn');
@@ -502,7 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Constants / Defaults
   const DEFAULTS = {
-    name: 'Ayon Debnath',
+    name: 'Shuvo Chandra Debnath',
     email: 'username@domain.com',
     phone: '+1 555-0199',
     tier: 'Standard',
@@ -557,14 +557,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isViewingShared()) return;
       if (e.target.checked) {
         const tierData = tierMap[e.target.value] || tierMap['Standard'];
-        
+
         // Update class list on the preview tier element
         previewTier.className = 'card-type'; // reset
         previewTier.classList.add(tierData.class);
-        
+
         // Update content with proper icon
         previewTier.innerHTML = `<i data-lucide="${tierData.icon}"></i><span>${tierData.label}</span>`;
-        
+
         if (typeof lucide !== 'undefined') {
           lucide.createIcons();
         }
@@ -583,10 +583,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isViewingShared()) return;
     const chosenColor = e.target.value;
     labelColorHex.textContent = chosenColor;
-    
+
     // Set custom CSS variable on library card
     libraryCard.style.setProperty('--user-card-theme', chosenColor);
-    
+
     // Update SVG background path beam glow matching picker color
     document.documentElement.style.setProperty('--accent-primary', chosenColor);
   });
@@ -646,58 +646,180 @@ document.addEventListener('DOMContentLoaded', () => {
     previewTerm.textContent = `${monthStr} ${year}`;
   });
 
-  // Helper to compress avatar image
+  // Helper to compute SHA-1 hash for Cloudinary signed upload
+  async function sha1(string) {
+    const utf8 = new TextEncoder().encode(string);
+    const hashBuffer = await window.crypto.subtle.digest('SHA-1', utf8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+  }
+
+  // Helper to upload base64 image to Cloudinary using signed or unsigned upload
+  async function uploadToCloudinary(base64Data) {
+    const env = window.ENV || {};
+    const cloudName = env.CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = env.CLOUDINARY_UPLOAD_PRESET;
+    const apiKey = env.CLOUDINARY_API_KEY;
+    const apiSecret = env.CLOUDINARY_API_SECRET;
+
+    if (!cloudName) {
+      throw new Error('Cloudinary cloud name is not configured in env.js');
+    }
+
+    const formData = new FormData();
+    formData.append('file', `data:image/jpeg;base64,${base64Data}`);
+
+    if (uploadPreset) {
+      // Unsigned Upload (Safe for public GitHub Pages)
+      formData.append('upload_preset', uploadPreset);
+    } else {
+      // Signed Upload (Fallback local development)
+      if (!apiKey || !apiSecret) {
+        throw new Error('Neither Cloudinary upload_preset nor api_key/api_secret are configured in env.js');
+      }
+      const timestamp = Math.round(Date.now() / 1000);
+      const folder = 'lms_avatars';
+      const signatureString = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
+      const signature = await sha1(signatureString);
+
+      formData.append('folder', folder);
+      formData.append('timestamp', timestamp);
+      formData.append('api_key', apiKey);
+      formData.append('signature', signature);
+    }
+
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      const errorJson = await response.json();
+      throw new Error(errorJson.error?.message || 'Cloudinary upload failed');
+    }
+
+    const result = await response.json();
+    return result.secure_url;
+  }
+
+  // Extract path of a Cloudinary secure URL (including version prefix) to minimize URL footprint while ensuring reliable CDN delivery
+  function getCloudinaryPath(url) {
+    if (!url) return '';
+    const match = url.match(/\/image\/upload\/(.+)$/);
+    return match ? match[1] : url;
+  }
+
+  // Custom Toast helper
+  function showToast(titleText, descText, isError = false) {
+    if (successToast && toastMessage) {
+      const titleEl = successToast.querySelector('.toast-title');
+      if (titleEl) titleEl.textContent = titleText;
+      toastMessage.textContent = descText;
+      
+      const iconEl = successToast.querySelector('i');
+      if (iconEl) {
+        if (isError) {
+          iconEl.setAttribute('data-lucide', 'alert-circle');
+          successToast.style.borderColor = 'var(--accent-error)';
+        } else {
+          iconEl.setAttribute('data-lucide', 'check-circle');
+          successToast.style.borderColor = '';
+        }
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+      
+      successToast.classList.add('show');
+      setTimeout(() => {
+        successToast.classList.remove('show');
+      }, 4000);
+    }
+  }
+
+  // Helper to compress avatar image (with square crop and optimal sizing)
   let compressedAvatarBase64 = '';
+  let cloudinaryAvatarUrl = '';
+
   function compressAvatar(dataUrl, callback) {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      const maxDim = 150;
-      let w = img.width;
-      let h = img.height;
-      if (w > h) {
-        if (w > maxDim) {
-          h = Math.round((h * maxDim) / w);
-          w = maxDim;
-        }
-      } else {
-        if (h > maxDim) {
-          w = Math.round((w * maxDim) / h);
-          h = maxDim;
-        }
-      }
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
+      const maxDim = 100; // Optimal 1:1 dimension for preview avatar
       
-      // Enable high quality image scaling
+      // Center crop to 1:1 aspect ratio
+      const size = Math.min(img.width, img.height);
+      const sourceX = (img.width - size) / 2;
+      const sourceY = (img.height - size) / 2;
+
+      canvas.width = maxDim;
+      canvas.height = maxDim;
+      const ctx = canvas.getContext('2d');
+
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
-      
-      ctx.drawImage(img, 0, 0, w, h);
-      const compressedUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+      // Draw cropped square region to target canvas
+      ctx.drawImage(img, sourceX, sourceY, size, size, 0, 0, maxDim, maxDim);
+
+      const compressedUrl = canvas.toDataURL('image/jpeg', 0.6);
       const base64Data = compressedUrl.split(',')[1];
       callback(base64Data);
     };
     img.src = dataUrl;
   }
 
-  // Avatar Upload Handler
+  // Avatar Upload Handler with Cloudinary Cloud Host Integration
   inputAvatar.addEventListener('change', (e) => {
     if (isViewingShared()) return;
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
+        // Render local preview instantly for visual feedback
         previewAvatar.src = event.target.result;
         previewAvatar.style.display = 'block';
         previewAvatarIcon.style.display = 'none';
-        
-        dropzoneAvatar.classList.add('has-file');
-        labelFile.textContent = file.name;
 
-        compressAvatar(event.target.result, (base64) => {
+        dropzoneAvatar.classList.add('has-file');
+        labelFile.textContent = 'Compressing image...';
+
+        // Temporarily disable form submission during cloud upload
+        if (btnSubmit) {
+          btnSubmit.disabled = true;
+          btnSubmit.style.opacity = '0.6';
+          btnSubmit.innerHTML = `<span>Uploading avatar...</span>`;
+        }
+
+        compressAvatar(event.target.result, async (base64) => {
           compressedAvatarBase64 = base64;
+          labelFile.textContent = 'Uploading to Cloudinary...';
+
+          try {
+            const hostedUrl = await uploadToCloudinary(base64);
+            cloudinaryAvatarUrl = hostedUrl;
+            
+            // Render the hosted version directly on the card to ensure CORS/rendering is verified
+            previewAvatar.src = hostedUrl;
+            
+            labelFile.textContent = file.name;
+            showToast('Avatar Hosted', 'Image successfully uploaded to Cloudinary.');
+          } catch (error) {
+            console.error('Cloudinary upload failed:', error);
+            cloudinaryAvatarUrl = '';
+            labelFile.textContent = 'Using local preview fallback';
+            showToast('Cloudinary Offline', 'Upload failed. Sharing payload will fall back to local compression.', true);
+          } finally {
+            if (btnSubmit) {
+              btnSubmit.disabled = false;
+              btnSubmit.style.opacity = '';
+              btnSubmit.innerHTML = `<i data-lucide="check-circle-2" class="btn-icon"></i><span>Generate Card & Register</span>`;
+              if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+              }
+            }
+          }
         });
       };
       reader.readAsDataURL(file);
@@ -713,6 +835,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dropzoneAvatar.classList.remove('has-file');
     labelFile.textContent = 'Choose image or drag here';
     compressedAvatarBase64 = '';
+    cloudinaryAvatarUrl = '';
   }
 
 
@@ -749,33 +872,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const handleTiltMove = (e, container) => {
     if (isFlipping) return;
-    
+
     // Remove transition delay during tracking for instant 3D responsiveness
     libraryCard.style.transition = 'none';
 
     const cardRect = container.getBoundingClientRect();
-    
+
     // Mouse coords relative to card
     const x = e.clientX - cardRect.left;
     const y = e.clientY - cardRect.top;
-    
+
     // Centering calculations (-0.5 to 0.5 range)
     const px = (x / cardRect.width) - 0.5;
     const py = (y / cardRect.height) - 0.5;
-    
+
     // Rotational angles (maximum 20deg tilt)
     const rotateY = px * 20;
     const rotateX = -py * 20;
-    
+
     const isFlipped = libraryCard.classList.contains('flipped');
     const baseRotationY = isFlipped ? 180 : 0;
-    
+
     libraryCard.style.transform = `rotateX(${rotateX}deg) rotateY(${baseRotationY + rotateY}deg)`;
-    
+
     // Holographic shine translation
     const glowAngle = Math.atan2(y - cardRect.height / 2, x - cardRect.width / 2) * (180 / Math.PI);
     libraryCard.style.setProperty('--hologram-pos', `${x / cardRect.width * 100}% ${y / cardRect.height * 100}%`);
-    
+
     // Modify shine overlay dynamically
     const shineOverlays = libraryCard.querySelectorAll('.library-card-glow');
     shineOverlays.forEach(overlay => {
@@ -818,52 +941,52 @@ document.addEventListener('DOMContentLoaded', () => {
       previewEmail.textContent = DEFAULTS.email;
       previewPhone.textContent = DEFAULTS.phone;
       previewTier.textContent = DEFAULTS.tier;
-      
+
       previewLimit.textContent = `${DEFAULTS.limit} BOOKS`;
       labelLimitValue.textContent = DEFAULTS.limit;
       updateSliderTicks(DEFAULTS.limit);
       updateSliderProgress(inputBorrowLimit);
-      
+
       previewTerm.textContent = DEFAULTS.term;
-      
+
       labelColorHex.textContent = DEFAULTS.theme;
       libraryCard.style.setProperty('--user-card-theme', DEFAULTS.theme);
       document.documentElement.style.setProperty('--accent-primary', DEFAULTS.theme);
-      
+
       resetAvatarPreview();
       generateCardKey();
-      
+
       // Clear visual feedback rings
       const controls = form.querySelectorAll('.input-control');
       controls.forEach(control => {
         control.style.borderColor = '';
         control.style.boxShadow = '';
       });
-      
+
 
       // Reset custom selects
       if (deptSelect) deptSelect.reset();
       if (semesterSelect) semesterSelect.reset();
-      
+
       // Clear select trigger error borders if any
       const deptTrigger = document.getElementById('custom-select-trigger-dept');
       if (deptTrigger) deptTrigger.style.borderColor = '';
       const semesterTrigger = document.getElementById('custom-select-trigger-semester');
       if (semesterTrigger) semesterTrigger.style.borderColor = '';
-      
+
       // Reset preview card texts for selects
       const previewDeptEl = document.getElementById('preview-dept');
       if (previewDeptEl) previewDeptEl.textContent = 'DEPT';
       const previewSemEl = document.getElementById('preview-semester');
       if (previewSemEl) previewSemEl.textContent = 'SEMESTER';
-      
+
       // Reset batch input
       if (inputBatch) {
         inputBatch.value = 'Batch 60';
       }
       const previewBatchEl = document.getElementById('preview-batch');
       if (previewBatchEl) previewBatchEl.textContent = 'BATCH 60';
-      
+
       // Reset tier badge
       previewTier.className = 'card-type tier-standard';
       previewTier.innerHTML = `<i data-lucide="shield"></i><span>Standard</span>`;
@@ -881,14 +1004,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Form Validation & Submit handling
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    
+
     let isFormValid = true;
-    
+
     // Validate required text fields
     const requiredInputs = form.querySelectorAll('[required]');
     requiredInputs.forEach(input => {
       const group = input.closest('.field-group');
-      
+
       if (!input.value.trim() || (input.type === 'checkbox' && !input.checked)) {
         isFormValid = false;
         highlightInputError(input, true);
@@ -915,29 +1038,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Process submission (loading state transition)
     btnSubmit.classList.add('is-loading');
-    
+
     // Simulate API Database Post delay
     setTimeout(() => {
       btnSubmit.classList.remove('is-loading');
-      
+
       const nameVal = inputName.value.trim() || 'Member';
       const tierVal = document.querySelector('input[name="tier"]:checked')?.value || 'Standard';
       const keyVal = previewCardKey.textContent;
-      
+
       // Update success modal summary fields
       document.getElementById('success-summary-name').textContent = nameVal;
       document.getElementById('success-summary-tier').textContent = tierVal;
       document.getElementById('success-summary-key').textContent = keyVal;
-      
+
       // Keep a reference to the payload before resetting form
       const payload = getSharePayload();
-      
+
+      // Save member record to the database
+      const deptValText = document.getElementById('custom-select-value-dept') ? document.getElementById('custom-select-value-dept').textContent : 'DEPT';
+      const semValText = document.getElementById('custom-select-value-semester') ? document.getElementById('custom-select-value-semester').textContent : 'SEMESTER';
+      const limitValText = previewLimit.textContent;
+      const themeValText = libraryCard.style.getPropertyValue('--user-card-theme') || DEFAULTS.theme;
+      const addrText = document.getElementById('preview-address') ? document.getElementById('preview-address').textContent : '';
+
+      const memberRecord = {
+        n: nameVal,
+        d: (deptValText === 'DEPT' || deptValText === 'Select Department') ? '' : deptValText,
+        b: inputBatch ? inputBatch.value : 'Batch 60',
+        s: (semValText === 'SEMESTER' || semValText === 'Select Semester') ? '' : semValText,
+        e: inputEmail.value.trim() || DEFAULTS.email,
+        p: inputPhone.value.trim() || DEFAULTS.phone,
+        l: limitValText,
+        t: previewTerm.textContent,
+        k: keyVal,
+        th: themeValText,
+        a: (addrText === '' || addrText === 'No specific special clearances or address declared.') ? '' : addrText,
+        tr: tierVal,
+        av: cloudinaryAvatarUrl ? getCloudinaryPath(cloudinaryAvatarUrl) : compressedAvatarBase64
+      };
+
+      DB.saveMember(memberRecord);
+
       // Trigger success modal
       const successModal = document.getElementById('success-modal');
       if (successModal) {
         successModal.classList.add('open');
       }
-      
+
       // Trigger confetti animation!
       triggerConfetti();
 
@@ -948,7 +1096,7 @@ document.addEventListener('DOMContentLoaded', () => {
           successModal.classList.remove('open');
           // Update URL hash to view the card in shared viewer mode
           window.location.hash = `share=${payload}`;
-          
+
           // Reset form fields
           btnReset.click();
         };
@@ -1135,10 +1283,60 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ---- Shared helper: temporarily strip 3D transforms so html2canvas can render both sides ----
+  function prepareCardForCapture(side) {
+    const saved = {
+      transform: side.style.transform,
+      backfaceVisibility: side.style.backfaceVisibility,
+      webkitBackfaceVisibility: side.style.webkitBackfaceVisibility,
+      position: side.style.position,
+      visibility: side.style.visibility
+    };
+    side.style.transform = 'none';
+    side.style.backfaceVisibility = 'visible';
+    side.style.webkitBackfaceVisibility = 'visible';
+    side.style.position = 'relative';
+    side.style.visibility = 'visible';
+    return saved;
+  }
+
+  function restoreCardAfterCapture(side, saved) {
+    side.style.transform = saved.transform;
+    side.style.backfaceVisibility = saved.backfaceVisibility;
+    side.style.webkitBackfaceVisibility = saved.webkitBackfaceVisibility;
+    side.style.position = saved.position;
+    side.style.visibility = saved.visibility;
+  }
+
+  function triggerBlobDownload(canvas, filename) {
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        if (!blob) { resolve(); return; }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        resolve();
+      }, 'image/png');
+    });
+  }
+
+  const renderOpts = {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: null,
+    logging: false
+  };
+
   // ---- PNG Image Export handler ----
   const btnDownloadImg = document.getElementById('btn-download-img');
   if (btnDownloadImg) {
-    btnDownloadImg.addEventListener('click', () => {
+    btnDownloadImg.addEventListener('click', async () => {
+      const cardEl = document.getElementById('library-id-card');
       const frontSide = document.querySelector('.card-front');
       const backSide = document.querySelector('.card-back');
       if (!frontSide || !backSide) return;
@@ -1146,46 +1344,52 @@ document.addEventListener('DOMContentLoaded', () => {
       btnDownloadImg.style.opacity = '0.5';
       btnDownloadImg.style.pointerEvents = 'none';
 
-      const renderOpts = {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: null,
-        logging: false
-      };
+      // Save parent card 3D context
+      const savedCard = { transformStyle: cardEl.style.transformStyle, transform: cardEl.style.transform };
+      cardEl.style.transformStyle = 'flat';
+      cardEl.style.transform = 'none';
 
-      function downloadURI(uri, name) {
-        const link = document.createElement("a");
-        link.download = name;
-        link.href = uri;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
+      try {
+        // Render front
+        const savedFront = prepareCardForCapture(frontSide);
+        const savedBackHide = { display: backSide.style.display };
+        backSide.style.display = 'none';
+        const canvasFront = await html2canvas(frontSide, renderOpts);
+        restoreCardAfterCapture(frontSide, savedFront);
+        backSide.style.display = savedBackHide.display;
 
-      // Render and download front side
-      html2canvas(frontSide, renderOpts).then(canvas => {
-        downloadURI(canvas.toDataURL('image/png'), 'AETHER-LMS-Card-Front.png');
-        
-        // Render and download back side after a brief pause
-        setTimeout(() => {
-          html2canvas(backSide, renderOpts).then(canvasBack => {
-            downloadURI(canvasBack.toDataURL('image/png'), 'AETHER-LMS-Card-Back.png');
-            btnDownloadImg.style.opacity = '';
-            btnDownloadImg.style.pointerEvents = '';
-          });
-        }, 500);
-      }).catch(err => {
+        // Render back
+        const savedBack = prepareCardForCapture(backSide);
+        const savedFrontHide = { display: frontSide.style.display };
+        frontSide.style.display = 'none';
+        const canvasBack = await html2canvas(backSide, renderOpts);
+        restoreCardAfterCapture(backSide, savedBack);
+        frontSide.style.display = savedFrontHide.display;
+
+        // Restore parent card
+        cardEl.style.transformStyle = savedCard.transformStyle;
+        cardEl.style.transform = savedCard.transform;
+
+        // Download both images
+        await triggerBlobDownload(canvasFront, 'AETHER-LMS-Card-Front.png');
+        await new Promise(r => setTimeout(r, 200));
+        await triggerBlobDownload(canvasBack, 'AETHER-LMS-Card-Back.png');
+      } catch (err) {
         console.error('Image rendering failed:', err);
-        btnDownloadImg.style.opacity = '';
-        btnDownloadImg.style.pointerEvents = '';
-      });
+        // Restore parent card on error
+        cardEl.style.transformStyle = savedCard.transformStyle;
+        cardEl.style.transform = savedCard.transform;
+      }
+      btnDownloadImg.style.opacity = '';
+      btnDownloadImg.style.pointerEvents = '';
     });
   }
 
   // ---- PDF Document Export handler ----
   const btnDownloadPdf = document.getElementById('btn-download-pdf');
   if (btnDownloadPdf) {
-    btnDownloadPdf.addEventListener('click', () => {
+    btnDownloadPdf.addEventListener('click', async () => {
+      const cardEl = document.getElementById('library-id-card');
       const frontSide = document.querySelector('.card-front');
       const backSide = document.querySelector('.card-back');
       if (!frontSide || !backSide) return;
@@ -1193,47 +1397,60 @@ document.addEventListener('DOMContentLoaded', () => {
       btnDownloadPdf.style.opacity = '0.5';
       btnDownloadPdf.style.pointerEvents = 'none';
 
-      const renderOpts = {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: null,
-        logging: false
-      };
+      // Save parent card 3D context
+      const savedCard = { transformStyle: cardEl.style.transformStyle, transform: cardEl.style.transform };
+      cardEl.style.transformStyle = 'flat';
+      cardEl.style.transform = 'none';
 
-      html2canvas(frontSide, renderOpts).then(frontCanvas => {
-        const frontImg = frontCanvas.toDataURL('image/png');
-        
-        setTimeout(() => {
-          html2canvas(backSide, renderOpts).then(backCanvas => {
-            const backImg = backCanvas.toDataURL('image/png');
-            
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF({
-              orientation: 'landscape',
-              unit: 'mm',
-              format: 'a4'
-            });
-            
-            // Standard dimensions of CR80 card centered on landscape A4 (297mm x 210mm)
-            const cardW = 150;
-            const cardH = 94.5;
-            const x = (297 - cardW) / 2;
-            const y = (210 - cardH) / 2;
-            
-            pdf.addImage(frontImg, 'PNG', x, y, cardW, cardH);
-            pdf.addPage();
-            pdf.addImage(backImg, 'PNG', x, y, cardW, cardH);
-            
-            pdf.save('AETHER-LMS-Card.pdf');
-            btnDownloadPdf.style.opacity = '';
-            btnDownloadPdf.style.pointerEvents = '';
-          });
-        }, 500);
-      }).catch(err => {
+      try {
+        // Render front
+        const savedFront = prepareCardForCapture(frontSide);
+        const savedBackHide = { display: backSide.style.display };
+        backSide.style.display = 'none';
+        const canvasFront = await html2canvas(frontSide, renderOpts);
+        restoreCardAfterCapture(frontSide, savedFront);
+        backSide.style.display = savedBackHide.display;
+
+        // Render back
+        const savedBack = prepareCardForCapture(backSide);
+        const savedFrontHide = { display: frontSide.style.display };
+        frontSide.style.display = 'none';
+        const canvasBack = await html2canvas(backSide, renderOpts);
+        restoreCardAfterCapture(backSide, savedBack);
+        frontSide.style.display = savedFrontHide.display;
+
+        // Restore parent card
+        cardEl.style.transformStyle = savedCard.transformStyle;
+        cardEl.style.transform = savedCard.transform;
+
+        // Generate PDF
+        const frontImg = canvasFront.toDataURL('image/png');
+        const backImg = canvasBack.toDataURL('image/png');
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        const cardW = 150;
+        const cardH = 94.5;
+        const x = (297 - cardW) / 2;
+        const y = (210 - cardH) / 2;
+
+        pdf.addImage(frontImg, 'PNG', x, y, cardW, cardH);
+        pdf.addPage();
+        pdf.addImage(backImg, 'PNG', x, y, cardW, cardH);
+
+        pdf.save('AETHER-LMS-Card.pdf');
+      } catch (err) {
         console.error('PDF generation failed:', err);
-        btnDownloadPdf.style.opacity = '';
-        btnDownloadPdf.style.pointerEvents = '';
-      });
+        cardEl.style.transformStyle = savedCard.transformStyle;
+        cardEl.style.transform = savedCard.transform;
+      }
+      btnDownloadPdf.style.opacity = '';
+      btnDownloadPdf.style.pointerEvents = '';
     });
   }
 
@@ -1315,7 +1532,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof lucide !== 'undefined') {
           lucide.createIcons();
         }
-        
+
         setTimeout(() => {
           btnCopyShareLink.innerHTML = `<i data-lucide="copy" id="copy-icon"></i><span id="copy-btn-text">Copy</span>`;
           if (typeof lucide !== 'undefined') {
@@ -1329,7 +1546,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (shareDiscord) {
     shareDiscord.addEventListener('click', (e) => {
       e.preventDefault();
-      
+
       navigator.clipboard.writeText(shareLinkUrl.value).then(() => {
         // Show Success Toast Notification for copy confirmation
         if (successToast && toastMessage) {
@@ -1339,7 +1556,7 @@ document.addEventListener('DOMContentLoaded', () => {
             successToast.classList.remove('show');
           }, 4000);
         }
-        
+
         // Open Discord channels page in a new window/tab after copying
         setTimeout(() => {
           window.open('https://discord.com/channels/@me', '_blank');
@@ -1351,7 +1568,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ---- Hashed URL Parser for Shared Card View Mode ----
+  // ---- Hashed URL Parser for Shared Card View / Admin Mode ----
   const formCardPlacement = document.getElementById('card-perspective');
   const mainNavbar = document.getElementById('main-navbar');
   const beamContainer = document.querySelector('.beam-container');
@@ -1362,6 +1579,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const hash = rawHash ? decodeURIComponent(rawHash) : '';
     const appWrapper = document.querySelector('.app-wrapper');
     const sharedViewerMode = document.getElementById('shared-viewer-mode');
+    const adminPanelMode = document.getElementById('admin-panel-mode');
+
+    // Reset visibility states
+    if (sharedViewerMode) sharedViewerMode.style.display = 'none';
+    if (adminPanelMode) adminPanelMode.style.display = 'none';
+    if (appWrapper) appWrapper.style.display = '';
+    if (mainNavbar) mainNavbar.style.display = '';
+    if (beamContainer) beamContainer.style.display = '';
+    skelRails.forEach(rail => rail.style.display = '');
 
     if (hash && hash.startsWith('#share=')) {
       const sharePayload = hash.replace('#share=', '');
@@ -1373,7 +1599,7 @@ document.addEventListener('DOMContentLoaded', () => {
           normalizedPayload += '=';
         }
         const decodedString = decodeURIComponent(escape(atob(normalizedPayload)));
-        
+
         if (decodedString.includes('\u001f')) {
           const parsed = decodedString.split('\u001f');
           // Map compressed array format to object format with default fallbacks
@@ -1382,10 +1608,10 @@ document.addEventListener('DOMContentLoaded', () => {
             '1': '1st Sem', '2': '2nd Sem', '3': '3rd Sem', '4': '4th Sem', '5': '5th Sem',
             '6': '6th Sem', '7': '7th Sem', '8': '8th Sem', '9': '9th Sem', '10': '10th Sem'
           };
-          
+
           const rawLimit = parsed[6];
           const limitText = rawLimit ? `${rawLimit} BOOK${rawLimit > 1 ? 'S' : ''}` : `${DEFAULTS.limit} BOOKS`;
-          
+
           decodedData = {
             n: parsed[0] || DEFAULTS.name,
             d: parsed[1] || 'DEPT',
@@ -1436,7 +1662,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
           }
         }
-        
+
         // Populate front card values
         if (previewName) previewName.textContent = decodedData.n;
         if (document.getElementById('preview-dept')) document.getElementById('preview-dept').textContent = decodedData.d;
@@ -1451,7 +1677,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // Populate avatar
         if (decodedData.av) {
           if (previewAvatar) {
-            previewAvatar.src = 'data:image/jpeg;base64,' + decodedData.av;
+            let avatarSrc = decodedData.av;
+            // Decode backward compatible raw base64 or construct secure Cloudinary CDN url
+            if (!avatarSrc.startsWith('http://') && !avatarSrc.startsWith('https://') && !avatarSrc.includes('lms_avatars/') && !avatarSrc.includes('lms-avatars/')) {
+              avatarSrc = 'data:image/jpeg;base64,' + avatarSrc;
+            } else if (!avatarSrc.startsWith('http://') && !avatarSrc.startsWith('https://')) {
+              const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
+              avatarSrc = `https://res.cloudinary.com/${cloudName}/image/upload/${avatarSrc}`;
+            }
+            previewAvatar.src = avatarSrc;
             previewAvatar.style.display = 'block';
           }
           if (previewAvatarIcon) {
@@ -1466,7 +1700,7 @@ document.addEventListener('DOMContentLoaded', () => {
             previewAvatarIcon.style.display = 'block';
           }
         }
-        
+
         // Populate address on back
         const previewAddr = document.getElementById('preview-address');
         if (previewAddr) previewAddr.textContent = decodedData.a || 'No specific special clearances or address declared.';
@@ -1526,9 +1760,19 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (err) {
         console.error('Failed to parse shared preview link:', err);
       }
+    } else if (hash === '#admin') {
+      if (appWrapper) appWrapper.style.display = 'none';
+      if (mainNavbar) mainNavbar.style.display = 'none';
+      if (beamContainer) beamContainer.style.display = 'none';
+      skelRails.forEach(rail => rail.style.display = 'none');
+      if (adminPanelMode) {
+        adminPanelMode.style.display = 'flex';
+      }
+      renderAdminDirectory();
     } else {
       // Restore page back to registration form state when hash is cleared
       if (sharedViewerMode) sharedViewerMode.style.display = 'none';
+      if (adminPanelMode) adminPanelMode.style.display = 'none';
       if (appWrapper) appWrapper.style.display = '';
       if (mainNavbar) mainNavbar.style.display = '';
       if (beamContainer) beamContainer.style.display = '';
@@ -1589,6 +1833,243 @@ document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
       }
     }
+  }
+
+  // Unified Minimal Database Helper (LocalStorage with Cloud Firebase REST API fallback)
+  const DB = {
+    getFirebaseUrl() {
+      return (window.ENV && window.ENV.FIREBASE_URL) ? window.ENV.FIREBASE_URL.replace(/\/$/, '') : null;
+    },
+
+    async saveMember(member) {
+      const firebaseUrl = this.getFirebaseUrl();
+      if (firebaseUrl) {
+        try {
+          const response = await fetch(`${firebaseUrl}/members/${member.k}.json`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(member)
+          });
+          if (!response.ok) throw new Error('Firebase save failed');
+          return await response.json();
+        } catch (err) {
+          console.warn('Firebase save failed, falling back to local storage:', err);
+        }
+      }
+      
+      // LocalStorage fallback
+      const members = this.getLocalMembers();
+      members[member.k] = member;
+      localStorage.setItem('aether_lms_members', JSON.stringify(members));
+    },
+
+    async deleteMember(key) {
+      const firebaseUrl = this.getFirebaseUrl();
+      if (firebaseUrl) {
+        try {
+          const response = await fetch(`${firebaseUrl}/members/${key}.json`, {
+            method: 'DELETE'
+          });
+          if (!response.ok) throw new Error('Firebase delete failed');
+        } catch (err) {
+          console.warn('Firebase delete failed, removing locally:', err);
+        }
+      }
+      
+      const members = this.getLocalMembers();
+      delete members[key];
+      localStorage.setItem('aether_lms_members', JSON.stringify(members));
+    },
+
+    async getAllMembers() {
+      const firebaseUrl = this.getFirebaseUrl();
+      if (firebaseUrl) {
+        try {
+          const response = await fetch(`${firebaseUrl}/members.json`);
+          if (!response.ok) throw new Error('Firebase fetch failed');
+          const data = await response.json();
+          return data || {};
+        } catch (err) {
+          console.warn('Firebase fetch failed, reading local storage:', err);
+        }
+      }
+      return this.getLocalMembers();
+    },
+
+    getLocalMembers() {
+      try {
+        return JSON.parse(localStorage.getItem('aether_lms_members')) || {};
+      } catch (e) {
+        return {};
+      }
+    }
+  };
+
+  // Serialize member database object back into share payload format
+  function serializeMemberToPayload(m) {
+    const semMap = {
+      '1st Sem': '1', '2nd Sem': '2', '3rd Sem': '3', '4th Sem': '4', '5th Sem': '5',
+      '6th Sem': '6', '7th Sem': '7', '8th Sem': '8', '9th Sem': '9', '10th Sem': '10'
+    };
+    const tierMap = { 'Standard': 'S', 'Premium': 'P', 'VIP': 'V' };
+
+    const nameVal = m.n === DEFAULTS.name ? "" : m.n;
+    const deptVal = (m.d === 'DEPT' || m.d === 'Select Department' || !m.d) ? "" : m.d;
+    const batchVal = m.b === 'Batch 60' ? "" : m.b.replace(/Batch\s+/i, '');
+    const semVal = (!m.s || m.s === 'SEMESTER' || m.s === 'Select Semester') ? "" : (semMap[m.s] || m.s);
+    const emailVal = m.e === DEFAULTS.email ? "" : m.e;
+    const phoneVal = m.p === DEFAULTS.phone ? "" : m.p;
+    
+    const limitDigits = m.l.match(/\d+/);
+    const limitVal = (limitDigits && limitDigits[0] === String(DEFAULTS.limit)) ? "" : (limitDigits ? limitDigits[0] : "");
+    const termVal = m.t === DEFAULTS.term ? "" : m.t;
+    const keyVal = m.k.startsWith('LMS-') ? m.k.replace('LMS-', '') : m.k;
+    const themeVal = m.th === DEFAULTS.theme ? "" : m.th.replace('#', '');
+    const addrVal = (m.a === '' || m.a === 'No specific special clearances or address declared.') ? "" : m.a;
+    const tierVal = m.tr === DEFAULTS.tier ? "" : (tierMap[m.tr] || m.tr);
+
+    const cardDataArray = [
+      nameVal,
+      deptVal,
+      batchVal,
+      semVal,
+      emailVal,
+      phoneVal,
+      limitVal,
+      termVal,
+      keyVal,
+      themeVal,
+      addrVal,
+      tierVal,
+      m.av || ""
+    ];
+
+    const rawString = cardDataArray.join('\u001f');
+    return btoa(unescape(encodeURIComponent(rawString))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  // Render Admin Dashboard directory cards dynamically
+  async function renderAdminDirectory() {
+    const grid = document.getElementById('admin-members-grid');
+    const searchInput = document.getElementById('admin-search-input');
+    if (!grid) return;
+
+    grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 3rem 1rem;"><div style="display:inline-block; width:1.5rem; height:1.5rem; border:2px solid currentColor; border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:0.5rem;"></div><p style="margin:0; font-size:0.85rem;">Loading directory...</p></div>';
+    
+    try {
+      const members = await DB.getAllMembers();
+      grid.innerHTML = '';
+      
+      const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      const filtered = Object.values(members).filter(m => {
+        return m.n.toLowerCase().includes(query) || 
+               m.k.toLowerCase().includes(query) || 
+               (m.e && m.e.toLowerCase().includes(query)) ||
+               (m.d && m.d.toLowerCase().includes(query));
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 3rem 1rem;">
+            <i data-lucide="info" style="width: 2rem; height: 2rem; margin-bottom: 0.5rem; color: var(--accent-secondary); display: block; margin-left: auto; margin-right: auto;"></i>
+            <p style="margin: 0; font-size: 0.85rem;">No members found in database.</p>
+          </div>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+      }
+
+      filtered.forEach(m => {
+        const card = document.createElement('div');
+        card.className = 'member-directory-card';
+        card.style.setProperty('--member-theme', m.th || 'var(--accent-primary)');
+
+        // Construct preview avatar
+        let avatarHtml = `<i data-lucide="user" class="card-avatar-placeholder" style="color: var(--text-muted); font-size: 1.1rem;"></i>`;
+        if (m.av) {
+          let src = m.av;
+          if (!src.startsWith('http://') && !src.startsWith('https://') && !src.includes('lms_avatars/') && !src.includes('lms-avatars/')) {
+            src = 'data:image/jpeg;base64,' + src;
+          } else if (!src.startsWith('http://') && !src.startsWith('https://')) {
+            const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
+            src = `https://res.cloudinary.com/${cloudName}/image/upload/${src}`;
+          }
+          avatarHtml = `<img src="${src}" alt="${m.n}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        }
+
+        card.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div style="width: 42px; height: 42px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--member-theme); background: rgba(255, 255, 255, 0.03); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              ${avatarHtml}
+            </div>
+            <div style="min-width: 0; flex: 1;">
+              <h4 style="font-size: 0.85rem; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0;">${m.n}</h4>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--member-theme); font-weight: 600;">LMS-${m.k.replace('LMS-', '')}</span>
+            </div>
+          </div>
+          
+          <div style="font-size: 0.7rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.2rem; margin-top: 0.1rem;">
+            <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong>Email:</strong> ${m.e || 'N/A'}</div>
+            <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong>Dept:</strong> ${m.d || 'N/A'} • ${m.b || 'N/A'}</div>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.04); padding-top: 0.5rem; z-index: 2;">
+            <button class="btn btn-primary view-btn" style="flex: 1; padding: 0.35rem 0.5rem; font-size: 0.7rem; justify-content: center; height: 30px;">
+              <i data-lucide="eye" style="width: 0.8rem; height: 0.8rem; margin-right: 0.25rem;"></i> View
+            </button>
+            <button class="btn btn-secondary delete-btn" style="padding: 0.35rem 0.5rem; font-size: 0.7rem; color: var(--accent-error); border-color: rgba(244, 63, 94, 0.15); background: rgba(244, 63, 94, 0.02); justify-content: center; height: 30px; width: 32px; flex-shrink: 0;">
+              <i data-lucide="trash-2" style="width: 0.8rem; height: 0.8rem;"></i>
+            </button>
+          </div>
+        `;
+
+        card.querySelector('.view-btn').addEventListener('click', () => {
+          const payload = serializeMemberToPayload(m);
+          window.location.hash = `share=${payload}`;
+        });
+
+        card.querySelector('.delete-btn').addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (confirm(`Are you sure you want to delete ${m.n}'s record?`)) {
+            await DB.deleteMember(m.k);
+            renderAdminDirectory();
+            showToast('Record Deleted', `${m.n} has been deleted from database.`);
+          }
+        });
+
+        grid.appendChild(card);
+      });
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    } catch (err) {
+      console.error(err);
+      grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--accent-error); padding: 2rem 1rem;"><i data-lucide="alert-circle" style="width: 2rem; height: 2rem; margin-bottom: 0.5rem;"></i><p style="margin: 0; font-size: 0.85rem;">Failed to load directory cards.</p></div>';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+  }
+
+  // Bind Admin navigation controls
+  const btnAdminPanel = document.querySelector('.admin-panel-btn');
+  if (btnAdminPanel) {
+    btnAdminPanel.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.hash = 'admin';
+    });
+  }
+
+  const btnAdminClose = document.getElementById('btn-admin-close');
+  if (btnAdminClose) {
+    btnAdminClose.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.hash = '';
+    });
+  }
+
+  const adminSearchInput = document.getElementById('admin-search-input');
+  if (adminSearchInput) {
+    adminSearchInput.addEventListener('input', () => {
+      renderAdminDirectory();
+    });
   }
 
   // Handle "Create Your Own Card" button — clean URL hash navigation
