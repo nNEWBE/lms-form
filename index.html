@@ -47,30 +47,27 @@
   <nav class="fixed-navbar" id="main-navbar">
     <div class="navbar-inner">
       <div class="navbar-brand">
-        <svg class="custom-logo-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="logo-hex-grad-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id="logo-grad-primary-nav" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="var(--accent-primary)" />
               <stop offset="100%" stop-color="var(--accent-secondary)" />
             </linearGradient>
-            <linearGradient id="logo-prism-grad-nav" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#ffffff" />
-              <stop offset="100%" stop-color="var(--accent-secondary)" />
+            <linearGradient id="logo-grad-dark-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="rgba(0, 0, 0, 0.5)" />
+              <stop offset="100%" stop-color="rgba(0, 0, 0, 0.15)" />
             </linearGradient>
-            <linearGradient id="logo-page-l-nav" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="rgba(255, 255, 255, 0.05)" />
-              <stop offset="100%" stop-color="rgba(0, 0, 0, 0.4)" />
-            </linearGradient>
-            <linearGradient id="logo-page-r-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id="logo-grad-light-nav" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="rgba(255, 255, 255, 0.2)" />
-              <stop offset="100%" stop-color="rgba(255, 255, 255, 0.02)" />
+              <stop offset="100%" stop-color="rgba(255, 255, 255, 0.05)" />
             </linearGradient>
           </defs>
-          <path d="M16 2L30 10V22L16 30L2 22V10L16 2Z" stroke="url(#logo-hex-grad-nav)" stroke-width="1.5" stroke-linejoin="round" fill="rgba(10, 10, 15, 0.6)" />
-          <path d="M16 6L21 10L16 14L11 10Z" fill="url(#logo-prism-grad-nav)" />
-          <path d="M15 16L6 12V21L15 25Z" fill="url(#logo-page-l-nav)" stroke="var(--accent-primary)" stroke-width="1" stroke-linejoin="round" />
-          <path d="M17 16L26 12V21L17 25Z" fill="url(#logo-page-r-nav)" stroke="var(--accent-secondary)" stroke-width="1" stroke-linejoin="round" />
-          <path d="M16 16V25" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round" />
+          <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-nav)" />
+          <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-nav)" />
+          <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-nav)" />
+          <path d="M12 12V22" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round" />
+          <path d="M12 12L2 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
+          <path d="M12 12L22 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
         </svg>
         <span>AETHER LMS</span>
       </div>
@@ -548,30 +545,27 @@
 
             <div class="card-header">
               <div class="card-logo">
-                <svg class="custom-logo-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <defs>
-                    <linearGradient id="logo-hex-grad-card" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <linearGradient id="logo-grad-primary-card" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stop-color="var(--user-card-theme, var(--accent-primary))" />
                       <stop offset="100%" stop-color="var(--accent-secondary)" />
                     </linearGradient>
-                    <linearGradient id="logo-prism-grad-card" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stop-color="#ffffff" />
-                      <stop offset="100%" stop-color="var(--user-card-theme, var(--accent-primary))" />
+                    <linearGradient id="logo-grad-dark-card" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="rgba(0, 0, 0, 0.5)" />
+                      <stop offset="100%" stop-color="rgba(0, 0, 0, 0.15)" />
                     </linearGradient>
-                    <linearGradient id="logo-page-l-card" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stop-color="rgba(255, 255, 255, 0.05)" />
-                      <stop offset="100%" stop-color="rgba(0, 0, 0, 0.4)" />
-                    </linearGradient>
-                    <linearGradient id="logo-page-r-card" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <linearGradient id="logo-grad-light-card" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stop-color="rgba(255, 255, 255, 0.2)" />
-                      <stop offset="100%" stop-color="rgba(255, 255, 255, 0.02)" />
+                      <stop offset="100%" stop-color="rgba(255, 255, 255, 0.05)" />
                     </linearGradient>
                   </defs>
-                  <path d="M16 2L30 10V22L16 30L2 22V10L16 2Z" stroke="url(#logo-hex-grad-card)" stroke-width="1.5" stroke-linejoin="round" fill="rgba(10, 10, 15, 0.6)" />
-                  <path d="M16 6L21 10L16 14L11 10Z" fill="url(#logo-prism-grad-card)" />
-                  <path d="M15 16L6 12V21L15 25Z" fill="url(#logo-page-l-card)" stroke="var(--user-card-theme, var(--accent-primary))" stroke-width="1" stroke-linejoin="round" />
-                  <path d="M17 16L26 12V21L17 25Z" fill="url(#logo-page-r-card)" stroke="var(--accent-secondary)" stroke-width="1" stroke-linejoin="round" />
-                  <path d="M16 16V25" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round" />
+                  <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-card)" />
+                  <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-card)" />
+                  <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-card)" />
+                  <path d="M12 12V22" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round" />
+                  <path d="M12 12L2 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
+                  <path d="M12 12L22 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
                 </svg>
                 <span class="card-logo-text">AETHER LMS</span>
               </div>

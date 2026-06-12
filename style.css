@@ -99,8 +99,8 @@ body {
 
 .navbar-brand i,
 .navbar-brand .custom-logo-svg {
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   color: var(--accent-primary);
 }
 
@@ -2030,8 +2030,8 @@ textarea.input-control {
 
 .card-logo i,
 .card-logo .custom-logo-svg {
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 1.85rem;
+  height: 1.85rem;
   color: var(--user-card-theme);
   filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--user-card-theme) 35%, transparent));
 }
