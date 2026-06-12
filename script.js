@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     optionsContainerId,
     hiddenSelectId,
     defaultValue,
+    placeholderText,
     hasSearch,
     searchPlaceholder,
     onChange
@@ -80,7 +81,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!wrapper || !trigger || !displayValue || !optionsContainer || !hiddenSelect) return null;
     
     const options = optionsContainer.querySelectorAll('.custom-option');
-    let currentValue = defaultValue || hiddenSelect.value;
+    let currentValue = defaultValue !== undefined ? defaultValue : hiddenSelect.value;
+    
+    function updateStyle() {
+      if (hiddenSelect.value === '') {
+        displayValue.classList.add('placeholder-style');
+      } else {
+        displayValue.classList.remove('placeholder-style');
+      }
+    }
     
     let searchInput = null;
     if (hasSearch) {
@@ -131,55 +140,60 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
     
+    // Listen to changes on the hidden select to update the custom UI dynamically
+    hiddenSelect.addEventListener('change', () => {
+      const val = hiddenSelect.value;
+      currentValue = val;
+      updateStyle();
+      
+      let text = placeholderText || 'Select';
+      if (val === '') {
+        displayValue.textContent = text;
+        options.forEach(o => o.classList.remove('selected'));
+      } else {
+        const option = Array.from(options).find(o => o.getAttribute('data-value') === val);
+        if (option) {
+          text = option.textContent;
+          displayValue.textContent = text;
+          options.forEach(o => o.classList.remove('selected'));
+          option.classList.add('selected');
+        }
+      }
+      if (onChange) onChange(val, text);
+    });
+
     options.forEach(option => {
       option.addEventListener('click', (e) => {
         e.stopPropagation();
         const val = option.getAttribute('data-value');
-        const text = option.textContent;
         
         hiddenSelect.value = val;
         hiddenSelect.dispatchEvent(new Event('change'));
         hiddenSelect.dispatchEvent(new Event('input'));
         
-        displayValue.textContent = text;
-        
-        options.forEach(o => o.classList.remove('selected'));
-        option.classList.add('selected');
-        
         wrapper.classList.remove('open');
-        currentValue = val;
-        if (onChange) onChange(val, text);
       });
     });
+    
+    // Trigger initial sync
+    hiddenSelect.dispatchEvent(new Event('change'));
     
     return {
       getWrapper: () => wrapper,
       getValue: () => currentValue,
       reset: () => {
-        currentValue = defaultValue;
         hiddenSelect.value = defaultValue;
         hiddenSelect.dispatchEvent(new Event('change'));
         hiddenSelect.dispatchEvent(new Event('input'));
-        
-        options.forEach(o => {
-          if (o.getAttribute('data-value') === defaultValue) {
-            o.classList.add('selected');
-            displayValue.textContent = o.textContent;
-          } else {
-            o.classList.remove('selected');
-          }
-        });
         if (searchInput) {
           searchInput.value = '';
           options.forEach(o => o.style.display = '');
         }
       },
       setValue: (val) => {
-        options.forEach(o => {
-          if (o.getAttribute('data-value') === val) {
-            o.click();
-          }
-        });
+        hiddenSelect.value = val;
+        hiddenSelect.dispatchEvent(new Event('change'));
+        hiddenSelect.dispatchEvent(new Event('input'));
       }
     };
   }
@@ -540,7 +554,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Immersive 3D Tilt & Holographic reflection card calculations
+  let isFlipping = false;
+
   const handleTiltMove = (e, container) => {
+    if (isFlipping) return;
+    
+    // Remove transition delay during tracking for instant 3D responsiveness
+    libraryCard.style.transition = 'none';
+
     const cardRect = container.getBoundingClientRect();
     
     // Mouse coords relative to card
@@ -572,6 +593,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const handleTiltLeave = () => {
+    if (isFlipping) return;
+
+    // Restore transition for smooth reset rotation back to center
+    libraryCard.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+
     // Reset rotations smoothly
     const isFlipped = libraryCard.classList.contains('flipped');
     libraryCard.style.transform = `rotateX(0deg) rotateY(${isFlipped ? 180 : 0}deg)`;
@@ -627,6 +653,18 @@ document.addEventListener('DOMContentLoaded', () => {
       // Reset custom selects
       if (deptSelect) deptSelect.reset();
       if (semesterSelect) semesterSelect.reset();
+      
+      // Clear select trigger error borders if any
+      const deptTrigger = document.getElementById('custom-select-trigger-dept');
+      if (deptTrigger) deptTrigger.style.borderColor = '';
+      const semesterTrigger = document.getElementById('custom-select-trigger-semester');
+      if (semesterTrigger) semesterTrigger.style.borderColor = '';
+      
+      // Reset preview card texts for selects
+      const previewDeptEl = document.getElementById('preview-dept');
+      if (previewDeptEl) previewDeptEl.textContent = 'DEPT';
+      const previewSemEl = document.getElementById('preview-semester');
+      if (previewSemEl) previewSemEl.textContent = 'SEMESTER';
       
       // Reset batch input
       if (inputBatch) {
@@ -708,10 +746,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Validation helper styling functions
   function highlightInputError(input, hasError) {
+    let target = input;
+    if (input.tagName === 'SELECT') {
+      target = input.closest('.custom-select-wrapper') ? input.closest('.custom-select-wrapper').querySelector('.custom-select-trigger') : input;
+    }
     if (hasError) {
-      input.style.borderColor = 'var(--accent-error)';
+      target.style.borderColor = 'var(--accent-error)';
     } else {
-      input.style.borderColor = '';
+      target.style.borderColor = '';
     }
   }
 
@@ -734,12 +776,13 @@ document.addEventListener('DOMContentLoaded', () => {
     valueId: 'custom-select-value-dept',
     optionsContainerId: 'custom-select-options-dept',
     hiddenSelectId: 'department',
-    defaultValue: 'CSE',
+    defaultValue: '',
+    placeholderText: 'Select Department',
     hasSearch: true,
     searchPlaceholder: 'Search department...',
     onChange: (val) => {
       const el = document.getElementById('preview-dept');
-      if (el) el.textContent = val;
+      if (el) el.textContent = val || 'DEPT';
     }
   });
 
@@ -749,12 +792,13 @@ document.addEventListener('DOMContentLoaded', () => {
     valueId: 'custom-select-value-semester',
     optionsContainerId: 'custom-select-options-semester',
     hiddenSelectId: 'semester',
-    defaultValue: '8th Sem',
+    defaultValue: '',
+    placeholderText: 'Select Semester',
     hasSearch: true,
     searchPlaceholder: 'Search semester...',
     onChange: (val) => {
       const el = document.getElementById('preview-semester');
-      if (el) el.textContent = val.toUpperCase();
+      if (el) el.textContent = val ? val.toUpperCase() : 'SEMESTER';
     }
   });
 
@@ -837,10 +881,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnViewerFlip = document.getElementById('btn-viewer-flip');
 
   function toggleCardFlip() {
-    if (cardElement) {
+    if (cardElement && !isFlipping) {
+      isFlipping = true;
+      cardElement.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
       cardElement.classList.toggle('flipped');
       const isFlipped = cardElement.classList.contains('flipped');
       cardElement.style.transform = `rotateX(0deg) rotateY(${isFlipped ? 180 : 0}deg)`;
+      setTimeout(() => {
+        isFlipping = false;
+      }, 800);
     }
   }
 

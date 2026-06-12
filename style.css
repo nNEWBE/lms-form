@@ -8,7 +8,7 @@
   --accent-secondary: #06b6d4;
   --accent-success: #10b981;
   --accent-error: #f43f5e;
-  --text-main: #f3f4f6;
+  --text-main: #ffffff;
   --text-muted: #9ca3af;
   --border-color: rgba(255, 255, 255, 0.08);
   --border-focus: rgba(139, 92, 246, 0.5);
@@ -133,6 +133,7 @@ body {
   .admin-panel-btn span {
     display: none;
   }
+
   .admin-panel-btn {
     padding: 0.45rem;
   }
@@ -239,13 +240,11 @@ body.light-mode .nav-icon-btn:hover {
 }
 
 body.light-mode .skel-rail {
-  background-image: repeating-linear-gradient(
-    -45deg,
-    transparent 0px,
-    transparent 18px,
-    rgba(0, 0, 0, 0.06) 18px,
-    rgba(0, 0, 0, 0.06) 19px
-  );
+  background-image: repeating-linear-gradient(-45deg,
+      transparent 0px,
+      transparent 18px,
+      rgba(0, 0, 0, 0.06) 18px,
+      rgba(0, 0, 0, 0.06) 19px);
 }
 
 body.light-mode .skel-rail-left {
@@ -562,7 +561,8 @@ body.light-mode .card-back-address-block .addr-value {
 }
 
 body.light-mode .qr-container {
-  background: #12131a; /* QR scanner remains dark block for contrast */
+  background: #12131a;
+  /* QR scanner remains dark block for contrast */
   border-color: rgba(0, 0, 0, 0.08);
 }
 
@@ -761,13 +761,11 @@ body.light-mode .calendar-nav-btn:hover {
   width: 40px;
   pointer-events: none;
   z-index: 1;
-  background-image: repeating-linear-gradient(
-    -45deg,
-    transparent 0px,
-    transparent 18px,
-    rgba(255, 255, 255, 0.09) 18px,
-    rgba(255, 255, 255, 0.09) 19px
-  );
+  background-image: repeating-linear-gradient(-45deg,
+      transparent 0px,
+      transparent 18px,
+      rgba(255, 255, 255, 0.09) 18px,
+      rgba(255, 255, 255, 0.09) 19px);
 }
 
 .skel-rail-left {
@@ -900,9 +898,21 @@ header p {
 }
 
 @media (max-width: 480px) {
+  body {
+    padding: 4.5rem 0.75rem 1.5rem;
+  }
   header p {
     font-size: 0.9rem;
     margin-top: 0.8rem;
+  }
+  .glass-panel {
+    padding: 0.85rem;
+    border-radius: 12px;
+  }
+  .datepicker-calendar {
+    width: 290px;
+    right: calc(50% - 145px);
+    left: auto;
   }
 }
 
@@ -919,6 +929,9 @@ header p {
   .main-layout {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+  }
+  .preview-container {
+    order: -1;
   }
 }
 
@@ -940,8 +953,8 @@ header p {
 /* Form Styling - Compact and Solid */
 .form-container h2 {
   font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text-main);
+  font-weight: 600;
+  color: #ffffff;
   margin-bottom: 1.1rem;
   display: flex;
   align-items: center;
@@ -964,15 +977,7 @@ header p {
   gap: 0.85rem;
 }
 
-@media (max-width: 960px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .form-section {
-    grid-column: span 1;
-  }
-}
+
 
 .form-section {
   grid-column: span 2;
@@ -1019,16 +1024,24 @@ header p {
   grid-column: span 2;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1024px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-section {
+    grid-column: span 1;
+  }
   .field-group.full-width {
     grid-column: span 1;
   }
 }
 
+
+
 .field-group label {
   font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--text-muted);
+  font-weight: 600;
+  color: #ffffff;
   display: flex;
   align-items: center;
   gap: 0.3rem;
@@ -1386,7 +1399,7 @@ input[type="file"].file-input {
   gap: 0.25rem;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 600px) {
   .triple-select-grid {
     grid-template-columns: 1fr;
   }
@@ -1411,6 +1424,14 @@ input[type="file"].file-input {
   align-items: center;
   justify-content: space-between;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.placeholder-style {
+  color: rgba(255, 255, 255, 0.25) !important;
+}
+
+body.light-mode .placeholder-style {
+  color: rgba(0, 0, 0, 0.35) !important;
 }
 
 .custom-select-trigger:hover {
@@ -1458,7 +1479,8 @@ input[type="file"].file-input {
 /* Custom Dropdown Search Styles */
 .select-search-container {
   position: sticky;
-  top: -4px; /* offset the default padding on .custom-select-options */
+  top: -4px;
+  /* offset the default padding on .custom-select-options */
   z-index: 10;
   background: #12131a;
   padding: 6px 8px;
@@ -1507,6 +1529,7 @@ input[type="file"].file-input {
     opacity: 0;
     transform: translateY(-6px) scale(0.98);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -1930,6 +1953,7 @@ input[type="file"].file-input {
   border-color: #8b5cf6;
   background: rgba(139, 92, 246, 0.08);
 }
+
 /* VIP Tier */
 .custom-radio:has(input[value="VIP"]):has(input:checked) {
   border-color: #fbbf24;
@@ -1965,6 +1989,7 @@ input[type="file"].file-input {
 .custom-checkbox:hover .checkmark {
   border-color: rgba(255, 255, 255, 0.4);
 }
+
 .custom-radio:hover .radiomark {
   border-color: rgba(255, 255, 255, 0.4);
 }
@@ -1988,25 +2013,28 @@ input[type="file"].file-input {
 }
 
 /* Radio dynamic dot colors */
-.custom-radio:has(input[value="Standard"]) input:checked ~ .radiomark {
+.custom-radio:has(input[value="Standard"]) input:checked~.radiomark {
   border-color: #06b6d4;
 }
-.custom-radio:has(input[value="Standard"]) input:checked ~ .radiomark::after {
+
+.custom-radio:has(input[value="Standard"]) input:checked~.radiomark::after {
   background-color: #06b6d4;
 }
 
 
-.custom-radio:has(input[value="Premium"]) input:checked ~ .radiomark {
+.custom-radio:has(input[value="Premium"]) input:checked~.radiomark {
   border-color: #8b5cf6;
 }
-.custom-radio:has(input[value="Premium"]) input:checked ~ .radiomark::after {
+
+.custom-radio:has(input[value="Premium"]) input:checked~.radiomark::after {
   background-color: #8b5cf6;
 }
 
-.custom-radio:has(input[value="VIP"]) input:checked ~ .radiomark {
+.custom-radio:has(input[value="VIP"]) input:checked~.radiomark {
   border-color: #fbbf24;
 }
-.custom-radio:has(input[value="VIP"]) input:checked ~ .radiomark::after {
+
+.custom-radio:has(input[value="VIP"]) input:checked~.radiomark::after {
   background-color: #fbbf24;
 }
 
@@ -2028,24 +2056,46 @@ textarea.input-control {
 .form-actions {
   grid-column: span 2;
   display: flex;
+  justify-content: flex-end; /* Align buttons to the right on large devices */
   gap: 0.75rem;
   margin-top: 0.8rem;
   padding-top: 0.75rem;
   border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1024px) {
   .form-actions {
     grid-column: span 1;
-    flex-direction: column;
+  }
+  .btn {
+    flex: 1; /* Stretch buttons on tablet and mobile */
+  }
+}
+
+
+
+@media (max-width: 480px) {
+  .form-actions {
+    gap: 0.5rem;
+  }
+  .btn {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  .btn i,
+  .btn svg {
+    width: 11px;
+    height: 11px;
+  }
+  .btn-text-full {
+    display: none;
   }
 }
 
 .btn {
-  flex: 1;
-  padding: 0.55rem 1rem;
+  padding: 0.45rem 0.85rem;
   border-radius: 6px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -2054,6 +2104,14 @@ textarea.input-control {
   gap: 0.4rem;
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
   outline: none;
+  min-width: 120px; /* Prevent overly tiny buttons while fitting content */
+}
+
+.btn i,
+.btn svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
 }
 
 .btn-primary {
@@ -2137,7 +2195,7 @@ textarea.input-control {
 
 .preview-title {
   font-size: 1.05rem;
-  color: var(--text-muted);
+  color: #ffffff;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -2157,6 +2215,7 @@ textarea.input-control {
   transform-style: preserve-3d;
   transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  container-type: inline-size;
 }
 
 .library-card.flipped {
@@ -2171,9 +2230,9 @@ textarea.input-control {
   height: 100%;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  border-radius: 16px;
+  border-radius: clamp(10px, 3.5cqw, 16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 1.25rem;
+  padding: clamp(0.75rem, 4.5cqw, 1.25rem);
   background: #08090f;
   display: flex;
   flex-direction: column;
@@ -2190,7 +2249,8 @@ textarea.input-control {
 
 .library-card-side.card-back {
   transform: rotateY(180deg);
-  background: #0a0b12; /* slightly darker back */
+  background: #0a0b12;
+  /* slightly darker back */
 }
 
 /* Card Hologram overlay on both sides */
@@ -2234,12 +2294,12 @@ textarea.input-control {
 
 /* Card Back Design Layout */
 .card-back-badge {
-  font-size: 0.64rem;
+  font-size: clamp(8px, 2.2cqw, 0.64rem);
   font-family: 'JetBrains Mono', monospace;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-muted);
-  padding: 0.15rem 0.4rem;
+  padding: clamp(0.1rem, 1cqw, 0.15rem) clamp(0.25rem, 1.5cqw, 0.4rem);
   border-radius: 4px;
   letter-spacing: 0.05em;
   font-weight: 700;
@@ -2248,16 +2308,16 @@ textarea.input-control {
 .card-body-back {
   display: grid;
   grid-template-columns: 1.8fr 1fr;
-  gap: 0.75rem;
-  margin: 0.5rem 0;
+  gap: clamp(0.4rem, 2cqw, 0.75rem);
+  margin: clamp(0.3rem, 1.8cqw, 0.5rem) 0;
   z-index: 1;
 }
 
 .card-back-left h5 {
-  font-size: 0.7rem;
+  font-size: clamp(8px, 2.4cqw, 0.7rem);
   color: var(--text-muted);
   letter-spacing: 0.04em;
-  margin-bottom: 0.35rem;
+  margin-bottom: clamp(0.2rem, 1.2cqw, 0.35rem);
   font-family: 'Inter', sans-serif;
   font-weight: 700;
 }
@@ -2269,12 +2329,12 @@ textarea.input-control {
 }
 
 .guidelines-list li {
-  font-size: 0.6rem;
+  font-size: clamp(7px, 2cqw, 0.6rem);
   color: rgba(255, 255, 255, 0.7);
   line-height: 1.45;
-  margin-bottom: 0.2rem;
+  margin-bottom: clamp(0.08rem, 0.6cqw, 0.2rem);
   position: relative;
-  padding-left: 0.6rem;
+  padding-left: clamp(0.4rem, 2cqw, 0.6rem);
 }
 
 .guidelines-list li::before {
@@ -2286,13 +2346,13 @@ textarea.input-control {
 }
 
 .card-back-address-block {
-  margin-top: 0.4rem;
+  margin-top: clamp(0.2rem, 1.2cqw, 0.4rem);
   border-top: 1px dashed rgba(255, 255, 255, 0.05);
-  padding-top: 0.3rem;
+  padding-top: clamp(0.15rem, 1cqw, 0.3rem);
 }
 
 .card-back-address-block .addr-label {
-  font-size: 0.56rem;
+  font-size: clamp(6.5px, 1.9cqw, 0.56rem);
   color: var(--text-muted);
   display: block;
   font-weight: 600;
@@ -2300,11 +2360,11 @@ textarea.input-control {
 }
 
 .card-back-address-block .addr-value {
-  font-size: 0.62rem;
+  font-size: clamp(8px, 2.1cqw, 0.62rem);
   color: var(--text-main);
   line-height: 1.35;
   display: block;
-  margin-top: 0.15rem;
+  margin-top: clamp(0.08rem, 0.6cqw, 0.15rem);
   font-family: 'JetBrains Mono', monospace;
   white-space: nowrap;
   overflow: hidden;
@@ -2320,12 +2380,12 @@ textarea.input-control {
 }
 
 .qr-container {
-  width: 65px;
-  height: 65px;
+  width: clamp(42px, 14cqw, 65px);
+  height: clamp(42px, 14cqw, 65px);
   background: #12131a;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
-  padding: 3px;
+  padding: clamp(1px, 0.6cqw, 3px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2343,12 +2403,12 @@ textarea.input-control {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-top: 0.4rem;
+  margin-top: clamp(0.2rem, 1.2cqw, 0.4rem);
 }
 
 .signature-line {
   font-family: 'Dancing Script', cursive, sans-serif;
-  font-size: 1.15rem;
+  font-size: clamp(0.8rem, 4cqw, 1.15rem);
   color: rgba(255, 255, 255, 0.85);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   width: 80%;
@@ -2358,7 +2418,7 @@ textarea.input-control {
 }
 
 .signature-label {
-  font-size: 0.52rem;
+  font-size: clamp(6.5px, 1.8cqw, 0.52rem);
   color: var(--text-muted);
   text-transform: uppercase;
   margin-top: 2px;
@@ -2368,7 +2428,7 @@ textarea.input-control {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.58rem;
+  font-size: clamp(7px, 2cqw, 0.58rem);
   color: var(--text-muted);
   font-family: 'JetBrains Mono', monospace;
   z-index: 1;
@@ -2381,12 +2441,13 @@ textarea.input-control {
   color: var(--user-card-theme, var(--accent-primary));
   font-weight: 700;
   text-shadow: 0 0 8px color-mix(in srgb, var(--user-card-theme, var(--accent-primary)) 40%, transparent);
+  font-size: clamp(7px, 2cqw, 0.58rem);
 }
 
 .card-back-glow-seal i,
 .card-back-glow-seal svg {
-  width: 0.65rem;
-  height: 0.65rem;
+  width: clamp(0.45rem, 2.2cqw, 0.65rem);
+  height: clamp(0.45rem, 2.2cqw, 0.65rem);
   stroke-width: 2.5px;
 }
 
@@ -2473,7 +2534,7 @@ textarea.input-control {
   width: 90%;
   max-width: 460px;
   padding: 1.75rem;
-  box-shadow: 
+  box-shadow:
     0 24px 80px rgba(0, 0, 0, 0.8),
     0 0 40px color-mix(in srgb, var(--accent-primary, #8b5cf6) 12%, transparent);
   transform: translateY(20px) scale(0.95);
@@ -2580,12 +2641,15 @@ textarea.input-control {
   transition: all 0.25s ease;
   box-sizing: border-box;
   overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 10+ */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 10+ */
 }
 
 .share-caption-input::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
+  /* Chrome, Safari, Opera */
 }
 
 
@@ -2839,13 +2903,13 @@ textarea.input-control {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: 
-    radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)),
-    radial-gradient(1.5px 1.5px at 40px 70px, #fff, rgba(0,0,0,0)),
-    radial-gradient(2px 2px at 150px 120px, #ddd, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 200px 80px, #fff, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 300px 150px, #eee, rgba(0,0,0,0)),
-    radial-gradient(1.5px 1.5px at 100px 200px, #fff, rgba(0,0,0,0));
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, #eee, rgba(0, 0, 0, 0)),
+    radial-gradient(1.5px 1.5px at 40px 70px, #fff, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 150px 120px, #ddd, rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1px at 200px 80px, #fff, rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1px at 300px 150px, #eee, rgba(0, 0, 0, 0)),
+    radial-gradient(1.5px 1.5px at 100px 200px, #fff, rgba(0, 0, 0, 0));
   background-size: 300px 300px;
   opacity: 0.15;
   pointer-events: none;
@@ -2853,8 +2917,13 @@ textarea.input-control {
 }
 
 @keyframes starsDrift {
-  0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
-  100% { background-position: 300px 300px, -300px 300px, 300px -300px, -300px -300px, 150px 300px, -150px -300px; }
+  0% {
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+  }
+
+  100% {
+    background-position: 300px 300px, -300px 300px, 300px -300px, -300px -300px, 150px 300px, -150px -300px;
+  }
 }
 
 .viewer-content {
@@ -2873,6 +2942,7 @@ textarea.input-control {
     opacity: 0;
     transform: translateY(24px) scale(0.96);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -2962,6 +3032,13 @@ textarea.input-control {
   }
 }
 
+@media (max-height: 600px) {
+  .shared-card-viewer-overlay {
+    align-items: flex-start;
+    padding: 1rem;
+  }
+}
+
 /* Card layout details */
 .card-header {
   display: flex;
@@ -2978,8 +3055,8 @@ textarea.input-control {
 
 .card-logo i,
 .card-logo .custom-logo-svg {
-  width: 1.85rem;
-  height: 1.85rem;
+  width: clamp(1.2rem, 6.5cqw, 1.85rem);
+  height: clamp(1.2rem, 6.5cqw, 1.85rem);
   color: var(--user-card-theme);
   filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--user-card-theme) 35%, transparent));
 }
@@ -2987,7 +3064,7 @@ textarea.input-control {
 .card-logo-text {
   font-family: 'Orbitron', sans-serif;
   font-weight: 900;
-  font-size: 0.95rem;
+  font-size: clamp(11px, 3.5cqw, 0.95rem);
   letter-spacing: 0.12em;
   color: #ffffff;
 }
@@ -2996,9 +3073,9 @@ textarea.input-control {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  font-size: 0.65rem;
+  font-size: clamp(8px, 2.3cqw, 0.65rem);
   font-family: 'JetBrains Mono', monospace;
-  padding: 0.25rem 0.5rem;
+  padding: clamp(0.15rem, 1cqw, 0.25rem) clamp(0.3rem, 2cqw, 0.5rem);
   border-radius: 4px;
   text-transform: uppercase;
   font-weight: 700;
@@ -3008,8 +3085,8 @@ textarea.input-control {
 
 .card-type i,
 .card-type svg {
-  width: 0.72rem;
-  height: 0.72rem;
+  width: clamp(0.5rem, 2.5cqw, 0.72rem);
+  height: clamp(0.5rem, 2.5cqw, 0.72rem);
   stroke-width: 2.5px;
 }
 
@@ -3036,19 +3113,19 @@ textarea.input-control {
 
 .card-body {
   display: grid;
-  grid-template-columns: 70px 1fr;
-  gap: 1rem;
+  grid-template-columns: clamp(45px, 15cqw, 70px) 1fr;
+  gap: clamp(0.5rem, 3cqw, 1rem);
   align-items: center;
-  margin: 1rem 0;
+  margin: clamp(0.5rem, 3.5cqw, 1rem) 0;
   z-index: 1;
 }
 
 .card-avatar-container {
-  width: 70px;
-  height: 70px;
+  width: clamp(45px, 15cqw, 70px);
+  height: clamp(45px, 15cqw, 70px);
   border-radius: 50%;
   overflow: hidden;
-  border: 2px solid var(--user-card-theme);
+  border: clamp(1px, 0.5cqw, 2px) solid var(--user-card-theme);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   background: rgba(255, 255, 255, 0.03);
   display: flex;
@@ -3066,7 +3143,7 @@ textarea.input-control {
 
 .card-avatar-placeholder {
   color: var(--text-muted);
-  font-size: 1.8rem;
+  font-size: clamp(1.1rem, 6cqw, 1.8rem);
 }
 
 .card-info {
@@ -3078,7 +3155,7 @@ textarea.input-control {
 }
 
 .card-name {
-  font-size: 1.2rem;
+  font-size: clamp(13px, 4.2cqw, 1.2rem);
   font-weight: 700;
   color: white;
   white-space: nowrap;
@@ -3088,7 +3165,7 @@ textarea.input-control {
 }
 
 .card-student-details {
-  font-size: 0.62rem;
+  font-size: clamp(8px, 2.2cqw, 0.62rem);
   font-family: 'JetBrains Mono', monospace;
   color: var(--user-card-theme, var(--accent-primary));
   text-transform: uppercase;
@@ -3104,7 +3181,7 @@ textarea.input-control {
 
 .card-email,
 .card-tel {
-  font-size: 0.75rem;
+  font-size: clamp(9px, 2.6cqw, 0.75rem);
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -3113,11 +3190,11 @@ textarea.input-control {
 
 .card-meta-row {
   display: flex;
-  gap: 1rem;
-  font-size: 0.65rem;
+  gap: clamp(0.5rem, 3cqw, 1rem);
+  font-size: clamp(8px, 2.2cqw, 0.65rem);
   color: rgba(255, 255, 255, 0.45);
   font-family: 'JetBrains Mono', monospace;
-  margin-top: 0.2rem;
+  margin-top: clamp(0.1rem, 0.8cqw, 0.2rem);
 }
 
 .card-footer {
@@ -3125,7 +3202,7 @@ textarea.input-control {
   justify-content: space-between;
   align-items: flex-end;
   border-top: 1px dashed rgba(255, 255, 255, 0.08);
-  padding-top: 0.75rem;
+  padding-top: clamp(0.4rem, 2.5cqw, 0.75rem);
   z-index: 1;
 }
 
@@ -3135,14 +3212,14 @@ textarea.input-control {
 }
 
 .card-id-label {
-  font-size: 0.55rem;
+  font-size: clamp(7px, 1.9cqw, 0.55rem);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .card-id-number {
-  font-size: 0.85rem;
+  font-size: clamp(10px, 3cqw, 0.85rem);
   font-family: 'JetBrains Mono', monospace;
   color: white;
   font-weight: 700;
@@ -3157,8 +3234,8 @@ textarea.input-control {
 }
 
 .barcode-svg {
-  height: 22px;
-  width: 90px;
+  height: clamp(14px, 4.8cqw, 22px);
+  width: clamp(60px, 20cqw, 90px);
   fill: white;
   opacity: 0.8;
 }

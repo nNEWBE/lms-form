@@ -365,11 +365,11 @@
                   </label>
                   <div class="custom-select-wrapper" id="custom-select-dept">
                     <div class="custom-select-trigger" id="custom-select-trigger-dept">
-                      <span id="custom-select-value-dept">CSE</span>
+                      <span id="custom-select-value-dept" class="placeholder-style">Select Department</span>
                       <i data-lucide="chevron-down" class="select-arrow-icon"></i>
                     </div>
                     <div class="custom-select-options" id="custom-select-options-dept">
-                      <div class="custom-option selected" data-value="CSE">CSE (Computer Science)</div>
+                      <div class="custom-option" data-value="CSE">CSE (Computer Science)</div>
                       <div class="custom-option" data-value="EEE">EEE (Electrical Eng.)</div>
                       <div class="custom-option" data-value="SWE">SWE (Software Eng.)</div>
                       <div class="custom-option" data-value="BBA">BBA (Business Admin.)</div>
@@ -379,7 +379,8 @@
                       <div class="custom-option" data-value="PHR">PHR (Pharmacy)</div>
                     </div>
                     <select id="department" name="department" style="display: none;" required>
-                      <option value="CSE" selected>CSE</option>
+                      <option value="" disabled selected>Select Department</option>
+                      <option value="CSE">CSE</option>
                       <option value="EEE">EEE</option>
                       <option value="SWE">SWE</option>
                       <option value="BBA">BBA</option>
@@ -406,7 +407,7 @@
                   </label>
                   <div class="custom-select-wrapper" id="custom-select-semester">
                     <div class="custom-select-trigger" id="custom-select-trigger-semester">
-                      <span id="custom-select-value-semester">8th Semester</span>
+                      <span id="custom-select-value-semester" class="placeholder-style">Select Semester</span>
                       <i data-lucide="chevron-down" class="select-arrow-icon"></i>
                     </div>
                     <div class="custom-select-options" id="custom-select-options-semester">
@@ -417,11 +418,12 @@
                       <div class="custom-option" data-value="5th Sem">5th Semester</div>
                       <div class="custom-option" data-value="6th Sem">6th Semester</div>
                       <div class="custom-option" data-value="7th Sem">7th Semester</div>
-                      <div class="custom-option selected" data-value="8th Sem">8th Semester</div>
+                      <div class="custom-option" data-value="8th Sem">8th Semester</div>
                       <div class="custom-option" data-value="9th Sem">9th Semester</div>
                       <div class="custom-option" data-value="10th Sem">10th Semester</div>
                     </div>
                     <select id="semester" name="semester" style="display: none;" required>
+                      <option value="" disabled selected>Select Semester</option>
                       <option value="1st Sem">1st Sem</option>
                       <option value="2nd Sem">2nd Sem</option>
                       <option value="3rd Sem">3rd Sem</option>
@@ -429,7 +431,7 @@
                       <option value="5th Sem">5th Sem</option>
                       <option value="6th Sem">6th Sem</option>
                       <option value="7th Sem">7th Sem</option>
-                      <option value="8th Sem" selected>8th Sem</option>
+                      <option value="8th Sem">8th Sem</option>
                       <option value="9th Sem">9th Sem</option>
                       <option value="10th Sem">10th Sem</option>
                     </select>
@@ -480,7 +482,7 @@
               <button type="submit" class="btn btn-primary" id="submit-form-btn">
                 <i data-lucide="check-circle-2" class="btn-icon"></i>
                 <div class="btn-spinner"></div>
-                <span>Create Member</span>
+                <span>Create<span class="btn-text-full"> Member</span></span>
               </button>
             </div>
 
@@ -543,7 +545,7 @@
                 <div class="card-info">
                   <div class="card-name" id="preview-name">Ayon Debnath</div>
                   <div class="card-student-details">
-                    <span id="preview-dept">CSE</span> &bull; <span id="preview-batch">BATCH 60</span> &bull; <span id="preview-semester">8TH SEM</span>
+                    <span id="preview-dept">DEPT</span> &bull; <span id="preview-batch">BATCH 60</span> &bull; <span id="preview-semester">SEMESTER</span>
                   </div>
                   <div class="card-email" id="preview-email">username@domain.com</div>
                   <div class="card-tel" id="preview-phone">+1 555-0199</div>
