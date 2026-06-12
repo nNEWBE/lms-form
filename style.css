@@ -20,23 +20,16 @@
   --user-card-theme: #06b6d4;
 }
 
-/* ==========================================================================
-   Theme-Toggle — Circle Reveal Animation (View Transitions API)
-   ========================================================================== */
-
-/* Enable view-transitions on the root */
 @view-transition {
   navigation: none;
 }
 
-/* Suppress the default cross-fade */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
 
-/* --- To Light Mode: new snapshot clips in as a growing circle --- */
 :root[data-theme-transitioning="to-light"]::view-transition-new(root) {
   animation: theme-circle-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   clip-path: circle(0% at var(--ripple-x, 50%) var(--ripple-y, 50%));
@@ -46,7 +39,6 @@
   z-index: -1;
 }
 
-/* --- To Dark Mode: new snapshot clips in as a growing circle --- */
 :root[data-theme-transitioning="to-dark"]::view-transition-new(root) {
   animation: theme-circle-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   clip-path: circle(0% at var(--ripple-x, 50%) var(--ripple-y, 50%));
@@ -61,7 +53,6 @@
   100% { clip-path: circle(150% at var(--ripple-x, 50%) var(--ripple-y, 50%)); }
 }
 
-/* Navbar button pulse on click */
 .theme-toggle.ripple-active {
   animation: toggle-btn-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
@@ -72,10 +63,6 @@
   70%  { transform: scale(0.9); }
   100% { transform: scale(1); }
 }
-
-/* ==========================================================================
-   End Theme-Toggle Animation
-   ========================================================================== */
 
 .required-asterisk {
   color: var(--accent-primary);
@@ -93,7 +80,6 @@
   scrollbar-color: var(--accent-primary) var(--bg-primary);
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -125,7 +111,6 @@ body {
   position: relative;
 }
 
-/* Fixed Navbar */
 .fixed-navbar {
   position: fixed;
   top: 0;
@@ -242,7 +227,6 @@ body {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Theme Toggle Icon Visibility */
 .theme-toggle .theme-icon-light {
   display: none;
 }
@@ -259,9 +243,6 @@ body.light-mode .theme-toggle .theme-icon-dark {
   display: none;
 }
 
-/* ==========================================================================
-   Light Mode Overrides
-   ========================================================================== */
 body.light-mode {
   background-color: #f0f1f5;
   color: #1a1a2e;
@@ -370,9 +351,6 @@ body.light-mode .form-section-title::after {
 body.light-mode .field-group label {
   color: #6b7280;
 }
-
-
-
 
 body.light-mode .input-control {
   background: #f8f8fb;
@@ -554,7 +532,6 @@ body.light-mode .btn-secondary .btn-spinner {
   border-top-color: #6b7280;
 }
 
-/* Light mode - Preview Card */
 body.light-mode .preview-title {
   color: #6b7280;
 }
@@ -626,7 +603,6 @@ body.light-mode .barcode-svg {
   fill: #1a1a2e;
 }
 
-/* Light mode - Card Back overrides */
 body.light-mode .card-back-badge {
   background: rgba(0, 0, 0, 0.04);
   border-color: rgba(0, 0, 0, 0.08);
@@ -655,7 +631,7 @@ body.light-mode .card-back-address-block .addr-value {
 
 body.light-mode .qr-container {
   background: #12131a;
-  /* QR scanner remains dark block for contrast */
+  
   border-color: rgba(0, 0, 0, 0.08);
 }
 
@@ -712,7 +688,6 @@ body.light-mode .beam-path {
   filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent-primary) 15%, transparent));
 }
 
-/* Light mode overrides for Custom Select and Date Picker */
 body.light-mode .custom-select-trigger {
   background: #f8f8fb;
   border-color: rgba(0, 0, 0, 0.1);
@@ -859,7 +834,6 @@ body.light-mode .calendar-nav-btn:hover {
   border-color: rgba(0, 0, 0, 0.06);
 }
 
-/* Technical Sidebar Rails styling */
 .skel-rail {
   position: fixed;
   top: 0;
@@ -890,7 +864,6 @@ body.light-mode .calendar-nav-btn:hover {
   }
 }
 
-/* Moving Beam SVG Background Overlay */
 .beam-container {
   position: fixed;
   top: 0;
@@ -1001,7 +974,6 @@ body.light-mode .calendar-nav-btn:hover {
   }
 }
 
-/* Main Container Layout */
 .app-wrapper {
   position: relative;
   width: 100%;
@@ -1105,7 +1077,6 @@ header p {
   }
 }
 
-/* Schematic Card Design (Solid, compact) */
 .glass-panel {
   background: #0d0e15;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1116,7 +1087,6 @@ header p {
   transition: border-color 0.3s ease;
 }
 
-/* Only clip overflow on non-form panels (preview, instructions, etc.) */
 .glass-panel:not(.form-container) {
   overflow: hidden;
 }
@@ -1125,7 +1095,6 @@ header p {
   border-color: rgba(255, 255, 255, 0.14);
 }
 
-/* Form Styling - Compact and Solid */
 .form-container h2 {
   font-size: 1.15rem;
   font-weight: 600;
@@ -1151,8 +1120,6 @@ header p {
   grid-template-columns: repeat(2, 1fr);
   gap: 0.85rem;
 }
-
-
 
 .form-section {
   grid-column: span 2;
@@ -1187,7 +1154,6 @@ header p {
   background: rgba(255, 255, 255, 0.04);
 }
 
-/* Compact field groups */
 .field-group {
   display: flex;
   flex-direction: column;
@@ -1212,8 +1178,6 @@ header p {
   }
 }
 
-
-
 .field-group label {
   font-size: 0.78rem;
   font-weight: 600;
@@ -1231,10 +1195,6 @@ header p {
   stroke-width: 2.2px;
 }
 
-
-
-
-/* Custom styled generic inputs */
 .input-control {
   width: 100%;
   background: #12131a;
@@ -1256,7 +1216,6 @@ header p {
   color: rgba(255, 255, 255, 0.2);
 }
 
-/* Date/Time specific input styling overrides */
 input[type="date"].input-control,
 input[type="time"].input-control,
 input[type="month"].input-control,
@@ -1266,7 +1225,6 @@ input[type="datetime-local"].input-control {
   cursor: pointer;
 }
 
-/* Search input wrapper */
 .search-wrapper {
   position: relative;
 }
@@ -1285,7 +1243,6 @@ input[type="datetime-local"].input-control {
   padding-right: 2.2rem;
 }
 
-/* Custom styled Color Picker */
 .color-picker-container {
   display: flex;
   align-items: center;
@@ -1330,7 +1287,6 @@ input[type="color"].input-color {
   text-transform: uppercase;
 }
 
-/* Custom Range Slider styling */
 .range-slider-wrapper {
   display: flex;
   align-items: center;
@@ -1408,7 +1364,6 @@ input[type="range"].range-slider:active::-moz-range-thumb {
   font-family: 'JetBrains Mono', monospace;
 }
 
-/* Premium Scale Ticks stylings */
 .slider-scale-ticks {
   display: flex;
   justify-content: space-between;
@@ -1462,7 +1417,6 @@ input[type="range"].range-slider:active::-moz-range-thumb {
   width: 1px;
 }
 
-/* Custom styled File Upload */
 .file-upload-wrapper {
   position: relative;
   display: flex;
@@ -1529,16 +1483,15 @@ input[type="file"].file-input {
   cursor: pointer;
 }
 
-/* Select Input Container styling */
 .select-wrapper {
   position: relative;
 }
 
 .select-wrapper::after {
   content: '\e9b2';
-  /* Unicode character for down arrow (if using icon font) or custom arrow */
+  
   font-family: 'lucide' !important;
-  /* using custom icon styles */
+  
   content: '▼';
   font-size: 0.7rem;
   position: absolute;
@@ -1560,7 +1513,6 @@ input[type="file"].file-input {
   color: var(--text-main);
 }
 
-/* Triple Select Grid */
 .triple-select-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1580,7 +1532,6 @@ input[type="file"].file-input {
   }
 }
 
-/* Custom Select Dropdown Styling */
 .custom-select-wrapper {
   position: relative;
   width: 100%;
@@ -1651,11 +1602,10 @@ body.light-mode .placeholder-style {
   padding: 4px 0;
 }
 
-/* Custom Dropdown Search Styles */
 .select-search-container {
   position: sticky;
   top: -4px;
-  /* offset the default padding on .custom-select-options */
+  
   z-index: 10;
   background: #12131a;
   padding: 6px 8px;
@@ -1736,7 +1686,6 @@ body.light-mode .placeholder-style {
   border-left: 2.5px solid var(--accent-primary);
 }
 
-/* Custom Datepicker Calendar Styling */
 .custom-datepicker-wrapper {
   position: relative;
   width: 100%;
@@ -1797,7 +1746,6 @@ body.light-mode .placeholder-style {
   z-index: 999 !important;
 }
 
-/* Upward opening select dropdowns and datepickers when vertical space below is restricted */
 .custom-select-wrapper.open-top .custom-select-options {
   top: auto;
   bottom: calc(100% + 5px);
@@ -1830,12 +1778,10 @@ body.light-mode .placeholder-style {
   }
 }
 
-/* Light mode shadow overrides for upward-facing dropdowns */
 body.light-mode .custom-select-wrapper.open-top .custom-select-options,
 body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
   box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.05);
 }
-
 
 .calendar-header {
   display: flex;
@@ -1957,7 +1903,6 @@ body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
   border: 1px solid var(--accent-primary);
 }
 
-/* Week highlight hover classes */
 .calendar-days.week-mode .calendar-row-hovered:not(.empty):not(.week-num) {
   background: rgba(255, 255, 255, 0.03);
 }
@@ -2009,7 +1954,6 @@ body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
   background: color-mix(in srgb, var(--accent-primary) 16%, transparent);
 }
 
-/* Custom Month Picker Grid styling */
 .calendar-months-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -2038,7 +1982,6 @@ body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
   font-weight: 700;
 }
 
-/* Custom Time Picker Scroll list styling */
 .time-picker-columns {
   display: flex;
   justify-content: center;
@@ -2088,7 +2031,6 @@ body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
   color: var(--text-muted);
 }
 
-/* Datetime time-input row styling */
 .datetime-time-selector {
   display: flex;
   align-items: center;
@@ -2114,7 +2056,6 @@ body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
   border-radius: 4px;
 }
 
-/* Custom Checkboxes and Radios */
 .checkbox-group,
 .radio-group {
   display: flex;
@@ -2157,7 +2098,6 @@ body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
   width: 0;
 }
 
-/* Checked text coloring */
 .custom-checkbox input:checked~span,
 .custom-checkbox-card input:checked~span,
 .custom-radio input:checked~span,
@@ -2165,40 +2105,33 @@ body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
   color: var(--text-main);
 }
 
-/* Checkbox specific active/checked state */
 .custom-checkbox:has(input:checked),
 .custom-checkbox-card:has(input:checked) {
   border-color: var(--accent-primary);
   background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
 }
 
-/* Dynamic Tier-based Radio Button Styling */
-/* Standard Tier */
 .custom-radio:has(input[value="Standard"]):has(input:checked) {
   border-color: var(--accent-secondary);
   background: color-mix(in srgb, var(--accent-secondary) 8%, transparent);
 }
 
-/* Premium Tier */
 .custom-radio:has(input[value="Premium"]):has(input:checked) {
   border-color: var(--accent-primary);
   background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
 }
 
-/* VIP Tier */
 .custom-radio:has(input[value="VIP"]):has(input:checked) {
   border-color: #fbbf24;
   background: rgba(251, 191, 36, 0.08);
   box-shadow: 0 0 12px rgba(251, 191, 36, 0.15);
 }
 
-/* Custom Radio Card Checked State */
 .custom-radio-card:has(input:checked) {
   border-color: var(--accent-primary);
   background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
 }
 
-/* Decorative Indicators */
 .custom-checkbox .checkmark,
 .custom-checkbox-card .checkmark,
 .custom-radio .radiomark,
@@ -2226,7 +2159,6 @@ body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
   border-radius: 50%;
 }
 
-/* Hover over indicator */
 .custom-checkbox:hover .checkmark,
 .custom-checkbox-card:hover .checkmark {
   border-color: rgba(255, 255, 255, 0.4);
@@ -2237,7 +2169,6 @@ body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-/* Checkbox checkmark fill */
 .custom-checkbox input:checked~.checkmark,
 .custom-checkbox-card input:checked~.checkmark {
   background-color: var(--accent-primary);
@@ -2257,7 +2188,6 @@ body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
   transform: rotate(45deg);
 }
 
-/* Radio dynamic dot colors */
 .custom-radio:has(input[value="Standard"]) input:checked~.radiomark {
   border-color: var(--accent-secondary);
 }
@@ -2265,7 +2195,6 @@ body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
 .custom-radio:has(input[value="Standard"]) input:checked~.radiomark::after {
   background-color: var(--accent-secondary);
 }
-
 
 .custom-radio:has(input[value="Premium"]) input:checked~.radiomark {
   border-color: var(--accent-primary);
@@ -2283,7 +2212,6 @@ body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
   background-color: #fbbf24;
 }
 
-/* Custom Radio Card Check Fill */
 .custom-radio-card input:checked~.radiomark {
   border-color: var(--accent-primary);
 }
@@ -2296,7 +2224,6 @@ body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
   background-color: var(--accent-primary);
 }
 
-/* General Radio Dot Placement */
 .custom-radio input:checked~.radiomark::after {
   content: '';
   width: 6px;
@@ -2304,18 +2231,16 @@ body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
   border-radius: 50%;
 }
 
-/* Textarea Input styling */
 textarea.input-control {
   resize: vertical;
   min-height: 70px;
 }
 
-/* Form Action Buttons */
 .form-actions {
   grid-column: span 2;
   display: flex;
   justify-content: flex-end;
-  /* Align buttons to the right on large devices */
+  
   gap: 0.75rem;
   margin-top: 0.8rem;
   padding-top: 0.75rem;
@@ -2329,11 +2254,9 @@ textarea.input-control {
 
   .btn {
     flex: 1;
-    /* Stretch buttons on tablet and mobile */
+    
   }
 }
-
-
 
 @media (max-width: 480px) {
   .form-actions {
@@ -2369,7 +2292,7 @@ textarea.input-control {
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
   outline: none;
   min-width: 120px;
-  /* Prevent overly tiny buttons while fitting content */
+  
 }
 
 .btn i,
@@ -2413,7 +2336,6 @@ textarea.input-control {
   transform: translateY(0);
 }
 
-/* Spinner and loading animation */
 .btn-spinner {
   display: none;
   width: 18px;
@@ -2449,9 +2371,6 @@ textarea.input-control {
   opacity: 0.8;
 }
 
-/* ==========================================================================
-   Library Card Preview Component (Right Column) - Compact & Holographic
-   ========================================================================== */
 .preview-container {
   position: sticky;
   top: 2rem;
@@ -2480,7 +2399,6 @@ textarea.input-control {
   flex-shrink: 0;
 }
 
-/* Card 3D Wrap */
 .card-perspective {
   perspective: 1000px;
   width: 100%;
@@ -2529,10 +2447,9 @@ textarea.input-control {
 .library-card-side.card-back {
   transform: rotateY(180deg);
   background: #0a0b12;
-  /* slightly darker back */
+  
 }
 
-/* Card Hologram overlay on both sides */
 .library-card-side::after {
   content: '';
   position: absolute;
@@ -2570,7 +2487,6 @@ textarea.input-control {
   z-index: 0;
 }
 
-/* Card Back Design Layout */
 .card-back-badge {
   display: flex;
   align-items: center;
@@ -2756,7 +2672,6 @@ textarea.input-control {
   stroke-width: 2.5px;
 }
 
-/* Card Actions beneath card */
 .card-actions-wrapper {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -2795,7 +2710,6 @@ textarea.input-control {
   transform: translateY(-1px);
 }
 
-/* Share Modal overlay */
 .share-modal-overlay {
   position: fixed;
   top: 0;
@@ -2885,7 +2799,6 @@ textarea.input-control {
   stroke-width: 2.5px;
 }
 
-/* Section labels inside modal */
 .share-label {
   display: block;
   font-size: 0.68rem;
@@ -2896,7 +2809,6 @@ textarea.input-control {
   margin-bottom: 0.4rem;
 }
 
-/* Caption textarea */
 .share-caption-header {
   display: flex;
   justify-content: space-between;
@@ -2937,16 +2849,15 @@ textarea.input-control {
   box-sizing: border-box;
   overflow-y: auto;
   scrollbar-width: none;
-  /* Firefox */
+  
   -ms-overflow-style: none;
-  /* IE 10+ */
+  
 }
 
 .share-caption-input::-webkit-scrollbar {
   display: none;
-  /* Chrome, Safari, Opera */
+  
 }
-
 
 .share-caption-input::placeholder {
   color: rgba(255, 255, 255, 0.2);
@@ -2957,7 +2868,6 @@ textarea.input-control {
   box-shadow: 0 0 12px color-mix(in srgb, var(--accent-primary, #06b6d4) 15%, transparent);
 }
 
-/* Info note at bottom of modal */
 .share-info-note {
   display: flex;
   align-items: flex-start;
@@ -3078,7 +2988,6 @@ textarea.input-control {
   flex-shrink: 0;
 }
 
-/* Inline SVG brand icons (filled, no stroke) */
 .social-btn .social-icon {
   width: 1.05rem;
   height: 1.05rem;
@@ -3176,7 +3085,6 @@ textarea.input-control {
   }
 }
 
-/* Shared Card Viewer Mode styles */
 .shared-card-viewer-overlay {
   position: fixed;
   top: 0;
@@ -3271,14 +3179,12 @@ textarea.input-control {
   letter-spacing: 0.06em;
 }
 
-/* The card placement container in the viewer */
 .viewer-card-placement {
   width: 100%;
   perspective: 1200px;
   position: relative;
 }
 
-/* Glow effect behind the card in the viewer */
 .viewer-card-placement::before {
   content: '';
   position: absolute;
@@ -3293,7 +3199,6 @@ textarea.input-control {
   z-index: 0;
 }
 
-/* When the library-card is inside the viewer, it inherits full width */
 .viewer-card-placement .library-card {
   position: relative;
   z-index: 1;
@@ -3335,7 +3240,6 @@ textarea.input-control {
   }
 }
 
-/* Card layout details */
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -3392,8 +3296,6 @@ textarea.input-control {
   color: var(--user-card-theme, var(--accent-primary));
 }
 
-
-
 .card-type.tier-premium {
   background: rgba(168, 85, 247, 0.08);
   border: 1px solid rgba(168, 85, 247, 0.25);
@@ -3447,7 +3349,7 @@ textarea.input-control {
   flex-direction: column;
   gap: 0.25rem;
   min-width: 0;
-  /* allows text truncation */
+  
 }
 
 .card-name {
@@ -3521,7 +3423,6 @@ textarea.input-control {
   font-weight: 700;
 }
 
-/* Barcode simulation */
 .card-barcode-container {
   display: flex;
   flex-direction: column;
@@ -3536,7 +3437,6 @@ textarea.input-control {
   opacity: 0.8;
 }
 
-/* Card Instructions Info */
 .card-instructions {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-color);
@@ -3568,7 +3468,6 @@ textarea.input-control {
   line-height: 1.4;
 }
 
-/* Interactive Toast Alert */
 .toast-notification {
   position: fixed;
   bottom: 24px;
@@ -3613,7 +3512,6 @@ textarea.input-control {
   color: var(--text-muted);
 }
 
-/* Optimize scroll performance on mobile/tablet devices by disabling blending layers */
 @media (max-width: 1024px) {
   .fixed-navbar {
     backdrop-filter: none !important;
@@ -3638,7 +3536,6 @@ textarea.input-control {
   }
 }
 
-/* Success Modal styling */
 .success-modal-overlay {
   position: fixed;
   top: 0;
@@ -3687,7 +3584,6 @@ textarea.input-control {
   transform: translateY(0) scale(1);
 }
 
-/* Success Modal Icon and Animations */
 .success-modal-icon-wrapper {
   position: relative;
   width: 68px;
@@ -3748,7 +3644,6 @@ textarea.input-control {
   margin-bottom: 1.5rem;
 }
 
-/* Success Summary Box */
 .success-member-summary {
   width: 100%;
   background: #090a0f;
@@ -3783,7 +3678,6 @@ textarea.input-control {
   color: var(--accent-secondary, #8b5cf6);
 }
 
-/* Actions */
 .success-modal-actions {
   display: flex;
   gap: 0.75rem;
@@ -3798,7 +3692,6 @@ textarea.input-control {
   justify-content: center;
 }
 
-/* Light mode overrides for success modal */
 body.light-mode .success-modal-content {
   background: #ffffff;
   border-color: rgba(0, 0, 0, 0.08);
@@ -3818,9 +3711,6 @@ body.light-mode .summary-value {
   color: #1a1a2e;
 }
 
-/* ==========================================================================
-   Admin Members Table & Login Overlay Styling
-   ========================================================================== */
 .admin-table-wrapper {
   transition: border-color 0.3s ease;
 }
@@ -3842,7 +3732,6 @@ body.light-mode .summary-value {
   border-bottom: none;
 }
 
-/* Light mode overrides for Admin Table */
 body.light-mode .admin-table-wrapper {
   background: rgba(255, 255, 255, 0.8) !important;
   border-color: rgba(0, 0, 0, 0.08) !important;
@@ -3866,7 +3755,6 @@ body.light-mode .admin-members-table tbody tr:hover {
   background-color: rgba(0, 0, 0, 0.01);
 }
 
-/* Admin Dashboard Table custom classes */
 .table-member-info {
   display: flex;
   align-items: center;
@@ -3909,7 +3797,6 @@ body.light-mode .table-member-name {
   color: #1a1a2e;
 }
 
-/* Tier Badges inside Table */
 .table-tier-badge {
   display: inline-flex;
   align-items: center;
@@ -3946,7 +3833,6 @@ body.light-mode .table-member-name {
   color: #ec4899;
 }
 
-/* Actions styling */
 .table-actions {
   display: flex;
   gap: 0.4rem;
@@ -4003,7 +3889,6 @@ body.light-mode .table-action-btn.view-btn:hover {
   box-shadow: 0 0 8px rgba(244, 63, 94, 0.2);
 }
 
-/* Light mode overrides for Login Panel */
 body.light-mode #admin-login-mode .glass-panel {
   background: #ffffff;
   border-color: rgba(0, 0, 0, 0.08);
@@ -4028,7 +3913,6 @@ body.light-mode #admin-login-mode input {
   color: #1a1a2e !important;
 }
 
-/* Expanded Form Grid & Card Styles */
 .checkbox-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -4098,7 +3982,6 @@ body.light-mode #admin-login-mode input {
   accent-color: var(--accent-primary);
 }
 
-/* Light mode overrides for checkbox & radio cards */
 body.light-mode .custom-checkbox-card,
 body.light-mode .custom-radio-card {
   background: #f8f8fb;
@@ -4142,7 +4025,6 @@ body.light-mode .custom-radio-card:hover .radiomark {
   }
 }
 
-/* Light mode overrides for share & details modal */
 body.light-mode .share-modal-content {
   background: #ffffff;
   border-color: rgba(0, 0, 0, 0.08);

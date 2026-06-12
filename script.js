@@ -1,19 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Wrap all required asterisks in a styled span dynamically
+  
   document.querySelectorAll('label').forEach(label => {
     if (label.innerHTML.includes('*')) {
       label.innerHTML = label.innerHTML.replace(/\*/g, '<span class="required-asterisk">*</span>');
     }
   });
 
-  // Initialize Lucide icons safely
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
   } else {
     console.warn('Lucide CDN is offline; icons will not render.');
   }
 
-  // ---- Theme Toggle (Dark / Light) ----
   const themeToggle = document.getElementById('theme-toggle');
   const savedTheme = localStorage.getItem('lms-theme');
   if (savedTheme === 'light') {
@@ -22,17 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
   themeToggle.addEventListener('click', (e) => {
     const isLight = !document.body.classList.contains('light-mode');
 
-    // Get click position relative to viewport for the ripple origin
     const rect = themeToggle.getBoundingClientRect();
     const x = Math.round(rect.left + rect.width / 2);
     const y = Math.round(rect.top + rect.height / 2);
 
-    // Diagonal of the screen = max radius needed
     const maxR = Math.ceil(
       Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y))
     );
 
-    // Expose ripple origin to CSS
     document.documentElement.style.setProperty('--ripple-x', x + 'px');
     document.documentElement.style.setProperty('--ripple-y', y + 'px');
     document.documentElement.style.setProperty('--ripple-r', maxR + 'px');
@@ -47,7 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof lucide !== 'undefined') lucide.createIcons();
     };
 
-    // View Transitions API (Chrome 111+, Edge 111+)
     if (document.startViewTransition) {
       document.documentElement.setAttribute('data-theme-transitioning', isLight ? 'to-light' : 'to-dark');
       const transition = document.startViewTransition(doToggle);
@@ -55,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.removeAttribute('data-theme-transitioning');
       });
     } else {
-      // Fallback: classic ripple overlay
+      
       const ripple = document.createElement('div');
       ripple.id = 'theme-ripple-overlay';
       ripple.style.cssText = `
@@ -85,13 +79,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Helper to check if viewing a shared card link
   function isViewingShared() {
     const hash = window.location.hash;
     return hash && decodeURIComponent(hash).startsWith('#share=');
   }
 
-  // Helper to compress and generate the share payload
   function getSharePayload() {
     const deptInput = document.getElementById('department');
     const deptValText = deptInput ? deptInput.value.trim() : 'DEPT';
@@ -104,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const tierMap = { 'Standard': 'S', 'Premium': 'P', 'VIP': 'V' };
 
-    // Compress URL payload by omitting defaults/placeholders and using a joined control-character separator
     const nameVal = previewName.textContent === DEFAULTS.name ? "" : previewName.textContent;
     const deptVal = (deptValText === 'DEPT' || deptValText === 'Select Department' || deptValText === "") ? "" : deptValText;
     const sessionInput = document.getElementById('admission_session');
@@ -142,12 +133,10 @@ document.addEventListener('DOMContentLoaded', () => {
       cloudinaryAvatarUrl ? getCloudinaryPath(cloudinaryAvatarUrl) : compressedAvatarBase64
     ];
 
-    // Join with ASCII Unit Separator control character (impossible to be input by users)
     const rawString = cardDataArray.join('\u001f');
     return btoa(unescape(encodeURIComponent(rawString))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
 
-  // Canvas-based Confetti celebration animation
   function triggerConfetti() {
     const canvas = document.createElement('canvas');
     canvas.style.position = 'fixed';
@@ -172,7 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const colors = ['#06b6d4', '#8b5cf6', '#ec4899', '#eab308', '#22c55e', '#3b82f6'];
     const particles = [];
 
-    // Shoot from bottom corners
     const particleCount = 120;
     for (let i = 0; i < particleCount; i++) {
       const isLeft = i < particleCount / 2;
@@ -230,7 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
     animate();
   }
 
-  // Elements - Form Inputs
   const form = document.getElementById('library-member-form');
   const inputFirstName = document.getElementById('first_name');
   const inputLastName = document.getElementById('last_name');
@@ -255,12 +242,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const inputBorrowLimit = document.getElementById('borrow_limit');
   const labelLimitValue = document.getElementById('borrow-limit-val');
   const ticksElements = document.querySelectorAll('.slider-scale-ticks .tick');
-  const inputBatch = document.getElementById('admission_session'); // Map session to inputBatch for compat
+  const inputBatch = document.getElementById('admission_session'); 
 
   const inputAddress = document.getElementById('address');
   const inputAgree = document.getElementById('agree_terms');
 
-  // Elements - Preview Card Cardboard
   const cardPerspective = document.getElementById('card-perspective');
   const libraryCard = document.getElementById('library-id-card');
   const previewName = document.getElementById('preview-name');
@@ -284,7 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Reusable Custom Select Setup Helper
   function setupCustomSelect({
     wrapperId,
     triggerId,
@@ -332,12 +317,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       searchInput = searchContainer.querySelector('.select-search-input');
 
-      // Prevent clicking the search box from propagating and closing dropdown
       searchInput.addEventListener('click', (e) => {
         e.stopPropagation();
       });
 
-      // Filter options on text input
       searchInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase().trim();
         options.forEach(option => {
@@ -358,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!isOpen) {
         const rect = trigger.getBoundingClientRect();
         const spaceBelow = window.innerHeight - rect.bottom;
-        const dropdownHeight = 230; // approx max height of dropdown
+        const dropdownHeight = 230; 
         if (spaceBelow < dropdownHeight && rect.top > spaceBelow) {
           wrapper.classList.add('open-top');
         } else {
@@ -373,8 +356,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-
-    // Listen to changes on the hidden select to update the custom UI dynamically
     hiddenSelect.addEventListener('change', () => {
       const val = hiddenSelect.value;
       currentValue = val;
@@ -410,7 +391,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Trigger initial sync
     hiddenSelect.dispatchEvent(new Event('change'));
 
     return {
@@ -433,7 +413,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Reusable Date Picker Setup Helper
   function setupDatePicker({
     wrapperId,
     triggerId,
@@ -472,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!isOpen) {
         const rect = trigger.getBoundingClientRect();
         const spaceBelow = window.innerHeight - rect.bottom;
-        const dropdownHeight = 330; // approx max height of datepicker calendar
+        const dropdownHeight = 330; 
         if (spaceBelow < dropdownHeight && rect.top > spaceBelow) {
           wrapper.classList.add('open-top');
         } else {
@@ -597,13 +576,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Buttons & Notifications
   const btnReset = document.getElementById('reset-form-btn');
   const btnSubmit = document.getElementById('submit-form-btn');
   const successToast = document.getElementById('success-toast');
   const toastMessage = document.getElementById('toast-message');
 
-  // Constants / Defaults
   const DEFAULTS = {
     name: 'Shuvo Chandra Debnath',
     email: 'username@domain.com',
@@ -614,7 +591,6 @@ document.addEventListener('DOMContentLoaded', () => {
     theme: '#06b6d4'
   };
 
-  // Generate a random membership card key on load
   function generateCardKey() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const randPart1 = Math.floor(1000 + Math.random() * 9000);
@@ -623,7 +599,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const key = `LMS-${randPart1}-${randPart2}${randChar}`;
     previewCardKey.textContent = key;
 
-    // Also update QR Code!
     const qrImage = document.getElementById('preview-qr');
     if (qrImage) {
       qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(key)}&color=ffffff&bgcolor=12131a`;
@@ -631,7 +606,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   generateCardKey();
 
-  // Live Syncing Input Handlers
   const updatePreviewName = () => {
     if (isViewingShared()) return;
     const first = inputFirstName ? inputFirstName.value.trim() : '';
@@ -655,7 +629,6 @@ document.addEventListener('DOMContentLoaded', () => {
     previewPhone.textContent = e.target.value.trim() || DEFAULTS.phone;
   });
 
-  // Sync Membership Tier Radio Input
   const radioTiers = document.querySelectorAll('input[name="tier"]');
   const tierMap = {
     'Standard': { icon: 'shield', label: 'Standard', class: 'tier-standard' },
@@ -669,18 +642,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target.checked) {
         const tierData = tierMap[e.target.value] || tierMap['Standard'];
 
-        // Update class list on the preview tier element
-        previewTier.className = 'card-type'; // reset
+        previewTier.className = 'card-type'; 
         previewTier.classList.add(tierData.class);
 
-        // Update content with proper icon
         previewTier.innerHTML = `<i data-lucide="${tierData.icon}"></i><span>${tierData.label}</span>`;
 
         if (typeof lucide !== 'undefined') {
           lucide.createIcons();
         }
 
-        // Optionally animate card type scaling
         previewTier.style.transform = 'scale(1.15)';
         setTimeout(() => {
           previewTier.style.transform = 'scale(1)';
@@ -689,20 +659,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Sync Card Accent Color Picker
   inputCardTheme.addEventListener('input', (e) => {
     if (isViewingShared()) return;
     const chosenColor = e.target.value;
     labelColorHex.textContent = chosenColor;
 
-    // Set custom CSS variable on library card
     libraryCard.style.setProperty('--user-card-theme', chosenColor);
 
-    // Update SVG background path beam glow matching picker color
     document.documentElement.style.setProperty('--accent-primary', chosenColor);
   });
 
-  // Sync Max Borrow Limit Range Slider
   function updateSliderProgress(slider) {
     const min = parseFloat(slider.min) || 1;
     const max = parseFloat(slider.max) || 25;
@@ -731,7 +697,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSliderProgress(e.target);
   });
 
-  // Ticks click handlers
   ticksElements.forEach(tick => {
     tick.addEventListener('click', () => {
       const val = tick.getAttribute('data-value');
@@ -740,18 +705,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Initialize ticks and progress
   updateSliderTicks(parseInt(inputBorrowLimit.value));
   updateSliderProgress(inputBorrowLimit);
 
-  // Clear error border on radio select change
   document.querySelectorAll('input[name="card_status"]').forEach(radio => {
     radio.addEventListener('change', () => {
       highlightInputError(radio, false);
     });
   });
 
-  // Sync Expiry Term Date Input (e.g. "2026-12-15" -> "DEC 2026")
   inputMembershipExpiry.addEventListener('input', (e) => {
     if (isViewingShared()) return;
     if (!e.target.value) {
@@ -764,7 +726,6 @@ document.addEventListener('DOMContentLoaded', () => {
     previewTerm.textContent = `${monthStr} ${year}`;
   });
 
-  // Helper to compute SHA-1 hash for Cloudinary signed upload
   async function sha1(string) {
     const utf8 = new TextEncoder().encode(string);
     const hashBuffer = await window.crypto.subtle.digest('SHA-1', utf8);
@@ -773,7 +734,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return hashHex;
   }
 
-  // Helper to upload base64 image to Cloudinary using signed or unsigned upload
   async function uploadToCloudinary(base64Data) {
     const env = window.ENV || {};
     const cloudName = env.CLOUDINARY_CLOUD_NAME || 'dorjgyfdl';
@@ -793,10 +753,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (uploadPreset) {
-      // Unsigned Upload (Safe for public GitHub Pages)
+      
       formData.append('upload_preset', uploadPreset);
     } else {
-      // Signed Upload (Fallback local development)
+      
       if (!apiKey || !apiSecret) {
         throw new Error('Neither Cloudinary upload_preset nor api_key/api_secret are configured in env.js');
       }
@@ -865,9 +825,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      const maxDim = 100; // Optimal 1:1 dimension for preview avatar
+      const maxDim = 100; 
 
-      // Center crop to 1:1 aspect ratio
       const size = Math.min(img.width, img.height);
       const sourceX = (img.width - size) / 2;
       const sourceY = (img.height - size) / 2;
@@ -879,7 +838,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
 
-      // Draw cropped square region to target canvas
       ctx.drawImage(img, sourceX, sourceY, size, size, 0, 0, maxDim, maxDim);
 
       const compressedUrl = canvas.toDataURL('image/jpeg', 0.6);
@@ -889,12 +847,11 @@ document.addEventListener('DOMContentLoaded', () => {
     img.src = dataUrl;
   }
 
-  // Avatar Upload Handler with Cloudinary Cloud Host Integration
   inputAvatar.addEventListener('change', (e) => {
     if (isViewingShared()) return;
     const file = e.target.files[0];
     if (file) {
-      const maxSize = 1 * 1024 * 1024; // 1MB in bytes
+      const maxSize = 1 * 1024 * 1024; 
       if (file.size > maxSize) {
         showToast('File Too Large', 'Student photo must be less than 1MB.', true);
         inputAvatar.value = '';
@@ -903,7 +860,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const reader = new FileReader();
       reader.onload = (event) => {
-        // Render local preview instantly for visual feedback
+        
         previewAvatar.src = event.target.result;
         previewAvatar.style.display = 'block';
         previewAvatarIcon.style.display = 'none';
@@ -911,7 +868,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dropzoneAvatar.classList.add('has-file');
         labelFile.textContent = 'Compressing image...';
 
-        // Temporarily disable form submission during cloud upload
         if (btnSubmit) {
           btnSubmit.disabled = true;
           btnSubmit.style.opacity = '0.6';
@@ -926,7 +882,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const hostedUrl = await uploadToCloudinary(base64);
             cloudinaryAvatarUrl = hostedUrl;
 
-            // Render the hosted version directly on the card to ensure CORS/rendering is verified
             previewAvatar.src = hostedUrl;
 
             labelFile.textContent = file.name;
@@ -964,8 +919,6 @@ document.addEventListener('DOMContentLoaded', () => {
     cloudinaryAvatarUrl = '';
   }
 
-
-  // Drag and drop event listeners for avatar dropzone
   ['dragenter', 'dragover'].forEach(eventName => {
     dropzoneAvatar.addEventListener(eventName, (e) => {
       e.preventDefault();
@@ -987,13 +940,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const file = dt.files[0];
     if (file && file.type.startsWith('image/')) {
       inputAvatar.files = dt.files;
-      // Trigger change event manually
+      
       const event = new Event('change');
       inputAvatar.dispatchEvent(event);
     }
   });
 
-  // Enrollment proof Upload Handler
   let cloudinaryEnrollmentUrl = '';
 
   if (inputEnrollment && dropzoneEnrollment && labelEnrollmentFile) {
@@ -1001,7 +953,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isViewingShared()) return;
       const file = e.target.files[0];
       if (file) {
-        const maxSize = 1 * 1024 * 1024; // 1MB in bytes
+        const maxSize = 1 * 1024 * 1024; 
         if (file.size > maxSize) {
           showToast('File Too Large', 'Enrollment proof must be less than 1MB.', true);
           inputEnrollment.value = '';
@@ -1013,7 +965,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dropzoneEnrollment.classList.add('has-file');
         labelEnrollmentFile.textContent = 'Uploading to Cloudinary...';
 
-        // Temporarily disable form submission during cloud upload
         if (btnSubmit) {
           btnSubmit.disabled = true;
           btnSubmit.style.opacity = '0.6';
@@ -1051,7 +1002,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Drag and drop event listeners for enrollment proof dropzone
     ['dragenter', 'dragover'].forEach(eventName => {
       dropzoneEnrollment.addEventListener(eventName, (e) => {
         e.preventDefault();
@@ -1079,26 +1029,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Immersive 3D Tilt & Holographic reflection card calculations
   let isFlipping = false;
 
   const handleTiltMove = (e, container) => {
     if (isFlipping) return;
 
-    // Remove transition delay during tracking for instant 3D responsiveness
     libraryCard.style.transition = 'none';
 
     const cardRect = container.getBoundingClientRect();
 
-    // Mouse coords relative to card
     const x = e.clientX - cardRect.left;
     const y = e.clientY - cardRect.top;
 
-    // Centering calculations (-0.5 to 0.5 range)
     const px = (x / cardRect.width) - 0.5;
     const py = (y / cardRect.height) - 0.5;
 
-    // Rotational angles (maximum 20deg tilt)
     const rotateY = px * 20;
     const rotateX = -py * 20;
 
@@ -1107,11 +1052,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     libraryCard.style.transform = `rotateX(${rotateX}deg) rotateY(${baseRotationY + rotateY}deg)`;
 
-    // Holographic shine translation
     const glowAngle = Math.atan2(y - cardRect.height / 2, x - cardRect.width / 2) * (180 / Math.PI);
     libraryCard.style.setProperty('--hologram-pos', `${x / cardRect.width * 100}% ${y / cardRect.height * 100}%`);
 
-    // Modify shine overlay dynamically
     const shineOverlays = libraryCard.querySelectorAll('.library-card-glow');
     shineOverlays.forEach(overlay => {
       overlay.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255, 255, 255, 0.15) 0%, transparent 60%)`;
@@ -1121,10 +1064,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const handleTiltLeave = () => {
     if (isFlipping) return;
 
-    // Restore transition for smooth reset rotation back to center
     libraryCard.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
 
-    // Reset rotations smoothly
     const isFlipped = libraryCard.classList.contains('flipped');
     libraryCard.style.transform = `rotateX(0deg) rotateY(${isFlipped ? 180 : 0}deg)`;
     const shineOverlays = libraryCard.querySelectorAll('.library-card-glow');
@@ -1144,11 +1085,10 @@ document.addEventListener('DOMContentLoaded', () => {
     viewerCardPlacement.addEventListener('mouseleave', handleTiltLeave);
   }
 
-  // Form Reset handler
   btnReset.addEventListener('click', () => {
-    // Form will reset field inputs automatically, we manually reset preview cards and indicators
+    
     setTimeout(() => {
-      // Restore card values to default
+      
       previewName.textContent = DEFAULTS.name;
       previewEmail.textContent = DEFAULTS.email;
       previewPhone.textContent = DEFAULTS.phone;
@@ -1168,15 +1108,12 @@ document.addEventListener('DOMContentLoaded', () => {
       resetAvatarPreview();
       generateCardKey();
 
-      // Clear visual feedback rings
       const controls = form.querySelectorAll('.input-control');
       controls.forEach(control => {
         control.style.borderColor = '';
         control.style.boxShadow = '';
       });
 
-
-      // Reset custom selects
       if (deptSelect) deptSelect.reset();
       if (semesterSelect) semesterSelect.reset();
       if (degreeLevelSelect) degreeLevelSelect.reset();
@@ -1188,7 +1125,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (borrowingCategorySelect) borrowingCategorySelect.reset();
       if (preferredContactSelect) preferredContactSelect.reset();
 
-      // Clear select trigger error borders if any
       const deptTrigger = document.getElementById('custom-select-trigger-dept');
       if (deptTrigger) deptTrigger.style.borderColor = '';
       const semesterTrigger = document.getElementById('custom-select-trigger-semester');
@@ -1210,21 +1146,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const preferredContactTrigger = document.getElementById('custom-select-trigger-preferred-contact');
       if (preferredContactTrigger) preferredContactTrigger.style.borderColor = '';
 
-      // Reset preview card texts for selects
       const previewDeptEl = document.getElementById('preview-dept');
       if (previewDeptEl) previewDeptEl.textContent = 'DEPT';
       const previewSemEl = document.getElementById('preview-semester');
       if (previewSemEl) previewSemEl.textContent = 'SEMESTER';
 
-
-      // Reset batch input
       if (inputBatch) {
         inputBatch.value = '';
       }
       const previewBatchEl = document.getElementById('preview-batch');
       if (previewBatchEl) previewBatchEl.textContent = 'BATCH 60';
 
-      // Reset enrollment proof dropzone
       if (dropzoneEnrollment) {
         dropzoneEnrollment.classList.remove('has-file');
       }
@@ -1233,27 +1165,23 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       cloudinaryEnrollmentUrl = '';
 
-      // Reset tier badge
       previewTier.className = 'card-type tier-standard';
       previewTier.innerHTML = `<i data-lucide="shield"></i><span>Standard</span>`;
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
       }
 
-      // Reset custom date pickers
       if (dobPicker) dobPicker.reset();
       if (startDatePicker) startDatePicker.reset();
       if (expiryDatePicker) expiryDatePicker.reset();
     }, 50);
   });
 
-  // Form Validation & Submit handling
   form.addEventListener('submit', (e) => {
     e.preventDefault();
 
     let isFormValid = true;
 
-    // Validate required text, checkbox, and radio fields
     const requiredInputs = form.querySelectorAll('[required]');
     const validatedRadioNames = new Set();
     requiredInputs.forEach(input => {
@@ -1277,14 +1205,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Validate email format specifically if value exists
     if (inputEmail.value.trim() && !validateEmail(inputEmail.value)) {
       isFormValid = false;
       highlightInputError(inputEmail, true);
     }
 
     if (!isFormValid) {
-      // Visual wobble animation on the form card
+      
       const formPanel = document.getElementById('registration-form-panel');
       formPanel.style.animation = 'shake-panel 0.4s ease';
       setTimeout(() => {
@@ -1293,10 +1220,8 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Process submission (loading state transition)
     btnSubmit.classList.add('is-loading');
 
-    // Simulate API Database Post delay
     setTimeout(() => {
       btnSubmit.classList.remove('is-loading');
 
@@ -1306,15 +1231,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const tierVal = document.querySelector('input[name="tier"]:checked')?.value || 'Standard';
       const keyVal = previewCardKey.textContent;
 
-      // Update success modal summary fields
       document.getElementById('success-summary-name').textContent = nameVal;
       document.getElementById('success-summary-tier').textContent = tierVal;
       document.getElementById('success-summary-key').textContent = keyVal;
 
-      // Keep a reference to the payload before resetting form
       const payload = getSharePayload();
 
-      // Save member record to the database
       const deptInput = document.getElementById('department');
       const deptValText = deptInput ? deptInput.value.trim() : 'DEPT';
       const semInput = document.getElementById('semester');
@@ -1323,13 +1245,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const themeValText = libraryCard.style.getPropertyValue('--user-card-theme') || DEFAULTS.theme;
       const addrText = document.getElementById('preview-address') ? document.getElementById('preview-address').textContent : '';
 
-      // Emergency details
       const emergencyName = document.getElementById('emergency_name') ? document.getElementById('emergency_name').value.trim() : '';
       const emergencyRelationship = document.getElementById('emergency_relationship') ? document.getElementById('emergency_relationship').value.trim() : '';
       const emergencyPhone = document.getElementById('emergency_phone') ? document.getElementById('emergency_phone').value.trim() : '';
       const emergencyAddress = document.getElementById('emergency_address') ? document.getElementById('emergency_address').value.trim() : '';
 
-      // Personal Details
       const gender = document.getElementById('gender') ? document.getElementById('gender').value : '';
       const bloodGroup = document.getElementById('blood_group') ? document.getElementById('blood_group').value : '';
       const nationality = document.getElementById('nationality') ? document.getElementById('nationality').value.trim() : '';
@@ -1341,7 +1261,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const country = document.getElementById('country') ? document.getElementById('country').value.trim() : '';
       const dob = inputDob ? inputDob.value : '';
 
-      // Membership Details
       const membershipType = document.getElementById('membership_type') ? document.getElementById('membership_type').value : '';
       const preferredBranch = document.getElementById('preferred_branch') ? document.getElementById('preferred_branch').value : '';
       const borrowingCategory = document.getElementById('borrowing_category') ? document.getElementById('borrowing_category').value : '';
@@ -1369,7 +1288,6 @@ document.addEventListener('DOMContentLoaded', () => {
         av: cloudinaryAvatarUrl || compressedAvatarBase64,
         ep: cloudinaryEnrollmentUrl || '',
 
-        // Detailed university profile
         student_info: {
           first_name: first,
           last_name: last,
@@ -1413,41 +1331,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
       DB.saveMember(memberRecord);
 
-      // Trigger success modal
       const successModal = document.getElementById('success-modal');
       if (successModal) {
         successModal.classList.add('open');
       }
 
-      // Trigger confetti animation!
       triggerConfetti();
 
-      // View Card click handler inside success modal
       const btnSuccessView = document.getElementById('btn-success-view');
       if (btnSuccessView) {
         btnSuccessView.onclick = () => {
           successModal.classList.remove('open');
-          // Update URL hash to view the card in shared viewer mode
+          
           window.location.hash = `share=${payload}`;
 
-          // Reset form fields
           btnReset.click();
         };
       }
 
-      // Close / Dismiss click handler inside success modal
       const btnSuccessClose = document.getElementById('btn-success-close');
       if (btnSuccessClose) {
         btnSuccessClose.onclick = () => {
           successModal.classList.remove('open');
-          // Reset form fields
+          
           btnReset.click();
         };
       }
     }, 1600);
   });
 
-  // Validation helper styling functions
   function highlightInputError(input, hasError) {
     let target = input;
     if (input.tagName === 'SELECT') {
@@ -1479,7 +1391,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return re.test(email);
   }
 
-  // ---- Close All Dropdowns Helper ----
   function closeAllDropdowns() {
     document.querySelectorAll('.custom-select-wrapper, .custom-datepicker-wrapper').forEach(wrapper => {
       wrapper.classList.remove('open');
@@ -1487,7 +1398,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ---- Initialize Custom Select Dropdowns ----
   const deptSelect = setupCustomSelect({
     wrapperId: 'custom-select-dept',
     triggerId: 'custom-select-trigger-dept',
@@ -1504,8 +1414,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (el) el.textContent = val ? val.toUpperCase() : 'DEPT';
     }
   });
-
-
 
   const semesterSelect = setupCustomSelect({
     wrapperId: 'custom-select-semester',
@@ -1604,11 +1512,6 @@ document.addEventListener('DOMContentLoaded', () => {
     placeholderText: 'Email'
   });
 
-
-
-
-
-  // Sync Batch normal text input
   if (inputBatch) {
     inputBatch.addEventListener('input', (e) => {
       if (isViewingShared()) return;
@@ -1617,7 +1520,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Sync Semester normal text input
   const inputSemester = document.getElementById('semester');
   if (inputSemester) {
     inputSemester.addEventListener('input', (e) => {
@@ -1627,7 +1529,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ---- Initialize Custom Date Pickers ----
   const dobPicker = setupDatePicker({
     wrapperId: 'custom-datepicker-dob',
     triggerId: 'datepicker-dob-trigger',
@@ -1670,10 +1571,9 @@ document.addEventListener('DOMContentLoaded', () => {
     selectTodayBtnId: 'expiry-calendar-select-today'
   });
 
-  // Global click to close custom dropdowns on click outside
   document.addEventListener('click', (e) => {
     document.querySelectorAll('.custom-select-wrapper.open, .custom-datepicker-wrapper.open').forEach(wrapper => {
-      // Prevent immediate closure when clicking associated labels
+      
       const label = wrapper.parentElement ? wrapper.parentElement.querySelector('label') : null;
       if (label && label.contains(e.target)) {
         return;
@@ -1685,7 +1585,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ---- Dynamic Back-card Address / Clearance Notes Sync ----
   if (inputAddress) {
     inputAddress.addEventListener('input', (e) => {
       if (isViewingShared()) return;
@@ -1694,7 +1593,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ---- 3D Card Flipping Event Listeners ----
   const cardElement = document.getElementById('library-id-card');
   const btnFlip = document.getElementById('btn-flip-card');
   const btnViewerFlip = document.getElementById('btn-viewer-flip');
@@ -1728,7 +1626,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ---- Shared helper: temporarily strip 3D transforms so html2canvas can render both sides ----
   function prepareCardForCapture(side) {
     const saved = {
       transform: side.style.transform,
@@ -1777,7 +1674,6 @@ document.addEventListener('DOMContentLoaded', () => {
     logging: false
   };
 
-  // ---- PNG Image Export handler ----
   const btnDownloadImg = document.getElementById('btn-download-img');
   if (btnDownloadImg) {
     btnDownloadImg.addEventListener('click', async () => {
@@ -1789,13 +1685,12 @@ document.addEventListener('DOMContentLoaded', () => {
       btnDownloadImg.style.opacity = '0.5';
       btnDownloadImg.style.pointerEvents = 'none';
 
-      // Save parent card 3D context
       const savedCard = { transformStyle: cardEl.style.transformStyle, transform: cardEl.style.transform };
       cardEl.style.transformStyle = 'flat';
       cardEl.style.transform = 'none';
 
       try {
-        // Render front
+        
         const savedFront = prepareCardForCapture(frontSide);
         const savedBackHide = { display: backSide.style.display };
         backSide.style.display = 'none';
@@ -1803,7 +1698,6 @@ document.addEventListener('DOMContentLoaded', () => {
         restoreCardAfterCapture(frontSide, savedFront);
         backSide.style.display = savedBackHide.display;
 
-        // Render back
         const savedBack = prepareCardForCapture(backSide);
         const savedFrontHide = { display: frontSide.style.display };
         frontSide.style.display = 'none';
@@ -1811,17 +1705,15 @@ document.addEventListener('DOMContentLoaded', () => {
         restoreCardAfterCapture(backSide, savedBack);
         frontSide.style.display = savedFrontHide.display;
 
-        // Restore parent card
         cardEl.style.transformStyle = savedCard.transformStyle;
         cardEl.style.transform = savedCard.transform;
 
-        // Download both images
         await triggerBlobDownload(canvasFront, 'AETHER-LMS-Card-Front.png');
         await new Promise(r => setTimeout(r, 200));
         await triggerBlobDownload(canvasBack, 'AETHER-LMS-Card-Back.png');
       } catch (err) {
         console.error('Image rendering failed:', err);
-        // Restore parent card on error
+        
         cardEl.style.transformStyle = savedCard.transformStyle;
         cardEl.style.transform = savedCard.transform;
       }
@@ -1830,7 +1722,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ---- PDF Document Export handler ----
   const btnDownloadPdf = document.getElementById('btn-download-pdf');
   if (btnDownloadPdf) {
     btnDownloadPdf.addEventListener('click', async () => {
@@ -1842,13 +1733,12 @@ document.addEventListener('DOMContentLoaded', () => {
       btnDownloadPdf.style.opacity = '0.5';
       btnDownloadPdf.style.pointerEvents = 'none';
 
-      // Save parent card 3D context
       const savedCard = { transformStyle: cardEl.style.transformStyle, transform: cardEl.style.transform };
       cardEl.style.transformStyle = 'flat';
       cardEl.style.transform = 'none';
 
       try {
-        // Render front
+        
         const savedFront = prepareCardForCapture(frontSide);
         const savedBackHide = { display: backSide.style.display };
         backSide.style.display = 'none';
@@ -1856,7 +1746,6 @@ document.addEventListener('DOMContentLoaded', () => {
         restoreCardAfterCapture(frontSide, savedFront);
         backSide.style.display = savedBackHide.display;
 
-        // Render back
         const savedBack = prepareCardForCapture(backSide);
         const savedFrontHide = { display: frontSide.style.display };
         frontSide.style.display = 'none';
@@ -1864,11 +1753,9 @@ document.addEventListener('DOMContentLoaded', () => {
         restoreCardAfterCapture(backSide, savedBack);
         frontSide.style.display = savedFrontHide.display;
 
-        // Restore parent card
         cardEl.style.transformStyle = savedCard.transformStyle;
         cardEl.style.transform = savedCard.transform;
 
-        // Generate PDF
         const frontImg = canvasFront.toDataURL('image/png');
         const backImg = canvasBack.toDataURL('image/png');
 
@@ -1899,7 +1786,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ---- Link Sharing Modal & Social Media Share generator ----
   const btnShare = document.getElementById('btn-share-card');
   const shareModal = document.getElementById('share-modal');
   const btnCloseShareModal = document.getElementById('btn-close-share-modal');
@@ -1914,7 +1800,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const shareMsg = document.getElementById('share-msg');
   const shareDiscord = document.getElementById('share-discord');
 
-  // Fix OG image meta tags to use absolute URL at runtime (needed for GitHub Pages)
   (function fixOgImageUrls() {
     const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
     const ogImage = document.getElementById('og-image');
@@ -1927,7 +1812,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })();
 
-  // Helper to update all social share URLs with only the direct link
   function updateSocialShareUrls(shareUrl) {
     const encodedUrl = encodeURIComponent(shareUrl);
 
@@ -1947,10 +1831,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       shareLinkUrl.value = finalShareUrl;
 
-      // Build initial social URLs with only the link (no caption)
       updateSocialShareUrls(finalShareUrl);
 
-      // Open Modal
       shareModal.classList.add('open');
     });
   }
@@ -1971,7 +1853,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnCopyShareLink) {
     btnCopyShareLink.addEventListener('click', () => {
-      // Copy only the link text (no caption)
+      
       navigator.clipboard.writeText(shareLinkUrl.value).then(() => {
         btnCopyShareLink.innerHTML = `<i data-lucide="check"></i><span>Copied!</span>`;
         if (typeof lucide !== 'undefined') {
@@ -1993,7 +1875,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
 
       navigator.clipboard.writeText(shareLinkUrl.value).then(() => {
-        // Show Success Toast Notification for copy confirmation
+        
         if (successToast && toastMessage) {
           toastMessage.textContent = "Share link copied! Opening Discord...";
           successToast.classList.add('show');
@@ -2002,7 +1884,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }, 4000);
         }
 
-        // Open Discord channels page in a new window/tab after copying
         setTimeout(() => {
           window.open('https://discord.com/channels/@me', '_blank');
         }, 800);
@@ -2013,7 +1894,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ---- Hashed URL Parser for Shared Card View / Admin Mode ----
   const formCardPlacement = document.getElementById('card-perspective');
   const mainNavbar = document.getElementById('main-navbar');
   const beamContainer = document.querySelector('.beam-container');
@@ -2028,7 +1908,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminLoginMode = document.getElementById('admin-login-mode');
     const adminLoginError = document.getElementById('admin-login-error');
 
-    // Reset visibility states
     if (sharedViewerMode) sharedViewerMode.style.display = 'none';
     if (adminPanelMode) adminPanelMode.style.display = 'none';
     if (adminLoginMode) adminLoginMode.style.display = 'none';
@@ -2043,7 +1922,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const sharePayload = hash.replace('#share=', '');
       try {
         let decodedData = {};
-        // Support URL-safe base64 decoding safely by restoring characters and padding
+        
         let normalizedPayload = sharePayload.replace(/-/g, '+').replace(/_/g, '/');
         while (normalizedPayload.length % 4) {
           normalizedPayload += '=';
@@ -2052,7 +1931,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (decodedString.includes('\u001f')) {
           const parsed = decodedString.split('\u001f');
-          // Map compressed array format to object format with default fallbacks
+          
           const tierMap = { 'S': 'Standard', 'P': 'Premium', 'V': 'VIP' };
           const semRevMap = {
             '1': '1st Sem', '2': '2nd Sem', '3': '3rd Sem', '4': '4th Sem', '5': '5th Sem',
@@ -2078,7 +1957,7 @@ document.addEventListener('DOMContentLoaded', () => {
             av: parsed[12] || ''
           };
         } else {
-          // Old JSON format (array or object)
+          
           const parsed = JSON.parse(decodedString);
           if (Array.isArray(parsed)) {
             decodedData = {
@@ -2113,7 +1992,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        // Populate front card values
         if (previewName) previewName.textContent = decodedData.n;
         if (document.getElementById('preview-dept')) document.getElementById('preview-dept').textContent = decodedData.d;
         if (document.getElementById('preview-batch')) document.getElementById('preview-batch').textContent = decodedData.b.toUpperCase();
@@ -2124,24 +2002,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (previewTerm) previewTerm.textContent = decodedData.t;
         if (previewCardKey) previewCardKey.textContent = decodedData.k;
 
-        // Populate avatar
         if (decodedData.av) {
           if (previewAvatar) {
             console.log("checkSharedLink: Raw avatar data from payload =", decodedData.av);
             let avatarSrc = decodedData.av;
-            // Detect Cloudinary paths by 'c:' prefix, full URLs, or legacy folder patterns
+            
             if (avatarSrc.startsWith('c:')) {
-              // New format: 'c:' prefixed Cloudinary path
+              
               const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
               avatarSrc = `https://res.cloudinary.com/${cloudName}/image/upload/${avatarSrc.substring(2)}`;
             } else if (avatarSrc.startsWith('http://') || avatarSrc.startsWith('https://')) {
-              // Already a full URL, use as-is
+              
             } else if (avatarSrc.includes('lms_avatars/') || avatarSrc.includes('lms-avatars/')) {
-              // Legacy format: folder-based Cloudinary path without prefix
+              
               const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
               avatarSrc = `https://res.cloudinary.com/${cloudName}/image/upload/${avatarSrc}`;
             } else {
-              // Raw base64 data
+              
               avatarSrc = 'data:image/jpeg;base64,' + avatarSrc;
             }
             console.log("checkSharedLink: Final constructed avatar URL =", avatarSrc);
@@ -2161,13 +2038,11 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        // Populate address on back
         const previewAddr = document.getElementById('preview-address');
         if (previewAddr) previewAddr.textContent = decodedData.a || 'No specific special clearances or address declared.';
 
-        // Populate tier badge with icon
         if (previewTier) {
-          previewTier.className = 'card-type'; // reset
+          previewTier.className = 'card-type'; 
           const tierVal = decodedData.tr || 'Standard';
           let iconName = 'shield';
           let tierClass = 'tier-standard';
@@ -2182,38 +2057,32 @@ document.addEventListener('DOMContentLoaded', () => {
           previewTier.innerHTML = `<i data-lucide="${iconName}"></i><span>${tierVal}</span>`;
         }
 
-        // Apply theme color
         if (libraryCard) {
           libraryCard.style.setProperty('--user-card-theme', decodedData.th);
         }
         document.documentElement.style.setProperty('--accent-primary', decodedData.th);
 
-        // Update QR code on back
         const qrImage = document.getElementById('preview-qr');
         if (qrImage) {
           qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(decodedData.k)}&color=ffffff&bgcolor=12131a`;
         }
 
-        // Reset card to front side before showing
         if (libraryCard && libraryCard.classList.contains('flipped')) {
           libraryCard.classList.remove('flipped');
           libraryCard.style.transform = 'rotateX(0deg) rotateY(0deg)';
         }
 
-        // Move the card to shared viewer placement
         const viewerCardPlacement = document.getElementById('viewer-card-placement');
         if (viewerCardPlacement && libraryCard) {
           viewerCardPlacement.appendChild(libraryCard);
         }
 
-        // Hide registration form panel, navbar, and background elements - show viewer panel
         if (appWrapper) appWrapper.style.display = 'none';
         if (mainNavbar) mainNavbar.style.display = 'none';
         if (beamContainer) beamContainer.style.display = 'none';
         skelRails.forEach(rail => rail.style.display = 'none');
         if (sharedViewerMode) sharedViewerMode.style.display = 'flex';
 
-        // Reinitialize icons in newly loaded card elements
         if (typeof lucide !== 'undefined') {
           lucide.createIcons();
         }
@@ -2231,14 +2100,14 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAdminDirectory();
       } else {
         if (adminLoginMode) adminLoginMode.style.display = 'flex';
-        // Auto-focus username field
+        
         setTimeout(() => {
           const uInput = document.getElementById('admin-username');
           if (uInput) uInput.focus();
         }, 50);
       }
     } else {
-      // Restore page back to registration form state when hash is cleared
+      
       if (sharedViewerMode) sharedViewerMode.style.display = 'none';
       if (adminPanelMode) adminPanelMode.style.display = 'none';
       if (appWrapper) appWrapper.style.display = '';
@@ -2246,21 +2115,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (beamContainer) beamContainer.style.display = '';
       skelRails.forEach(rail => rail.style.display = '');
 
-      // Generate a new card key to prevent overwriting existing shared/admin-viewed cards
       generateCardKey();
 
-      // Move card back to form preview placement if it is currently inside the viewer
       if (formCardPlacement && libraryCard && libraryCard.parentElement !== formCardPlacement) {
         formCardPlacement.appendChild(libraryCard);
 
-        // Reset card to front side
         if (libraryCard.classList.contains('flipped')) {
           libraryCard.classList.remove('flipped');
           libraryCard.style.transform = 'rotateX(0deg) rotateY(0deg)';
         }
       }
 
-      // Re-trigger visual sync from input fields to card preview
       if (inputFirstName) inputFirstName.dispatchEvent(new Event('input'));
       if (inputLastName) inputLastName.dispatchEvent(new Event('input'));
       if (inputEmail) inputEmail.dispatchEvent(new Event('input'));
@@ -2270,18 +2135,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (inputBorrowLimit) inputBorrowLimit.dispatchEvent(new Event('input'));
       if (inputMembershipExpiry) inputMembershipExpiry.dispatchEvent(new Event('input'));
 
-      // Sync theme color
       if (inputCardTheme) {
         inputCardTheme.dispatchEvent(new Event('input'));
       }
 
-      // Sync tier
       const activeRadio = document.querySelector('input[name="tier"]:checked');
       if (activeRadio) {
         activeRadio.dispatchEvent(new Event('change'));
       }
 
-      // Sync avatar preview
       if (compressedAvatarBase64) {
         if (previewAvatar) {
           previewAvatar.src = 'data:image/jpeg;base64,' + compressedAvatarBase64;
@@ -2300,14 +2162,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Reinitialize icons
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
       }
     }
   }
 
-  // Initialize Firebase and Cloud Firestore compatibility SDK
   let firestoreDb = null;
   if (window.ENV && window.ENV.FIREBASE_CONFIG && typeof firebase !== 'undefined') {
     try {
@@ -2321,7 +2181,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Listen to Firebase Auth state changes to handle async initialization and re-load data once ready
   if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth()) {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
@@ -2345,7 +2204,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             renderAdminDirectory();
           } else if (adminPanelMode && adminPanelMode.style.display === 'flex') {
-            // Already showing dashboard but fetched without auth on reload, re-render with auth now active
+            
             renderAdminDirectory();
           }
         }
@@ -2361,14 +2220,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Unified Minimal Database Helper (Firestore SDK with fallback to LocalStorage / Realtime DB REST API)
   const DB = {
     getFirebaseUrl() {
       return (window.ENV && window.ENV.FIREBASE_URL) ? window.ENV.FIREBASE_URL.replace(/\/$/, '') : null;
     },
 
     async saveMember(member) {
-      // 1. Try Cloud Firestore SDK
+      
       if (firestoreDb) {
         try {
           await firestoreDb.collection('members').doc(member.k).set(member);
@@ -2379,7 +2237,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 2. Try Realtime Database REST API
       const firebaseUrl = this.getFirebaseUrl();
       if (firebaseUrl) {
         try {
@@ -2395,7 +2252,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 3. Fallback to LocalStorage
       const members = this.getLocalMembers();
       members[member.k] = member;
       localStorage.setItem('aether_lms_members', JSON.stringify(members));
@@ -2403,7 +2259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     async deleteMember(key) {
-      // 1. Try Cloud Firestore SDK
+      
       if (firestoreDb) {
         try {
           await firestoreDb.collection('members').doc(key).delete();
@@ -2413,7 +2269,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 2. Try Realtime Database REST API
       const firebaseUrl = this.getFirebaseUrl();
       if (firebaseUrl) {
         try {
@@ -2426,14 +2281,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 3. Fallback to LocalStorage
       const members = this.getLocalMembers();
       delete members[key];
       localStorage.setItem('aether_lms_members', JSON.stringify(members));
     },
 
     async getAllMembers() {
-      // 1. Try Cloud Firestore SDK
+      
       if (firestoreDb) {
         try {
           const snapshot = await firestoreDb.collection('members').get();
@@ -2448,7 +2302,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 2. Try Realtime Database REST API
       const firebaseUrl = this.getFirebaseUrl();
       if (firebaseUrl) {
         try {
@@ -2461,7 +2314,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 3. Fallback to LocalStorage
       return this.getLocalMembers();
     },
 
@@ -2474,7 +2326,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Serialize member database object back into share payload format
   function serializeMemberToPayload(m) {
     const semMap = {
       '1st Sem': '1', '2nd Sem': '2', '3rd Sem': '3', '4th Sem': '4', '5th Sem': '5',
@@ -2517,7 +2368,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return btoa(unescape(encodeURIComponent(rawString))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
 
-  // ---- Admin Authentication State & Form ----
   let isAdminAuthenticated = sessionStorage.getItem('isAdminAuthenticated') === 'true';
   const adminLoginForm = document.getElementById('admin-login-form');
   const adminLoginError = document.getElementById('admin-login-error');
@@ -2529,7 +2379,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const emailVal = document.getElementById('admin-username').value.trim();
       const passVal = document.getElementById('admin-password').value;
 
-      // Disable submission button while verifying
       const submitBtn = adminLoginForm.querySelector('button[type="submit"]');
       const submitBtnSpan = submitBtn ? submitBtn.querySelector('span') : null;
       const originalText = submitBtnSpan ? submitBtnSpan.textContent : "Unlock Directory";
@@ -2543,8 +2392,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.setItem('isAdminAuthenticated', 'true');
         adminLoginError.style.display = 'none';
         adminLoginForm.reset();
-        
-        // Hide login, show panel, and load table
+
         const adminLoginMode = document.getElementById('admin-login-mode');
         const adminPanelMode = document.getElementById('admin-panel-mode');
         if (adminLoginMode) adminLoginMode.style.display = 'none';
@@ -2568,7 +2416,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Check if Firebase Auth is initialized
       if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth()) {
         firebase.auth().signInWithEmailAndPassword(emailVal, passVal)
           .then((userCredential) => {
@@ -2583,7 +2430,7 @@ document.addEventListener('DOMContentLoaded', () => {
             resetSubmitBtn();
           });
       } else {
-        // Fallback local check (useful if offline or configuration is not active yet)
+        
         console.warn("Firebase Auth SDK not active. Falling back to local credentials.");
         const expectedUser = (window.ENV && window.ENV.ADMIN_USERNAME) || 'admin@gmail.com';
         const expectedPass = (window.ENV && window.ENV.ADMIN_PASSWORD) || 'admin1234';
@@ -2604,12 +2451,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Detailed modal popup handler
   function showMemberDetailsModal(m) {
     const detailsModal = document.getElementById('admin-details-modal');
     if (!detailsModal) return;
 
-    // Set modal title & key
     const fullNameEl = document.getElementById('details-full-name');
     if (fullNameEl) fullNameEl.textContent = m.n || 'N/A';
     const keyEl = document.getElementById('details-key');
@@ -2617,7 +2462,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const studentIdEl = document.getElementById('details-student-id');
     if (studentIdEl) studentIdEl.textContent = m.student_info?.student_id || 'N/A';
 
-    // Populate avatar
     const detailsAvatar = document.getElementById('details-avatar');
     const detailsAvatarPlaceholder = document.getElementById('details-avatar-placeholder');
     if (detailsAvatar) {
@@ -2627,7 +2471,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
           src = `https://res.cloudinary.com/${cloudName}/image/upload/${src.substring(2)}`;
         } else if (src.startsWith('http://') || src.startsWith('https://')) {
-          // full URL, use as-is
+          
         } else if (src.includes('lms_avatars/') || src.includes('lms-avatars/')) {
           const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
           src = `https://res.cloudinary.com/${cloudName}/image/upload/${src}`;
@@ -2644,7 +2488,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Academic Info
     const degreeEl = document.getElementById('details-degree-level');
     if (degreeEl) degreeEl.textContent = m.student_info?.degree_level || 'N/A';
     const facultyEl = document.getElementById('details-faculty');
@@ -2662,7 +2505,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const advisorEl = document.getElementById('details-advisor');
     if (advisorEl) advisorEl.textContent = m.student_info?.advisor || 'N/A';
 
-    // Personal Info
     const dobEl = document.getElementById('details-dob');
     if (dobEl) dobEl.textContent = m.personal_info?.dob || 'N/A';
     const genderEl = document.getElementById('details-gender');
@@ -2688,7 +2530,6 @@ document.addEventListener('DOMContentLoaded', () => {
       cityPostCountryEl.textContent = `${city} / ${postcode} / ${country}`;
     }
 
-    // Emergency Contact
     const emNameEl = document.getElementById('details-emergency-name');
     if (emNameEl) emNameEl.textContent = m.emergency_contact?.name || 'N/A';
     const emRelationEl = document.getElementById('details-emergency-relation');
@@ -2698,7 +2539,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const emAddrEl = document.getElementById('details-emergency-addr');
     if (emAddrEl) emAddrEl.textContent = m.emergency_contact?.address || 'N/A';
 
-    // Membership Details
     const mTypeEl = document.getElementById('details-membership-type');
     if (mTypeEl) mTypeEl.textContent = m.membership_details?.type || m.tr || 'Standard';
     const branchEl = document.getElementById('details-branch');
@@ -2727,16 +2567,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const expiryDateEl = document.getElementById('details-expiry-date');
     if (expiryDateEl) expiryDateEl.textContent = m.t || m.membership_details?.expiry_date || 'N/A';
 
-    // Open Modal
     detailsModal.style.display = 'flex';
-    
-    // Reinitialize icons in modal
+
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
   }
 
-  // Bind Close Actions for Details Modal
   const detailsModal = document.getElementById('admin-details-modal');
   const btnCloseDetailsModal = document.getElementById('btn-close-details-modal');
   const btnCloseDetailsFooter = document.getElementById('btn-close-details-footer');
@@ -2757,7 +2594,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Render Admin Dashboard directory table rows dynamically
   async function renderAdminDirectory() {
     const tableBody = document.getElementById('admin-table-body');
     const searchInput = document.getElementById('admin-search-input');
@@ -2799,7 +2635,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const row = document.createElement('tr');
         row.style.setProperty('--member-theme', m.th || 'var(--accent-primary)');
 
-        // Construct preview avatar
         let avatarHtml = `<i data-lucide="user" class="table-avatar-placeholder"></i>`;
         if (m.av) {
           let src = m.av;
@@ -2807,7 +2642,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
             src = `https://res.cloudinary.com/${cloudName}/image/upload/${src.substring(2)}`;
           } else if (src.startsWith('http://') || src.startsWith('https://')) {
-            // full URL, use as-is
+            
           } else if (src.includes('lms_avatars/') || src.includes('lms-avatars/')) {
             const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
             src = `https://res.cloudinary.com/${cloudName}/image/upload/${src}`;
@@ -2817,7 +2652,6 @@ document.addEventListener('DOMContentLoaded', () => {
           avatarHtml = `<img src="${src}" alt="${m.n}" class="table-avatar-img">`;
         }
 
-        // Tier details
         let tierIcon = 'shield';
         let tierClass = 'tier-standard';
         if (m.tr === 'Premium') {
@@ -2891,7 +2725,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Bind Admin navigation controls
   const btnAdminPanel = document.querySelector('.admin-panel-btn');
   if (btnAdminPanel) {
     btnAdminPanel.addEventListener('click', (e) => {
@@ -2904,7 +2737,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnAdminClose) {
     btnAdminClose.addEventListener('click', (e) => {
       e.preventDefault();
-      // Sign out of Firebase Auth to secure the dashboard session
+      
       if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth()) {
         firebase.auth().signOut()
           .then(() => {
@@ -2927,23 +2760,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Handle "Create Your Own Card" button — clean URL hash navigation
   const btnViewerCreate = document.getElementById('btn-viewer-create');
   if (btnViewerCreate) {
     btnViewerCreate.addEventListener('click', (e) => {
       e.preventDefault();
-      // Remove hash cleanly without adding a history entry
+      
       history.replaceState(null, '', window.location.pathname);
       checkSharedLink();
     });
   }
 
-  // Bind hashchange listener to support dynamic hash navigation without reload
   window.addEventListener('hashchange', checkSharedLink);
   checkSharedLink();
 });
 
-// Dynamic keyframe injection for invalid shake animations
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `
   @keyframes shake-panel {

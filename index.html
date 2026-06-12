@@ -7,7 +7,7 @@
   <title>AETHER LMS — Digital Library Card Portal</title>
   <meta name="description"
     content="Generate and share your digital AETHER LMS library membership card with holographic 3D effects, QR codes, and instant PDF downloads.">
-  <!-- Open Graph meta tags for social media link previews -->
+  
   <meta property="og:title" content="AETHER LMS — Digital Library Card">
   <meta property="og:description"
     content="🎓 Check out my digital library membership card on AETHER LMS Portal! Create your own holographic 3D card with QR codes and instant downloads.">
@@ -17,32 +17,31 @@
   <meta property="og:image" id="og-image" content="https://nnewbe.github.io/lms-form/og-preview.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <!-- Twitter Card meta tags -->
+  
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="AETHER LMS — Digital Library Card">
   <meta name="twitter:description" content="🎓 Check out my digital library membership card on AETHER LMS Portal!">
   <meta name="twitter:image" id="twitter-image" content="https://nnewbe.github.io/lms-form/og-preview.png">
-  <!-- Dynamic canonical URL set by script for GitHub Pages -->
+  
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="style.css">
-  <!-- Lucide Icons for high-fidelity UI -->
+  
   <script src="https://cdn.jsdelivr.net/npm/lucide/dist/umd/lucide.min.js"></script>
   <script>
     if (typeof lucide === 'undefined') {
       document.write('<script src="https://unpkg.com/lucide@latest"><\/script>');
     }
   </script>
-  <!-- html2canvas and jsPDF for client-side card downloads -->
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body>
 
-  <!-- Moving Laser Beam Background (SVG overlay) -->
   <svg class="beam-container" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <!-- Beam gradients matching purple to cyan and vice-versa -->
+      
       <linearGradient id="beam-grad-left" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="0" />
         <stop offset="60%" stop-color="var(--accent-primary)" stop-opacity="1" />
@@ -62,27 +61,20 @@
       </linearGradient>
     </defs>
 
-    <!-- Paths winding towards the container edges -->
-    <!-- Left beam enters from bottom-left, runs towards center-left -->
     <path id="beam-path-left" d="M 50 800 Q 150 400, 300 500 T 500 300 L 580 320" class="beam-path" />
 
-    <!-- Right beam enters from top-right, runs towards center-right -->
     <path id="beam-path-right" d="M 1200 50 Q 1100 300, 950 200 T 800 450 L 720 420" class="beam-path" />
 
-    <!-- Top-left to top-right path -->
     <path id="beam-path-top" d="M 100 -100 Q 400 150, 700 50 T 1300 -50" class="beam-path" />
 
-    <!-- Center-left to bottom-right path -->
     <path id="beam-path-center" d="M -100 350 Q 500 200, 600 600 T 1400 750" class="beam-path" />
 
-    <!-- Bottom-left to bottom-right path -->
     <path id="beam-path-bottom" d="M 200 900 Q 600 700, 800 850 T 1200 950" class="beam-path" />
   </svg>
 
-  <!-- Technical Schematic Sidebar Rails -->
   <div class="skel-rail skel-rail-left"></div>
   <div class="skel-rail skel-rail-right"></div>
-  <!-- Fixed Navigation Bar -->
+  
   <nav class="fixed-navbar" id="main-navbar">
     <div class="navbar-inner">
       <div class="navbar-brand">
@@ -130,7 +122,7 @@
     </header>
 
     <main class="main-layout">
-      <!-- Left Column: The Form with all fields and options -->
+      
       <section class="glass-panel form-container" id="registration-form-panel">
         <h2>
           <i data-lucide="user-plus"></i>
@@ -140,7 +132,6 @@
         <form id="library-member-form" novalidate>
           <div class="form-grid">
 
-            <!-- Section 1: Student Information -->
             <div class="form-section">
               <h3 class="form-section-title">
                 <i data-lucide="graduation-cap"></i>
@@ -148,7 +139,6 @@
               </h3>
             </div>
 
-            <!-- First Name -->
             <div class="field-group">
               <label for="first_name">
                 <i data-lucide="user"></i> First Name *
@@ -157,7 +147,6 @@
                 placeholder="E.g. Shuvo" required minlength="2">
             </div>
 
-            <!-- Last Name -->
             <div class="field-group">
               <label for="last_name">
                 <i data-lucide="user"></i> Last Name *
@@ -166,7 +155,6 @@
                 placeholder="E.g. Debnath" required minlength="2">
             </div>
 
-            <!-- 3-col Student ID, Email, Phone -->
             <div class="field-group full-width">
               <div class="triple-select-grid">
                 <div class="student-select-col">
@@ -193,7 +181,6 @@
               </div>
             </div>
 
-            <!-- 3-col Degree, Faculty, Department -->
             <div class="field-group full-width">
               <div class="triple-select-grid">
                 <div class="student-select-col">
@@ -262,7 +249,6 @@
               </div>
             </div>
 
-            <!-- 3-col Program, Semester, Session -->
             <div class="field-group full-width">
               <div class="triple-select-grid">
                 <div class="student-select-col">
@@ -289,7 +275,6 @@
               </div>
             </div>
 
-            <!-- Campus & Advisor -->
             <div class="field-group">
               <label for="campus">
                 <i data-lucide="map-pin"></i> Campus
@@ -320,7 +305,6 @@
                 placeholder="Advisor name">
             </div>
 
-            <!-- Section 2: Personal Information -->
             <div class="form-section">
               <h3 class="form-section-title">
                 <i data-lucide="user-cog"></i>
@@ -328,7 +312,6 @@
               </h3>
             </div>
 
-             <!-- 3-col DOB, Gender, Blood Group -->
              <div class="field-group full-width">
                <div class="triple-select-grid">
                  <div class="student-select-col">
@@ -421,7 +404,6 @@
                </div>
              </div>
 
-            <!-- 3-col Nationality, NID/Passport, Alt Phone -->
             <div class="field-group full-width">
               <div class="triple-select-grid">
                 <div class="student-select-col">
@@ -445,7 +427,6 @@
               </div>
             </div>
 
-            <!-- Address Textareas -->
             <div class="field-group full-width">
               <label for="address">
                 <i data-lucide="home"></i> Present Address *
@@ -460,7 +441,6 @@
               <textarea id="permanent_address" name="permanent_address" class="input-control" placeholder="Enter permanent address..."></textarea>
             </div>
 
-            <!-- 3-col City, Postcode, Country -->
             <div class="field-group full-width">
               <div class="triple-select-grid">
                 <div class="student-select-col">
@@ -484,7 +464,6 @@
               </div>
             </div>
 
-            <!-- Section 3: Emergency Contact -->
             <div class="form-section">
               <h3 class="form-section-title">
                 <i data-lucide="phone-call"></i>
@@ -492,7 +471,6 @@
               </h3>
             </div>
 
-            <!-- 3-col Emergency Contact Name, Relationship, Phone -->
             <div class="field-group full-width">
               <div class="triple-select-grid">
                 <div class="student-select-col">
@@ -523,7 +501,6 @@
               <textarea id="emergency_address" name="emergency_address" class="input-control" placeholder="Contact physical address..."></textarea>
             </div>
 
-            <!-- Section 4: Membership Details & Card Settings -->
             <div class="form-section">
               <h3 class="form-section-title">
                 <i data-lucide="settings"></i>
@@ -531,7 +508,6 @@
               </h3>
             </div>
 
-            <!-- 3-col Membership Type, Branch, Category -->
             <div class="field-group full-width">
               <div class="triple-select-grid">
                 <div class="student-select-col">
@@ -602,7 +578,6 @@
               </div>
             </div>
 
-            <!-- Research Interests -->
             <div class="field-group full-width">
               <label><i data-lucide="book-marked"></i> Research Interests</label>
               <div class="checkbox-grid">
@@ -639,7 +614,6 @@
               </div>
             </div>
 
-            <!-- Card Status, Contact Method, Access Security PIN -->
             <div class="field-group full-width">
               <div class="triple-select-grid">
                 <div class="student-select-col">
@@ -686,7 +660,6 @@
               </div>
             </div>
 
-            <!-- Slider settings & color theme -->
             <div class="field-group">
               <label for="card_theme">
                 <i data-lucide="palette"></i> Card Theme Color
@@ -721,7 +694,6 @@
               </div>
             </div>
 
-            <!-- Datepickers for Membership Start and End -->
             <div class="field-group">
               <label for="start-date-display">
                 <i data-lucide="calendar"></i> Membership Start Date
@@ -790,14 +762,12 @@
               </div>
             </div>
 
-            <!-- Radio Tiers -->
             <div class="field-group full-width" style="display: none;">
               <input type="radio" name="tier" value="Standard" checked>
               <input type="radio" name="tier" value="Premium">
               <input type="radio" name="tier" value="VIP">
             </div>
 
-            <!-- Section 5: Documents & Declaration -->
             <div class="form-section">
               <h3 class="form-section-title">
                 <i data-lucide="shield-alert"></i>
@@ -805,7 +775,6 @@
               </h3>
             </div>
 
-            <!-- Member Avatar / Photo Upload -->
             <div class="field-group">
               <label for="avatar">
                 <i data-lucide="image"></i> Student Photo
@@ -819,7 +788,6 @@
               </div>
             </div>
 
-            <!-- Student ID / Enrollment Proof -->
             <div class="field-group">
               <label for="enrollment_proof">
                 <i data-lucide="file-check"></i> Student ID / Enrollment Proof
@@ -833,7 +801,6 @@
               </div>
             </div>
 
-            <!-- Consent Checkbox -->
             <div class="field-group full-width">
               <label class="custom-checkbox" style="align-items: flex-start; padding: 0.75rem 1rem;">
                 <input type="checkbox" id="agree_terms" name="agree_terms" required>
@@ -844,7 +811,6 @@
               </label>
             </div>
 
-            <!-- Buttons -->
             <div class="form-actions">
               <button type="reset" class="btn btn-secondary" id="reset-form-btn">
                 <i data-lucide="rotate-ccw" class="btn-icon"></i>
@@ -862,7 +828,6 @@
         </form>
       </section>
 
-      <!-- Right Column: Live Holographic Preview Card -->
       <section class="preview-container">
         <div class="preview-title">
           <i data-lucide="eye"></i>
@@ -871,9 +836,9 @@
 
         <div class="card-perspective" id="card-perspective">
           <div class="library-card" id="library-id-card">
-            <!-- FRONT SIDE -->
+            
             <div class="library-card-side card-front">
-              <!-- Floating glows inside the card -->
+              
               <div class="library-card-glow"></div>
 
               <div class="card-header">
@@ -936,7 +901,6 @@
                   <span class="card-id-number" id="preview-card-key">LMS-4820-91B</span>
                 </div>
 
-                <!-- Simulated barcode -->
                 <div class="card-barcode-container">
                   <svg class="barcode-svg" id="barcode-elem" viewBox="0 0 100 20" xmlns="http://www.w3.org/2000/svg">
                     <rect x="0" y="0" width="3" height="20" />
@@ -968,9 +932,8 @@
               </div>
             </div>
 
-            <!-- BACK SIDE -->
             <div class="library-card-side card-back">
-              <!-- Floating glows inside the card back -->
+              
               <div class="library-card-glow"></div>
 
               <div class="card-header">
@@ -1035,7 +998,6 @@
           </div>
         </div>
 
-        <!-- Card Action Buttons -->
         <div class="card-actions-wrapper">
           <button type="button" class="action-btn btn-flip" id="btn-flip-card" title="Flip to see front/back of card">
             <i data-lucide="rotate-3d"></i>
@@ -1069,7 +1031,6 @@
     </main>
   </div>
 
-  <!-- Share Card Modal -->
   <div class="share-modal-overlay" id="share-modal">
     <div class="share-modal-content">
       <div class="share-modal-header">
@@ -1080,7 +1041,6 @@
       </div>
       <div class="share-modal-body">
 
-        <!-- Link Section -->
         <label class="share-label">Shareable Link</label>
         <div class="share-link-input-wrapper">
           <input type="text" class="share-link-input" id="share-link-url" readonly>
@@ -1090,7 +1050,6 @@
           </button>
         </div>
 
-        <!-- Social Buttons -->
         <label class="share-label">Share to Platform</label>
         <div class="social-share-buttons">
           <a href="#" class="social-btn whatsapp" id="share-wa" target="_blank">
@@ -1137,7 +1096,6 @@
           </a>
         </div>
 
-        <!-- Info Note -->
         <div class="share-info-note">
           <i data-lucide="info"></i>
           <span>Link previews with card image appear when shared from a deployed public URL. On localhost, share the
@@ -1147,7 +1105,6 @@
     </div>
   </div>
 
-  <!-- Shared Card Viewer Mode Container -->
   <div class="shared-card-viewer-overlay" id="shared-viewer-mode" style="display: none;">
     <div class="viewer-stars-container"></div>
     <div class="viewer-content">
@@ -1164,9 +1121,8 @@
         <p class="viewer-tagline">Secure Digital Library Credentials Verification</p>
       </div>
 
-      <!-- Interactive Card placement -->
       <div class="viewer-card-placement" id="viewer-card-placement">
-        <!-- Card will be moved here dynamically by JS -->
+        
       </div>
 
       <div class="viewer-actions">
@@ -1182,7 +1138,6 @@
     </div>
   </div>
 
-  <!-- Admin Login Mode Container -->
   <div class="shared-card-viewer-overlay" id="admin-login-mode" style="display: none;">
     <div class="viewer-stars-container"></div>
     <div class="glass-panel" style="max-width: 400px; width: 90%; padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem; z-index: 10;">
@@ -1229,7 +1184,6 @@
     </div>
   </div>
 
-  <!-- Admin Panel Mode Container -->
   <div class="shared-card-viewer-overlay" id="admin-panel-mode" style="display: none;">
     <div class="viewer-stars-container"></div>
     <div class="viewer-content" style="max-width: 900px; width: 95%; gap: 1.25rem;">
@@ -1248,7 +1202,6 @@
         <p class="viewer-tagline">Central Member Directory & Database Control</p>
       </div>
 
-      <!-- Search Control -->
       <div class="admin-controls-row" style="width: 100%; margin-bottom: 0.25rem;">
         <div class="search-input-wrapper"
           style="display: flex; align-items: center; gap: 0.65rem; background: rgba(5, 6, 11, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 0.6rem 1rem; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);">
@@ -1259,7 +1212,6 @@
         </div>
       </div>
 
-      <!-- Members Directory Table Wrapper -->
       <div class="admin-table-wrapper" style="width: 100%; overflow-x: auto; max-height: 480px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; background: rgba(5, 6, 11, 0.65); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); -webkit-overflow-scrolling: touch;">
         <table class="admin-members-table" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.8rem; font-family: 'Inter', sans-serif; min-width: 750px;">
           <thead style="background: rgba(10, 11, 18, 0.9); border-bottom: 1px solid rgba(255, 255, 255, 0.08); position: sticky; top: 0; z-index: 1;">
@@ -1273,7 +1225,7 @@
             </tr>
           </thead>
           <tbody id="admin-table-body">
-            <!-- Dynamically populated member rows -->
+            
           </tbody>
         </table>
       </div>
@@ -1288,7 +1240,6 @@
     </div>
   </div>
 
-  <!-- Success Toast Alert -->
   <div class="toast-notification" id="success-toast">
     <i data-lucide="check-circle"></i>
     <div class="toast-content">
@@ -1297,7 +1248,6 @@
     </div>
   </div>
 
-  <!-- Registration Success Modal -->
   <div class="success-modal-overlay" id="success-modal">
     <div class="success-modal-content">
       <div class="success-modal-icon-wrapper">
@@ -1334,7 +1284,6 @@
     </div>
   </div>
 
-  <!-- Admin Member Details Modal -->
   <div class="share-modal-overlay" id="admin-details-modal" style="display: none;">
     <div class="share-modal-content" style="max-width: 650px; width: 95%;">
       <div class="share-modal-header">
@@ -1344,8 +1293,7 @@
         </button>
       </div>
       <div class="share-modal-body" style="max-height: 70vh; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem; padding-right: 0.5rem; text-align: left;">
-        
-        <!-- Summary Info Header -->
+
         <div style="display: flex; gap: 1rem; align-items: center; background: rgba(255, 255, 255, 0.03); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);">
           <div id="details-avatar-container" style="width: 70px; height: 70px; border-radius: 8px; border: 1px solid var(--accent-primary); overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); flex-shrink: 0;">
             <i data-lucide="user" id="details-avatar-placeholder" style="width: 2rem; height: 2rem; color: var(--text-muted);"></i>
@@ -1361,8 +1309,7 @@
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-          
-          <!-- Student Details -->
+
           <div>
             <h4 style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.25rem;">
               <i data-lucide="graduation-cap" style="width: 1rem; height: 1rem;"></i> Academic & Student Info
@@ -1403,7 +1350,6 @@
             </table>
           </div>
 
-          <!-- Personal Details -->
           <div>
             <h4 style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.25rem;">
               <i data-lucide="user-cog" style="width: 1rem; height: 1rem;"></i> Personal Profile
@@ -1448,7 +1394,6 @@
             </table>
           </div>
 
-          <!-- Emergency Contact Info -->
           <div>
             <h4 style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.25rem;">
               <i data-lucide="phone-call" style="width: 1rem; height: 1rem;"></i> Emergency Contact
@@ -1473,7 +1418,6 @@
             </table>
           </div>
 
-          <!-- Membership & System details -->
           <div>
             <h4 style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.25rem;">
               <i data-lucide="settings" style="width: 1rem; height: 1rem;"></i> Membership Details
