@@ -1079,7 +1079,7 @@ document.addEventListener('DOMContentLoaded', () => {
         th: themeValText,
         a: (addrText === '' || addrText === 'No specific special clearances or address declared.') ? '' : addrText,
         tr: tierVal,
-        av: cloudinaryAvatarUrl ? getCloudinaryPath(cloudinaryAvatarUrl) : compressedAvatarBase64
+        av: cloudinaryAvatarUrl || compressedAvatarBase64
       };
 
       DB.saveMember(memberRecord);
@@ -1584,14 +1584,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const appWrapper = document.querySelector('.app-wrapper');
     const sharedViewerMode = document.getElementById('shared-viewer-mode');
     const adminPanelMode = document.getElementById('admin-panel-mode');
+    const adminLoginMode = document.getElementById('admin-login-mode');
+    const adminLoginError = document.getElementById('admin-login-error');
 
     // Reset visibility states
     if (sharedViewerMode) sharedViewerMode.style.display = 'none';
     if (adminPanelMode) adminPanelMode.style.display = 'none';
+    if (adminLoginMode) adminLoginMode.style.display = 'none';
     if (appWrapper) appWrapper.style.display = '';
     if (mainNavbar) mainNavbar.style.display = '';
     if (beamContainer) beamContainer.style.display = '';
     skelRails.forEach(rail => rail.style.display = '');
+
+    if (adminLoginError) adminLoginError.style.display = 'none';
 
     if (hash && hash.startsWith('#share=')) {
       const sharePayload = hash.replace('#share=', '');
@@ -1779,10 +1784,18 @@ document.addEventListener('DOMContentLoaded', () => {
       if (mainNavbar) mainNavbar.style.display = 'none';
       if (beamContainer) beamContainer.style.display = 'none';
       skelRails.forEach(rail => rail.style.display = 'none');
-      if (adminPanelMode) {
-        adminPanelMode.style.display = 'flex';
+      
+      if (isAdminAuthenticated) {
+        if (adminPanelMode) adminPanelMode.style.display = 'flex';
+        renderAdminDirectory();
+      } else {
+        if (adminLoginMode) adminLoginMode.style.display = 'flex';
+        // Auto-focus username field
+        setTimeout(() => {
+          const uInput = document.getElementById('admin-username');
+          if (uInput) uInput.focus();
+        }, 50);
       }
-      renderAdminDirectory();
     } else {
       // Restore page back to registration form state when hash is cleared
       if (sharedViewerMode) sharedViewerMode.style.display = 'none';
@@ -2011,24 +2024,111 @@ document.addEventListener('DOMContentLoaded', () => {
       themeVal,
       addrVal,
       tierVal,
-      m.av || ""
+      m.av ? (m.av.startsWith('http') ? getCloudinaryPath(m.av) : m.av) : ""
     ];
 
     const rawString = cardDataArray.join('\u001f');
     return btoa(unescape(encodeURIComponent(rawString))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
 
-  // Render Admin Dashboard directory cards dynamically
-  async function renderAdminDirectory() {
-    const grid = document.getElementById('admin-members-grid');
-    const searchInput = document.getElementById('admin-search-input');
-    if (!grid) return;
+  // ---- Admin Authentication State & Form ----
+  let isAdminAuthenticated = sessionStorage.getItem('isAdminAuthenticated') === 'true';
+  const adminLoginForm = document.getElementById('admin-login-form');
+  const adminLoginError = document.getElementById('admin-login-error');
+  const btnLoginCancel = document.getElementById('btn-login-cancel');
 
-    grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 3rem 1rem;"><div style="display:inline-block; width:1.5rem; height:1.5rem; border:2px solid currentColor; border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:0.5rem;"></div><p style="margin:0; font-size:0.85rem;">Loading directory...</p></div>';
+  if (adminLoginForm) {
+    adminLoginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const emailVal = document.getElementById('admin-username').value.trim();
+      const passVal = document.getElementById('admin-password').value;
+
+      // Disable submission button while verifying
+      const submitBtn = adminLoginForm.querySelector('button[type="submit"]');
+      const submitBtnSpan = submitBtn ? submitBtn.querySelector('span') : null;
+      const originalText = submitBtnSpan ? submitBtnSpan.textContent : "Unlock Directory";
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        if (submitBtnSpan) submitBtnSpan.textContent = "Verifying...";
+      }
+
+      function handleSuccessfulLogin() {
+        isAdminAuthenticated = true;
+        sessionStorage.setItem('isAdminAuthenticated', 'true');
+        adminLoginError.style.display = 'none';
+        adminLoginForm.reset();
+        
+        // Hide login, show panel, and load table
+        const adminLoginMode = document.getElementById('admin-login-mode');
+        const adminPanelMode = document.getElementById('admin-panel-mode');
+        if (adminLoginMode) adminLoginMode.style.display = 'none';
+        if (adminPanelMode) adminPanelMode.style.display = 'flex';
+        renderAdminDirectory();
+      }
+
+      function handleFailedLogin() {
+        adminLoginError.style.display = 'block';
+        const loginPanel = adminLoginForm.closest('.glass-panel');
+        if (loginPanel) {
+          loginPanel.style.animation = 'shake-panel 0.4s ease';
+          setTimeout(() => { loginPanel.style.animation = ''; }, 400);
+        }
+      }
+
+      function resetSubmitBtn() {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          if (submitBtnSpan) submitBtnSpan.textContent = originalText;
+        }
+      }
+
+      // Check if Firebase Auth is initialized
+      if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth()) {
+        firebase.auth().signInWithEmailAndPassword(emailVal, passVal)
+          .then((userCredential) => {
+            console.log("Logged in via Firebase Auth successfully:", userCredential.user.email);
+            handleSuccessfulLogin();
+          })
+          .catch((error) => {
+            console.warn("Firebase Auth sign-in failed:", error.code, error.message);
+            handleFailedLogin();
+          })
+          .finally(() => {
+            resetSubmitBtn();
+          });
+      } else {
+        // Fallback local check (useful if offline or configuration is not active yet)
+        console.warn("Firebase Auth SDK not active. Falling back to local credentials.");
+        const expectedUser = (window.ENV && window.ENV.ADMIN_USERNAME) || 'admin@gmail.com';
+        const expectedPass = (window.ENV && window.ENV.ADMIN_PASSWORD) || 'admin1234';
+
+        if (emailVal === expectedUser && passVal === expectedPass) {
+          handleSuccessfulLogin();
+        } else {
+          handleFailedLogin();
+        }
+        resetSubmitBtn();
+      }
+    });
+  }
+
+  if (btnLoginCancel) {
+    btnLoginCancel.addEventListener('click', () => {
+      window.location.hash = '';
+    });
+  }
+
+  // Render Admin Dashboard directory table rows dynamically
+  async function renderAdminDirectory() {
+    const tableBody = document.getElementById('admin-table-body');
+    const searchInput = document.getElementById('admin-search-input');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;"><div style="display:inline-block; width:1.5rem; height:1.5rem; border:2px solid currentColor; border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:0.5rem; vertical-align:middle;"></div><p style="margin:0; font-size:0.85rem; display:inline-block; margin-left:0.5rem;">Loading directory...</p></td></tr>';
 
     try {
       const members = await DB.getAllMembers();
-      grid.innerHTML = '';
+      tableBody.innerHTML = '';
 
       const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
       const filtered = Object.values(members).filter(m => {
@@ -2039,23 +2139,24 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (filtered.length === 0) {
-        grid.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 3rem 1rem;">
-            <i data-lucide="info" style="width: 2rem; height: 2rem; margin-bottom: 0.5rem; color: var(--accent-secondary); display: block; margin-left: auto; margin-right: auto;"></i>
-            <p style="margin: 0; font-size: 0.85rem;">No members found in database.</p>
-          </div>
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">
+              <i data-lucide="info" style="width: 2rem; height: 2rem; margin-bottom: 0.5rem; color: var(--accent-secondary); display: inline-block;"></i>
+              <p style="margin: 0; font-size: 0.85rem;">No members found in database.</p>
+            </td>
+          </tr>
         `;
         if (typeof lucide !== 'undefined') lucide.createIcons();
         return;
       }
 
       filtered.forEach(m => {
-        const card = document.createElement('div');
-        card.className = 'member-directory-card';
-        card.style.setProperty('--member-theme', m.th || 'var(--accent-primary)');
+        const row = document.createElement('tr');
+        row.style.setProperty('--member-theme', m.th || 'var(--accent-primary)');
 
         // Construct preview avatar
-        let avatarHtml = `<i data-lucide="user" class="card-avatar-placeholder" style="color: var(--text-muted); font-size: 1.1rem;"></i>`;
+        let avatarHtml = `<i data-lucide="user" class="table-avatar-placeholder"></i>`;
         if (m.av) {
           let src = m.av;
           if (src.startsWith('c:')) {
@@ -2069,41 +2170,65 @@ document.addEventListener('DOMContentLoaded', () => {
           } else {
             src = 'data:image/jpeg;base64,' + src;
           }
-          avatarHtml = `<img src="${src}" alt="${m.n}" style="width: 100%; height: 100%; object-fit: cover;">`;
+          avatarHtml = `<img src="${src}" alt="${m.n}" class="table-avatar-img">`;
         }
 
-        card.innerHTML = `
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div style="width: 42px; height: 42px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--member-theme); background: rgba(255, 255, 255, 0.03); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              ${avatarHtml}
-            </div>
-            <div style="min-width: 0; flex: 1;">
-              <h4 style="font-size: 0.85rem; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0;">${m.n}</h4>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--member-theme); font-weight: 600;">LMS-${m.k.replace('LMS-', '')}</span>
-            </div>
-          </div>
-          
-          <div style="font-size: 0.7rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.2rem; margin-top: 0.1rem;">
-            <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong>Email:</strong> ${m.e || 'N/A'}</div>
-            <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong>Dept:</strong> ${m.d || 'N/A'} • ${m.b || 'N/A'}</div>
-          </div>
+        // Tier details
+        let tierIcon = 'shield';
+        let tierClass = 'tier-standard';
+        if (m.tr === 'Premium') {
+          tierIcon = 'zap';
+          tierClass = 'tier-premium';
+        } else if (m.tr === 'VIP') {
+          tierIcon = 'crown';
+          tierClass = 'tier-vip';
+        }
 
-          <div style="display: flex; gap: 0.5rem; margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.04); padding-top: 0.5rem; z-index: 2;">
-            <button class="btn btn-primary view-btn" style="flex: 1; padding: 0.35rem 0.5rem; font-size: 0.7rem; justify-content: center; height: 30px;">
-              <i data-lucide="eye" style="width: 0.8rem; height: 0.8rem; margin-right: 0.25rem;"></i> View
-            </button>
-            <button class="btn btn-secondary delete-btn" style="padding: 0.35rem 0.5rem; font-size: 0.7rem; color: var(--accent-error); border-color: rgba(244, 63, 94, 0.15); background: rgba(244, 63, 94, 0.02); justify-content: center; height: 30px; width: 32px; flex-shrink: 0;">
-              <i data-lucide="trash-2" style="width: 0.8rem; height: 0.8rem;"></i>
-            </button>
-          </div>
+        row.innerHTML = `
+          <td style="padding: 0.85rem 1rem;">
+            <div class="table-member-info">
+              <div class="table-avatar-container">
+                ${avatarHtml}
+              </div>
+              <div style="min-width: 0;">
+                <h4 class="table-member-name">${m.n}</h4>
+              </div>
+            </div>
+          </td>
+          <td style="padding: 0.85rem 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--member-theme); font-weight: 600;">
+            LMS-${m.k.replace('LMS-', '')}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem;">
+            ${m.e || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-muted); font-size: 0.78rem;">
+            <div style="color: var(--text-main); font-weight: 500;">${m.d || 'N/A'}</div>
+            <div style="font-size: 0.7rem;">${m.b || 'N/A'}</div>
+          </td>
+          <td style="padding: 0.85rem 1rem;">
+            <span class="table-tier-badge ${tierClass}">
+              <i data-lucide="${tierIcon}"></i>
+              <span>${m.tr || 'Standard'}</span>
+            </span>
+          </td>
+          <td style="padding: 0.85rem 1rem;">
+            <div class="table-actions">
+              <button class="table-action-btn view-btn">
+                <i data-lucide="eye" style="width: 0.8rem; height: 0.8rem; margin-right: 0.25rem;"></i> View
+              </button>
+              <button class="table-action-btn delete-btn">
+                <i data-lucide="trash-2" style="width: 0.8rem; height: 0.8rem;"></i>
+              </button>
+            </div>
+          </td>
         `;
 
-        card.querySelector('.view-btn').addEventListener('click', () => {
+        row.querySelector('.view-btn').addEventListener('click', () => {
           const payload = serializeMemberToPayload(m);
           window.location.hash = `share=${payload}`;
         });
 
-        card.querySelector('.delete-btn').addEventListener('click', async (e) => {
+        row.querySelector('.delete-btn').addEventListener('click', async (e) => {
           e.stopPropagation();
           if (confirm(`Are you sure you want to delete ${m.n}'s record?`)) {
             await DB.deleteMember(m.k);
@@ -2112,13 +2237,13 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
 
-        grid.appendChild(card);
+        tableBody.appendChild(row);
       });
 
       if (typeof lucide !== 'undefined') lucide.createIcons();
     } catch (err) {
       console.error(err);
-      grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--accent-error); padding: 2rem 1rem;"><i data-lucide="alert-circle" style="width: 2rem; height: 2rem; margin-bottom: 0.5rem;"></i><p style="margin: 0; font-size: 0.85rem;">Failed to load directory cards.</p></div>';
+      tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--accent-error); padding: 2rem 1rem;"><i data-lucide="alert-circle" style="width: 2rem; height: 2rem; margin-bottom: 0.5rem; display: inline-block;"></i><p style="margin: 0; font-size: 0.85rem;">Failed to load directory table rows.</p></td></tr>';
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
   }
@@ -2136,6 +2261,18 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnAdminClose) {
     btnAdminClose.addEventListener('click', (e) => {
       e.preventDefault();
+      // Sign out of Firebase Auth to secure the dashboard session
+      if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth()) {
+        firebase.auth().signOut()
+          .then(() => {
+            console.log("Signed out of Firebase Auth successfully.");
+          })
+          .catch(err => {
+            console.warn("Firebase signout error:", err);
+          });
+      }
+      isAdminAuthenticated = false;
+      sessionStorage.removeItem('isAdminAuthenticated');
       window.location.hash = '';
     });
   }

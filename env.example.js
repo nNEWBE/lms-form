@@ -5,6 +5,8 @@ window.ENV = {
   CLOUDINARY_UPLOAD_PRESET: 'your_unsigned_preset_here', // If using unsigned uploads (recommended for public GitHub Pages)
   CLOUDINARY_API_KEY: 'your_api_key_here', // Only needed if NOT using an upload preset
   CLOUDINARY_API_SECRET: 'your_api_secret_here', // Only needed if NOT using an upload preset
+  ADMIN_USERNAME: 'admin', // Username to access Admin Panel
+  ADMIN_PASSWORD: 'your_admin_password_here', // Password to access Admin Panel
   // Optional Cloud Database:
   // Option A: Realtime Database REST API URL
   FIREBASE_URL: 'https://your-firebase-db-id.firebaseio.com',

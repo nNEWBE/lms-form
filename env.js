@@ -1,6 +1,8 @@
 window.ENV = {
   CLOUDINARY_CLOUD_NAME: 'dorjgyfdl',
   CLOUDINARY_UPLOAD_PRESET: 'lms-form',
+  ADMIN_USERNAME: 'admin@gmail.com',
+  ADMIN_PASSWORD: 'admin1234',
   FIREBASE_CONFIG: {
     apiKey: "AIzaSyANEgOd8gSN7BOSBYLxXqXoqUqGHlhUN6w",
     authDomain: "lms-form-49a97.firebaseapp.com",
