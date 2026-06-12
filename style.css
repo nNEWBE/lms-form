@@ -455,14 +455,36 @@ body.light-mode .preview-title {
 }
 
 body.light-mode .library-card {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+body.light-mode .library-card-side {
   background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+}
+
+body.light-mode .library-card-side.card-back {
+  background: #fafafa;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .card-avatar-container {
+  background: #f3f4f6;
+}
+
+body.light-mode .card-avatar-placeholder {
+  color: #9ca3af;
 }
 
 body.light-mode .card-logo-text {
-  background: linear-gradient(90deg, #1a1a2e, #4b5563);
-  -webkit-background-clip: text;
-  background-clip: text;
+  color: #1a1a2e;
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: initial;
 }
 
 body.light-mode .card-type {
@@ -497,6 +519,51 @@ body.light-mode .card-id-number {
 
 body.light-mode .barcode-svg {
   fill: #1a1a2e;
+}
+
+/* Light mode - Card Back overrides */
+body.light-mode .card-back-badge {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #6b7280;
+}
+
+body.light-mode .card-back-left h5 {
+  color: #4b5563;
+}
+
+body.light-mode .guidelines-list li {
+  color: #374151;
+}
+
+body.light-mode .card-back-address-block {
+  border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-mode .card-back-address-block .addr-label {
+  color: #6b7280;
+}
+
+body.light-mode .card-back-address-block .addr-value {
+  color: #1f2937;
+}
+
+body.light-mode .qr-container {
+  background: #12131a; /* QR scanner remains dark block for contrast */
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .signature-line {
+  color: #1f2937;
+  border-bottom-color: rgba(0, 0, 0, 0.15);
+}
+
+body.light-mode .signature-label {
+  color: #6b7280;
+}
+
+body.light-mode .card-footer-back {
+  color: #6b7280;
 }
 
 body.light-mode .card-instructions {
@@ -2125,7 +2192,7 @@ textarea.input-control {
 
 /* Card Back Design Layout */
 .card-back-badge {
-  font-size: 0.58rem;
+  font-size: 0.64rem;
   font-family: 'JetBrains Mono', monospace;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2145,10 +2212,10 @@ textarea.input-control {
 }
 
 .card-back-left h5 {
-  font-size: 0.52rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   letter-spacing: 0.04em;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.35rem;
   font-family: 'Inter', sans-serif;
   font-weight: 700;
 }
@@ -2160,12 +2227,12 @@ textarea.input-control {
 }
 
 .guidelines-list li {
-  font-size: 0.48rem;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.4;
-  margin-bottom: 0.15rem;
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.45;
+  margin-bottom: 0.2rem;
   position: relative;
-  padding-left: 0.5rem;
+  padding-left: 0.6rem;
 }
 
 .guidelines-list li::before {
@@ -2183,7 +2250,7 @@ textarea.input-control {
 }
 
 .card-back-address-block .addr-label {
-  font-size: 0.48rem;
+  font-size: 0.56rem;
   color: var(--text-muted);
   display: block;
   font-weight: 600;
@@ -2191,11 +2258,11 @@ textarea.input-control {
 }
 
 .card-back-address-block .addr-value {
-  font-size: 0.5rem;
+  font-size: 0.62rem;
   color: var(--text-main);
-  line-height: 1.3;
+  line-height: 1.35;
   display: block;
-  margin-top: 0.1rem;
+  margin-top: 0.15rem;
   font-family: 'JetBrains Mono', monospace;
   white-space: nowrap;
   overflow: hidden;
@@ -2249,7 +2316,7 @@ textarea.input-control {
 }
 
 .signature-label {
-  font-size: 0.42rem;
+  font-size: 0.52rem;
   color: var(--text-muted);
   text-transform: uppercase;
   margin-top: 2px;
@@ -2259,7 +2326,7 @@ textarea.input-control {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.5rem;
+  font-size: 0.58rem;
   color: var(--text-muted);
   font-family: 'JetBrains Mono', monospace;
   z-index: 1;
@@ -2276,8 +2343,8 @@ textarea.input-control {
 
 .card-back-glow-seal i,
 .card-back-glow-seal svg {
-  width: 0.55rem;
-  height: 0.55rem;
+  width: 0.65rem;
+  height: 0.65rem;
   stroke-width: 2.5px;
 }
 
