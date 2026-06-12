@@ -60,13 +60,82 @@ document.addEventListener('DOMContentLoaded', () => {
   const previewAvatar = document.getElementById('preview-avatar');
   const previewAvatarIcon = document.getElementById('preview-avatar-icon');
 
-  // Custom Select Dropdown
-  const customSelect = document.getElementById('custom-select-branch');
-  const customSelectTrigger = document.getElementById('custom-select-trigger-branch');
-  const customSelectValue = document.getElementById('custom-select-value-branch');
-  const customSelectOptions = document.getElementById('custom-select-options-branch');
-  const customOptions = customSelectOptions ? customSelectOptions.querySelectorAll('.custom-option') : [];
-  const hiddenBranch = document.getElementById('branch');
+  // Reusable Custom Select Setup Helper
+  function setupCustomSelect({
+    wrapperId,
+    triggerId,
+    valueId,
+    optionsContainerId,
+    hiddenSelectId,
+    defaultValue,
+    onChange
+  }) {
+    const wrapper = document.getElementById(wrapperId);
+    const trigger = document.getElementById(triggerId);
+    const displayValue = document.getElementById(valueId);
+    const optionsContainer = document.getElementById(optionsContainerId);
+    const hiddenSelect = document.getElementById(hiddenSelectId);
+    
+    if (!wrapper || !trigger || !displayValue || !optionsContainer || !hiddenSelect) return null;
+    
+    const options = optionsContainer.querySelectorAll('.custom-option');
+    let currentValue = defaultValue || hiddenSelect.value;
+    
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = wrapper.classList.contains('open');
+      closeAllDropdowns();
+      if (!isOpen) wrapper.classList.add('open');
+    });
+    
+    options.forEach(option => {
+      option.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const val = option.getAttribute('data-value');
+        const text = option.textContent;
+        
+        hiddenSelect.value = val;
+        hiddenSelect.dispatchEvent(new Event('change'));
+        hiddenSelect.dispatchEvent(new Event('input'));
+        
+        displayValue.textContent = text;
+        
+        options.forEach(o => o.classList.remove('selected'));
+        option.classList.add('selected');
+        
+        wrapper.classList.remove('open');
+        currentValue = val;
+        if (onChange) onChange(val, text);
+      });
+    });
+    
+    return {
+      getWrapper: () => wrapper,
+      getValue: () => currentValue,
+      reset: () => {
+        currentValue = defaultValue;
+        hiddenSelect.value = defaultValue;
+        hiddenSelect.dispatchEvent(new Event('change'));
+        hiddenSelect.dispatchEvent(new Event('input'));
+        
+        options.forEach(o => {
+          if (o.getAttribute('data-value') === defaultValue) {
+            o.classList.add('selected');
+            displayValue.textContent = o.textContent;
+          } else {
+            o.classList.remove('selected');
+          }
+        });
+      },
+      setValue: (val) => {
+        options.forEach(o => {
+          if (o.getAttribute('data-value') === val) {
+            o.click();
+          }
+        });
+      }
+    };
+  }
 
   // Reusable Date Picker Setup Helper
   function setupDatePicker({
@@ -265,10 +334,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Sync Membership Tier Radio Input
   const radioTiers = document.querySelectorAll('input[name="tier"]');
+  const tierMap = {
+    'Standard': { icon: 'shield', label: 'Standard', class: 'tier-standard' },
+    'Faculty': { icon: 'graduation-cap', label: 'Faculty', class: 'tier-faculty' },
+    'Premium': { icon: 'zap', label: 'Premium', class: 'tier-premium' },
+    'VIP': { icon: 'crown', label: 'VIP', class: 'tier-vip' }
+  };
+
   radioTiers.forEach(radio => {
     radio.addEventListener('change', (e) => {
       if (e.target.checked) {
-        previewTier.textContent = e.target.value;
+        const tierData = tierMap[e.target.value] || tierMap['Standard'];
+        
+        // Update class list on the preview tier element
+        previewTier.className = 'card-type'; // reset
+        previewTier.classList.add(tierData.class);
+        
+        // Update content with proper icon
+        previewTier.innerHTML = `<i data-lucide="${tierData.icon}"></i><span>${tierData.label}</span>`;
+        
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+
         // Optionally animate card type scaling
         previewTier.style.transform = 'scale(1.15)';
         setTimeout(() => {
@@ -490,16 +578,17 @@ document.addEventListener('DOMContentLoaded', () => {
         parentLabel.style.pointerEvents = 'auto';
       });
 
-      // Reset custom select
-      customSelectValue.textContent = 'Central Library HQ';
-      customOptions.forEach(o => {
-        if (o.getAttribute('data-value') === 'Central Library') {
-          o.classList.add('selected');
-        } else {
-          o.classList.remove('selected');
-        }
-      });
-      hiddenBranch.value = 'Central Library';
+      // Reset custom selects
+      if (deptSelect) deptSelect.reset();
+      if (batchSelect) batchSelect.reset();
+      if (semesterSelect) semesterSelect.reset();
+      
+      // Reset tier badge
+      previewTier.className = 'card-type tier-standard';
+      previewTier.innerHTML = `<i data-lucide="shield"></i><span>Standard</span>`;
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
 
       // Reset custom date pickers
       if (dobPicker) dobPicker.reset();
@@ -586,30 +675,44 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ---- Custom Select Dropdown ----
-  customSelectTrigger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isOpen = customSelect.classList.contains('open');
-    closeAllDropdowns();
-    if (!isOpen) customSelect.classList.add('open');
+  // ---- Initialize Custom Select Dropdowns ----
+  const deptSelect = setupCustomSelect({
+    wrapperId: 'custom-select-dept',
+    triggerId: 'custom-select-trigger-dept',
+    valueId: 'custom-select-value-dept',
+    optionsContainerId: 'custom-select-options-dept',
+    hiddenSelectId: 'department',
+    defaultValue: 'CSE',
+    onChange: (val) => {
+      const el = document.getElementById('preview-dept');
+      if (el) el.textContent = val;
+    }
   });
 
-  customOptions.forEach(option => {
-    option.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const val = option.getAttribute('data-value');
-      const text = option.textContent;
+  const batchSelect = setupCustomSelect({
+    wrapperId: 'custom-select-batch',
+    triggerId: 'custom-select-trigger-batch',
+    valueId: 'custom-select-value-batch',
+    optionsContainerId: 'custom-select-options-batch',
+    hiddenSelectId: 'batch',
+    defaultValue: 'Batch 60',
+    onChange: (val) => {
+      const el = document.getElementById('preview-batch');
+      if (el) el.textContent = val.toUpperCase();
+    }
+  });
 
-      hiddenBranch.value = val;
-      hiddenBranch.dispatchEvent(new Event('change'));
-
-      customSelectValue.textContent = text;
-
-      customOptions.forEach(o => o.classList.remove('selected'));
-      option.classList.add('selected');
-
-      customSelect.classList.remove('open');
-    });
+  const semesterSelect = setupCustomSelect({
+    wrapperId: 'custom-select-semester',
+    triggerId: 'custom-select-trigger-semester',
+    valueId: 'custom-select-value-semester',
+    optionsContainerId: 'custom-select-options-semester',
+    hiddenSelectId: 'semester',
+    defaultValue: '8th Sem',
+    onChange: (val) => {
+      const el = document.getElementById('preview-semester');
+      if (el) el.textContent = val.toUpperCase();
+    }
   });
 
   // ---- Initialize Custom Date Pickers ----

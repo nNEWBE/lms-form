@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Library Member Registration - LMS Portal</title>
+  <title>Library Member Registration - AETHER LMS Portal</title>
   <link rel="stylesheet" href="style.css">
   <!-- Lucide Icons for high-fidelity UI -->
   <script src="https://cdn.jsdelivr.net/npm/lucide/dist/umd/lucide.min.js"></script>
@@ -47,8 +47,32 @@
   <nav class="fixed-navbar" id="main-navbar">
     <div class="navbar-inner">
       <div class="navbar-brand">
-        <i data-lucide="library"></i>
-        <span>Metro LMS</span>
+        <svg class="custom-logo-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="logo-hex-grad-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="var(--accent-primary)" />
+              <stop offset="100%" stop-color="var(--accent-secondary)" />
+            </linearGradient>
+            <linearGradient id="logo-prism-grad-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff" />
+              <stop offset="100%" stop-color="var(--accent-secondary)" />
+            </linearGradient>
+            <linearGradient id="logo-page-l-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="rgba(255, 255, 255, 0.05)" />
+              <stop offset="100%" stop-color="rgba(0, 0, 0, 0.4)" />
+            </linearGradient>
+            <linearGradient id="logo-page-r-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="rgba(255, 255, 255, 0.2)" />
+              <stop offset="100%" stop-color="rgba(255, 255, 255, 0.02)" />
+            </linearGradient>
+          </defs>
+          <path d="M16 2L30 10V22L16 30L2 22V10L16 2Z" stroke="url(#logo-hex-grad-nav)" stroke-width="1.5" stroke-linejoin="round" fill="rgba(10, 10, 15, 0.6)" />
+          <path d="M16 6L21 10L16 14L11 10Z" fill="url(#logo-prism-grad-nav)" />
+          <path d="M15 16L6 12V21L15 25Z" fill="url(#logo-page-l-nav)" stroke="var(--accent-primary)" stroke-width="1" stroke-linejoin="round" />
+          <path d="M17 16L26 12V21L17 25Z" fill="url(#logo-page-r-nav)" stroke="var(--accent-secondary)" stroke-width="1" stroke-linejoin="round" />
+          <path d="M16 16V25" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+        <span>AETHER LMS</span>
       </div>
       <div class="navbar-actions">
         <a href="#" class="admin-panel-btn">
@@ -320,39 +344,113 @@
               </div>
             </div>
 
-            <!-- select -->
-            <div class="field-group">
-              <label for="custom-select-trigger-branch">
-                <i data-lucide="map-pin"></i> Designated Branch
-              </label>
-              <div class="custom-select-wrapper" id="custom-select-branch">
-                <div class="custom-select-trigger" id="custom-select-trigger-branch">
-                  <span id="custom-select-value-branch">Central Library HQ</span>
-                  <i data-lucide="chevron-down" class="select-arrow-icon"></i>
+            <!-- academic student selects -->
+            <div class="field-group full-width">
+              <div class="triple-select-grid">
+                <!-- Department select -->
+                <div class="student-select-col">
+                  <label for="custom-select-trigger-dept">
+                    <i data-lucide="graduation-cap"></i> Department *
+                  </label>
+                  <div class="custom-select-wrapper" id="custom-select-dept">
+                    <div class="custom-select-trigger" id="custom-select-trigger-dept">
+                      <span id="custom-select-value-dept">CSE</span>
+                      <i data-lucide="chevron-down" class="select-arrow-icon"></i>
+                    </div>
+                    <div class="custom-select-options" id="custom-select-options-dept">
+                      <div class="custom-option selected" data-value="CSE">CSE (Computer Science)</div>
+                      <div class="custom-option" data-value="EEE">EEE (Electrical Eng.)</div>
+                      <div class="custom-option" data-value="SWE">SWE (Software Eng.)</div>
+                      <div class="custom-option" data-value="BBA">BBA (Business Admin.)</div>
+                      <div class="custom-option" data-value="CE">CE (Civil Eng.)</div>
+                      <div class="custom-option" data-value="ENG">ENG (English Lit.)</div>
+                      <div class="custom-option" data-value="LAW">LAW (Bachelor of Laws)</div>
+                      <div class="custom-option" data-value="PHR">PHR (Pharmacy)</div>
+                    </div>
+                    <select id="department" name="department" style="display: none;" required>
+                      <option value="CSE" selected>CSE</option>
+                      <option value="EEE">EEE</option>
+                      <option value="SWE">SWE</option>
+                      <option value="BBA">BBA</option>
+                      <option value="CE">CE</option>
+                      <option value="ENG">ENG</option>
+                      <option value="LAW">LAW</option>
+                      <option value="PHR">PHR</option>
+                    </select>
+                  </div>
                 </div>
-                <div class="custom-select-options" id="custom-select-options-branch">
-                  <div class="custom-option selected" data-value="Central Library">Central Library HQ</div>
-                  <div class="custom-option" data-value="Engineering & IT">Engineering & IT Branch</div>
-                  <div class="custom-option" data-value="Medical Sciences">Medical Sciences Library</div>
-                  <div class="custom-option" data-value="Humanities & Arts">Humanities & Arts Wing</div>
-                </div>
-                <select id="branch" name="branch" style="display: none;">
-                  <option value="Central Library" selected>Central Library HQ</option>
-                  <option value="Engineering & IT">Engineering & IT Branch</option>
-                  <option value="Medical Sciences">Medical Sciences Library</option>
-                  <option value="Humanities & Arts">Humanities & Arts Wing</option>
-                </select>
-              </div>
-            </div>
 
-            <!-- search (Interest tags search demo) -->
-            <div class="field-group">
-              <label for="search_interests">
-                <i data-lucide="search"></i> Category Filter Tags
-              </label>
-              <div class="search-wrapper">
-                <input type="search" id="search_interests" class="input-control" placeholder="Search genres (e.g. Science)">
-                <i data-lucide="hash"></i>
+                <!-- Batch select -->
+                <div class="student-select-col">
+                  <label for="custom-select-trigger-batch">
+                    <i data-lucide="users"></i> Batch *
+                  </label>
+                  <div class="custom-select-wrapper" id="custom-select-batch">
+                    <div class="custom-select-trigger" id="custom-select-trigger-batch">
+                      <span id="custom-select-value-batch">Batch 60</span>
+                      <i data-lucide="chevron-down" class="select-arrow-icon"></i>
+                    </div>
+                    <div class="custom-select-options" id="custom-select-options-batch">
+                      <div class="custom-option" data-value="Batch 58">Batch 58</div>
+                      <div class="custom-option" data-value="Batch 59">Batch 59</div>
+                      <div class="custom-option selected" data-value="Batch 60">Batch 60</div>
+                      <div class="custom-option" data-value="Batch 61">Batch 61</div>
+                      <div class="custom-option" data-value="Batch 62">Batch 62</div>
+                      <div class="custom-option" data-value="Batch 63">Batch 63</div>
+                      <div class="custom-option" data-value="Batch 64">Batch 64</div>
+                    </div>
+                    <select id="batch" name="batch" style="display: none;" required>
+                      <option value="Batch 58">Batch 58</option>
+                      <option value="Batch 59">Batch 59</option>
+                      <option value="Batch 60" selected>Batch 60</option>
+                      <option value="Batch 61">Batch 61</option>
+                      <option value="Batch 62">Batch 62</option>
+                      <option value="Batch 63">Batch 63</option>
+                      <option value="Batch 64">Batch 64</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Semester select -->
+                <div class="student-select-col">
+                  <label for="custom-select-trigger-semester">
+                    <i data-lucide="award"></i> Semester *
+                  </label>
+                  <div class="custom-select-wrapper" id="custom-select-semester">
+                    <div class="custom-select-trigger" id="custom-select-trigger-semester">
+                      <span id="custom-select-value-semester">8th Semester</span>
+                      <i data-lucide="chevron-down" class="select-arrow-icon"></i>
+                    </div>
+                    <div class="custom-select-options" id="custom-select-options-semester">
+                      <div class="custom-option" data-value="1st Sem">1st Semester</div>
+                      <div class="custom-option" data-value="2nd Sem">2nd Semester</div>
+                      <div class="custom-option" data-value="3rd Sem">3rd Semester</div>
+                      <div class="custom-option" data-value="4th Sem">4th Semester</div>
+                      <div class="custom-option" data-value="5th Sem">5th Semester</div>
+                      <div class="custom-option" data-value="6th Sem">6th Semester</div>
+                      <div class="custom-option" data-value="7th Sem">7th Semester</div>
+                      <div class="custom-option selected" data-value="8th Sem">8th Semester</div>
+                      <div class="custom-option" data-value="9th Sem">9th Semester</div>
+                      <div class="custom-option" data-value="10th Sem">10th Semester</div>
+                      <div class="custom-option" data-value="11th Sem">11th Semester</div>
+                      <div class="custom-option" data-value="12th Sem">12th Semester</div>
+                    </div>
+                    <select id="semester" name="semester" style="display: none;" required>
+                      <option value="1st Sem">1st Sem</option>
+                      <option value="2nd Sem">2nd Sem</option>
+                      <option value="3rd Sem">3rd Sem</option>
+                      <option value="4th Sem">4th Sem</option>
+                      <option value="5th Sem">5th Sem</option>
+                      <option value="6th Sem">6th Sem</option>
+                      <option value="7th Sem">7th Sem</option>
+                      <option value="8th Sem" selected>8th Sem</option>
+                      <option value="9th Sem">9th Sem</option>
+                      <option value="10th Sem">10th Sem</option>
+                      <option value="11th Sem">11th Sem</option>
+                      <option value="12th Sem">12th Sem</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -450,10 +548,37 @@
 
             <div class="card-header">
               <div class="card-logo">
-                <i data-lucide="book-open"></i>
-                <span class="card-logo-text">METRO LMS</span>
+                <svg class="custom-logo-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="logo-hex-grad-card" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="var(--user-card-theme, var(--accent-primary))" />
+                      <stop offset="100%" stop-color="var(--accent-secondary)" />
+                    </linearGradient>
+                    <linearGradient id="logo-prism-grad-card" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#ffffff" />
+                      <stop offset="100%" stop-color="var(--user-card-theme, var(--accent-primary))" />
+                    </linearGradient>
+                    <linearGradient id="logo-page-l-card" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="rgba(255, 255, 255, 0.05)" />
+                      <stop offset="100%" stop-color="rgba(0, 0, 0, 0.4)" />
+                    </linearGradient>
+                    <linearGradient id="logo-page-r-card" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="rgba(255, 255, 255, 0.2)" />
+                      <stop offset="100%" stop-color="rgba(255, 255, 255, 0.02)" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M16 2L30 10V22L16 30L2 22V10L16 2Z" stroke="url(#logo-hex-grad-card)" stroke-width="1.5" stroke-linejoin="round" fill="rgba(10, 10, 15, 0.6)" />
+                  <path d="M16 6L21 10L16 14L11 10Z" fill="url(#logo-prism-grad-card)" />
+                  <path d="M15 16L6 12V21L15 25Z" fill="url(#logo-page-l-card)" stroke="var(--user-card-theme, var(--accent-primary))" stroke-width="1" stroke-linejoin="round" />
+                  <path d="M17 16L26 12V21L17 25Z" fill="url(#logo-page-r-card)" stroke="var(--accent-secondary)" stroke-width="1" stroke-linejoin="round" />
+                  <path d="M16 16V25" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+                <span class="card-logo-text">AETHER LMS</span>
               </div>
-              <div class="card-type" id="preview-tier">Standard</div>
+              <div class="card-type tier-standard" id="preview-tier">
+                <i data-lucide="shield"></i>
+                <span>Standard</span>
+              </div>
             </div>
 
             <div class="card-body">
@@ -464,6 +589,9 @@
               
               <div class="card-info">
                 <div class="card-name" id="preview-name">Ayon Debnath</div>
+                <div class="card-student-details">
+                  <span id="preview-dept">CSE</span> &bull; <span id="preview-batch">BATCH 60</span> &bull; <span id="preview-semester">8TH SEM</span>
+                </div>
                 <div class="card-email" id="preview-email">username@domain.com</div>
                 <div class="card-tel" id="preview-phone">+1 555-0199</div>
                 

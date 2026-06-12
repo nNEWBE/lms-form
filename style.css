@@ -97,7 +97,8 @@ body {
   letter-spacing: -0.01em;
 }
 
-.navbar-brand i {
+.navbar-brand i,
+.navbar-brand .custom-logo-svg {
   width: 18px;
   height: 18px;
   color: var(--accent-primary);
@@ -1265,6 +1266,26 @@ input[type="file"].file-input {
   color: var(--text-main);
 }
 
+/* Triple Select Grid */
+.triple-select-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.student-select-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+@media (max-width: 640px) {
+  .triple-select-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Custom Select Dropdown Styling */
 .custom-select-wrapper {
   position: relative;
@@ -2007,10 +2028,12 @@ textarea.input-control {
   gap: 0.5rem;
 }
 
-.card-logo i {
-  font-size: 1.4rem;
+.card-logo i,
+.card-logo .custom-logo-svg {
+  width: 1.4rem;
+  height: 1.4rem;
   color: var(--user-card-theme);
-  text-shadow: 0 0 10px rgba(var(--user-card-theme), 0.4);
+  filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--user-card-theme) 35%, transparent));
 }
 
 .card-logo-text {
@@ -2024,16 +2047,49 @@ textarea.input-control {
 }
 
 .card-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   font-size: 0.65rem;
   font-family: 'JetBrains Mono', monospace;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 0.2rem 0.5rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--user-card-theme);
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 0.05em;
+  transition: all 0.25s ease;
+}
+
+.card-type i,
+.card-type svg {
+  width: 0.72rem;
+  height: 0.72rem;
+  stroke-width: 2.5px;
+}
+
+.card-type.tier-standard {
+  background: rgba(6, 182, 212, 0.08);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  color: #06b6d4;
+}
+
+.card-type.tier-faculty {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #10b981;
+}
+
+.card-type.tier-premium {
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  color: #a855f7;
+}
+
+.card-type.tier-vip {
+  background: rgba(234, 179, 8, 0.08);
+  border: 1px solid rgba(234, 179, 8, 0.28);
+  color: #eab308;
+  box-shadow: 0 0 10px rgba(234, 179, 8, 0.15);
 }
 
 .card-body {
@@ -2087,6 +2143,21 @@ textarea.input-control {
   overflow: hidden;
   text-overflow: ellipsis;
   letter-spacing: -0.01em;
+}
+
+.card-student-details {
+  font-size: 0.62rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--user-card-theme, var(--accent-primary));
+  text-transform: uppercase;
+  margin-top: 0.05rem;
+  margin-bottom: 0.1rem;
+  opacity: 0.95;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .card-email,
