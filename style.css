@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@700;800;900&display=swap');
 
 :root {
   --bg-primary: #0a0a0f;
@@ -92,9 +92,13 @@ body {
   align-items: center;
   gap: 0.5rem;
   color: var(--text-main);
-  font-weight: 700;
+}
+
+.navbar-brand span {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 800;
   font-size: 1rem;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.1em;
 }
 
 .navbar-brand i,
@@ -123,6 +127,15 @@ body {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: all 0.25s ease;
+}
+
+@media (max-width: 480px) {
+  .admin-panel-btn span {
+    display: none;
+  }
+  .admin-panel-btn {
+    padding: 0.45rem;
+  }
 }
 
 .admin-panel-btn i,
@@ -853,6 +866,18 @@ header h1 {
   display: inline-block;
 }
 
+@media (max-width: 960px) {
+  header h1 {
+    font-size: 2.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 1.8rem;
+  }
+}
+
 header h1::after {
   content: 'LMS PORTAL';
   position: absolute;
@@ -874,16 +899,26 @@ header p {
   font-weight: 300;
 }
 
+@media (max-width: 480px) {
+  header p {
+    font-size: 0.9rem;
+    margin-top: 0.8rem;
+  }
+}
+
 .main-layout {
   display: grid;
   grid-template-columns: 1.5fr 1fr;
   gap: 2.5rem;
   align-items: start;
+  width: 100%;
+  max-width: 1280px;
 }
 
 @media (max-width: 1024px) {
   .main-layout {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 }
 
@@ -929,9 +964,13 @@ header p {
   gap: 0.85rem;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 960px) {
   .form-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .form-section {
+    grid-column: span 1;
   }
 }
 
@@ -980,7 +1019,7 @@ header p {
   grid-column: span 2;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 960px) {
   .field-group.full-width {
     grid-column: span 1;
   }
@@ -1347,7 +1386,7 @@ input[type="file"].file-input {
   gap: 0.25rem;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 960px) {
   .triple-select-grid {
     grid-template-columns: 1fr;
   }
@@ -1995,7 +2034,7 @@ textarea.input-control {
   border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 960px) {
   .form-actions {
     grid-column: span 1;
     flex-direction: column;
@@ -2091,6 +2130,9 @@ textarea.input-control {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto;
 }
 
 .preview-title {
@@ -2904,7 +2946,7 @@ textarea.input-control {
   font-size: 0.82rem;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 960px) {
   .card-actions-wrapper {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -2943,9 +2985,10 @@ textarea.input-control {
 }
 
 .card-logo-text {
-  font-weight: 800;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
   font-size: 0.95rem;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.12em;
   color: #ffffff;
 }
 
