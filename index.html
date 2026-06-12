@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Library Member Registration - LMS Portal</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Lucide Icons for high-fidelity UI -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide/dist/umd/lucide.min.js"></script>
+  <script>
+    if (typeof lucide === 'undefined') {
+      document.write('<script src="https://unpkg.com/lucide@latest"><\/script>');
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Moving Laser Beam Background (SVG overlay) -->
+  <svg class="beam-container" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Beam gradients matching purple to cyan and vice-versa -->
+      <linearGradient id="beam-grad-left" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="0" />
+        <stop offset="60%" stop-color="var(--accent-primary)" stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--accent-secondary)" stop-opacity="0.3" />
+      </linearGradient>
+      
+      <linearGradient id="beam-grad-right" x1="100%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stop-color="var(--accent-secondary)" stop-opacity="0" />
+        <stop offset="60%" stop-color="var(--accent-secondary)" stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.3" />
+      </linearGradient>
+    </defs>
+    
+    <!-- Paths winding towards the container edges -->
+    <!-- Left beam enters from bottom-left, runs towards center-left -->
+    <path id="beam-path-left" d="M 50 800 Q 150 400, 300 500 T 500 300 L 580 320" class="beam-path" />
+    
+    <!-- Right beam enters from top-right, runs towards center-right -->
+    <path id="beam-path-right" d="M 1200 50 Q 1100 300, 950 200 T 800 450 L 720 420" class="beam-path" />
+  </svg>
+
+  <!-- Technical Schematic Sidebar Rails -->
+  <div class="skel-rail skel-rail-left"></div>
+  <div class="skel-rail skel-rail-right"></div>
+  <!-- Fixed Navigation Bar -->
+  <nav class="fixed-navbar" id="main-navbar">
+    <div class="navbar-inner">
+      <div class="navbar-brand">
+        <i data-lucide="library"></i>
+        <span>Metro LMS</span>
+      </div>
+      <div class="navbar-actions">
+        <a href="#" class="admin-panel-btn">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Admin Panel</span>
+        </a>
+        <button class="nav-icon-btn theme-toggle" id="theme-toggle" title="Toggle Light/Dark Mode">
+          <i data-lucide="moon" class="theme-icon-dark"></i>
+          <i data-lucide="sun" class="theme-icon-light"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="app-wrapper">
+    <header>
+      <h1>Member Registration</h1>
+      <p>Configure and generate an active digital membership card with smart LMS access keys.</p>
+    </header>
+
+    <main class="main-layout">
+      <!-- Left Column: The Form with all fields and options -->
+      <section class="glass-panel form-container" id="registration-form-panel">
+        <h2>
+          <i data-lucide="user-plus"></i>
+          <span>Add New Library Member</span>
+        </h2>
+        
+        <form id="library-member-form" novalidate>
+          <div class="form-grid">
+            
+            <!-- Section 1: Account Identity -->
+            <div class="form-section">
+              <h3 class="form-section-title">
+                <i data-lucide="fingerprint"></i>
+                Account Identity
+              </h3>
+            </div>
+
+            <!-- text -->
+            <div class="field-group">
+              <label for="full_name">
+                <i data-lucide="user"></i> Full Name *
+              </label>
+              <input type="text" id="full_name" name="full_name" class="input-control" placeholder="E.g. Ayon Debnath" required minlength="3">
+            </div>
+
+            <!-- email -->
+            <div class="field-group">
+              <label for="email">
+                <i data-lucide="mail"></i> Email Address *
+              </label>
+              <input type="email" id="email" name="email" class="input-control" placeholder="username@domain.com" required>
+            </div>
+
+            <!-- password -->
+            <div class="field-group">
+              <label for="password">
+                <i data-lucide="lock"></i> Access Security PIN *
+              </label>
+              <input type="password" id="password" name="password" class="input-control" placeholder="4-8 digit passcode" required minlength="4">
+            </div>
+
+            <!-- file -->
+            <div class="field-group">
+              <label for="avatar">
+                <i data-lucide="image"></i> Member Avatar
+              </label>
+              <div class="file-upload-wrapper">
+                <div class="file-dropzone" id="avatar-dropzone">
+                  <i data-lucide="upload-cloud"></i>
+                  <span id="file-label">Choose image or drag here</span>
+                  <input type="file" id="avatar" name="avatar" class="file-input" accept="image/*">
+                </div>
+              </div>
+            </div>
+
+            <!-- url -->
+            <div class="field-group full-width">
+              <label for="profile_url">
+                <i data-lucide="link-2"></i> Academic Portfolio / URL
+              </label>
+              <input type="url" id="profile_url" name="profile_url" class="input-control" placeholder="https://github.com/username">
+            </div>
+
+
+            <!-- Section 2: Contact & Borrowing Access -->
+            <div class="form-section">
+              <h3 class="form-section-title">
+                <i data-lucide="calendar-range"></i>
+                Contact & Scheduling
+              </h3>
+            </div>
+
+            <!-- tel -->
+            <div class="field-group">
+              <label for="phone">
+                <i data-lucide="phone"></i> Contact Number *
+              </label>
+              <input type="tel" id="phone" name="phone" class="input-control" placeholder="E.g. +1 555-0199" required>
+            </div>
+
+            <!-- date -->
+            <div class="field-group">
+              <label for="dob-display">
+                <i data-lucide="calendar"></i> Date of Birth
+              </label>
+              <div class="custom-datepicker-wrapper" id="custom-datepicker-dob">
+                <div class="datepicker-trigger" id="datepicker-dob-trigger">
+                  <input type="text" id="dob-display" class="input-control" placeholder="mm/dd/yyyy" readonly>
+                  <i data-lucide="calendar" class="datepicker-icon"></i>
+                </div>
+                <div class="datepicker-calendar" id="datepicker-dob-calendar">
+                  <div class="calendar-header">
+                    <button type="button" class="calendar-nav-btn prev-month" id="calendar-prev-month">
+                      <i data-lucide="chevron-left" class="calendar-nav-icon"></i>
+                    </button>
+                    <span class="calendar-month-year" id="calendar-month-year">June 2026</span>
+                    <button type="button" class="calendar-nav-btn next-month" id="calendar-next-month">
+                      <i data-lucide="chevron-right" class="calendar-nav-icon"></i>
+                    </button>
+                  </div>
+                  <div class="calendar-weekdays">
+                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                  </div>
+                  <div class="calendar-days" id="calendar-days-grid"></div>
+                  <div class="calendar-footer">
+                    <button type="button" class="calendar-footer-btn clear-date" id="calendar-clear-date">Clear</button>
+                    <button type="button" class="calendar-footer-btn select-today" id="calendar-select-today">Today</button>
+                  </div>
+                </div>
+                <input type="hidden" id="dob" name="dob">
+              </div>
+            </div>
+
+            <!-- membership start date -->
+            <div class="field-group">
+              <label for="start-date-display">
+                <i data-lucide="calendar"></i> Membership Start Date
+              </label>
+              <div class="custom-datepicker-wrapper" id="custom-datepicker-start">
+                <div class="datepicker-trigger" id="datepicker-start-trigger">
+                  <input type="text" id="start-date-display" class="input-control" placeholder="mm/dd/yyyy" readonly>
+                  <i data-lucide="calendar" class="datepicker-icon"></i>
+                </div>
+                <div class="datepicker-calendar" id="datepicker-start-calendar">
+                  <div class="calendar-header">
+                    <button type="button" class="calendar-nav-btn prev-month" id="start-calendar-prev-month">
+                      <i data-lucide="chevron-left" class="calendar-nav-icon"></i>
+                    </button>
+                    <span class="calendar-month-year" id="start-calendar-month-year">June 2026</span>
+                    <button type="button" class="calendar-nav-btn next-month" id="start-calendar-next-month">
+                      <i data-lucide="chevron-right" class="calendar-nav-icon"></i>
+                    </button>
+                  </div>
+                  <div class="calendar-weekdays">
+                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                  </div>
+                  <div class="calendar-days" id="start-calendar-days-grid"></div>
+                  <div class="calendar-footer">
+                    <button type="button" class="calendar-footer-btn clear-date" id="start-calendar-clear-date">Clear</button>
+                    <button type="button" class="calendar-footer-btn select-today" id="start-calendar-select-today">Today</button>
+                  </div>
+                </div>
+                <input type="hidden" id="membership_start" name="membership_start">
+              </div>
+            </div>
+
+            <!-- membership expiry date -->
+            <div class="field-group">
+              <label for="expiry-date-display">
+                <i data-lucide="calendar-check-2"></i> Membership Expiry Date
+              </label>
+              <div class="custom-datepicker-wrapper" id="custom-datepicker-expiry">
+                <div class="datepicker-trigger" id="datepicker-expiry-trigger">
+                  <input type="text" id="expiry-date-display" class="input-control" placeholder="mm/dd/yyyy" readonly>
+                  <i data-lucide="calendar-check-2" class="datepicker-icon"></i>
+                </div>
+                <div class="datepicker-calendar" id="datepicker-expiry-calendar">
+                  <div class="calendar-header">
+                    <button type="button" class="calendar-nav-btn prev-month" id="expiry-calendar-prev-month">
+                      <i data-lucide="chevron-left" class="calendar-nav-icon"></i>
+                    </button>
+                    <span class="calendar-month-year" id="expiry-calendar-month-year">June 2026</span>
+                    <button type="button" class="calendar-nav-btn next-month" id="expiry-calendar-next-month">
+                      <i data-lucide="chevron-right" class="calendar-nav-icon"></i>
+                    </button>
+                  </div>
+                  <div class="calendar-weekdays">
+                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                  </div>
+                  <div class="calendar-days" id="expiry-calendar-days-grid"></div>
+                  <div class="calendar-footer">
+                    <button type="button" class="calendar-footer-btn clear-date" id="expiry-calendar-clear-date">Clear</button>
+                    <button type="button" class="calendar-footer-btn select-today" id="expiry-calendar-select-today">Today</button>
+                  </div>
+                </div>
+                <input type="hidden" id="membership_expiry" name="membership_expiry">
+              </div>
+            </div>
+
+
+            <!-- Section 3: Preferences & Security Config -->
+            <div class="form-section">
+              <h3 class="form-section-title">
+                <i data-lucide="sliders"></i>
+                Preferences & Bounds
+              </h3>
+            </div>
+
+            <!-- radio -->
+            <div class="field-group full-width">
+              <label><i data-lucide="shield-check"></i> Membership Tier *</label>
+              <div class="radio-group">
+                <label class="custom-radio">
+                  <input type="radio" name="tier" value="Standard" checked>
+                  <span class="radiomark"></span>
+                  <span>Standard</span>
+                </label>
+                <label class="custom-radio">
+                  <input type="radio" name="tier" value="Faculty">
+                  <span class="radiomark"></span>
+                  <span>Faculty</span>
+                </label>
+                <label class="custom-radio">
+                  <input type="radio" name="tier" value="Premium">
+                  <span class="radiomark"></span>
+                  <span>Premium</span>
+                </label>
+                <label class="custom-radio">
+                  <input type="radio" name="tier" value="VIP">
+                  <span class="radiomark"></span>
+                  <span>VIP Special</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- color -->
+            <div class="field-group">
+              <label for="card_theme">
+                <i data-lucide="palette"></i> Card Theme Color
+              </label>
+              <div class="color-picker-container" id="color-picker-trigger">
+                <div class="color-picker-wrapper">
+                  <input type="color" id="card_theme" name="card_theme" class="input-color" value="#8b5cf6">
+                </div>
+                <span class="color-picker-value" id="color-hex-label">#8b5cf6</span>
+              </div>
+            </div>
+
+            <!-- range -->
+            <div class="field-group">
+              <label for="borrow_limit">
+                <i data-lucide="book-open"></i> Max Borrow Limit
+              </label>
+              <div class="range-slider-wrapper" style="display: flex; flex-direction: column; align-items: stretch; gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 1rem; width: 100%;">
+                  <input type="range" id="borrow_limit" name="borrow_limit" class="range-slider" min="1" max="25" value="5">
+                  <span class="range-value" id="borrow-limit-val">5</span>
+                </div>
+                <div class="slider-scale-ticks" id="slider-ticks">
+                  <span class="tick" data-value="1">1</span>
+                  <span class="tick" data-value="5">5</span>
+                  <span class="tick" data-value="10">10</span>
+                  <span class="tick" data-value="15">15</span>
+                  <span class="tick" data-value="20">20</span>
+                  <span class="tick" data-value="25">25</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- select -->
+            <div class="field-group">
+              <label for="custom-select-trigger-branch">
+                <i data-lucide="map-pin"></i> Designated Branch
+              </label>
+              <div class="custom-select-wrapper" id="custom-select-branch">
+                <div class="custom-select-trigger" id="custom-select-trigger-branch">
+                  <span id="custom-select-value-branch">Central Library HQ</span>
+                  <i data-lucide="chevron-down" class="select-arrow-icon"></i>
+                </div>
+                <div class="custom-select-options" id="custom-select-options-branch">
+                  <div class="custom-option selected" data-value="Central Library">Central Library HQ</div>
+                  <div class="custom-option" data-value="Engineering & IT">Engineering & IT Branch</div>
+                  <div class="custom-option" data-value="Medical Sciences">Medical Sciences Library</div>
+                  <div class="custom-option" data-value="Humanities & Arts">Humanities & Arts Wing</div>
+                </div>
+                <select id="branch" name="branch" style="display: none;">
+                  <option value="Central Library" selected>Central Library HQ</option>
+                  <option value="Engineering & IT">Engineering & IT Branch</option>
+                  <option value="Medical Sciences">Medical Sciences Library</option>
+                  <option value="Humanities & Arts">Humanities & Arts Wing</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- search (Interest tags search demo) -->
+            <div class="field-group">
+              <label for="search_interests">
+                <i data-lucide="search"></i> Category Filter Tags
+              </label>
+              <div class="search-wrapper">
+                <input type="search" id="search_interests" class="input-control" placeholder="Search genres (e.g. Science)">
+                <i data-lucide="hash"></i>
+              </div>
+            </div>
+
+            <!-- checkbox -->
+            <div class="field-group full-width">
+              <label><i data-lucide="bookmark"></i> Literature Genres of Interest</label>
+              <div class="checkbox-group" id="genre-checkbox-container">
+                <label class="custom-checkbox">
+                  <input type="checkbox" name="genres" value="Fiction" checked>
+                  <span class="checkmark"></span>
+                  <span>Fiction</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" name="genres" value="Science">
+                  <span class="checkmark"></span>
+                  <span>Science</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" name="genres" value="Biography">
+                  <span class="checkmark"></span>
+                  <span>Biography</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" name="genres" value="History">
+                  <span class="checkmark"></span>
+                  <span>History</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" name="genres" value="Technology">
+                  <span class="checkmark"></span>
+                  <span>Tech</span>
+                </label>
+              </div>
+            </div>
+
+
+            <!-- Section 4: Bio / Terms -->
+            <div class="form-section">
+              <h3 class="form-section-title">
+                <i data-lucide="file-text"></i>
+                Verify & Terms
+              </h3>
+            </div>
+
+            <!-- textarea -->
+            <div class="field-group full-width">
+              <label for="address">
+                <i data-lucide="home"></i> Residential Address / Bio Note
+              </label>
+              <textarea id="address" name="address" class="input-control" placeholder="Enter physical mailing address or note special academic clearance status..."></textarea>
+            </div>
+
+            <!-- Terms checkbox -->
+            <div class="field-group full-width">
+              <label class="custom-checkbox" style="align-items: flex-start; padding: 0.75rem 1rem;">
+                <input type="checkbox" id="agree_terms" name="agree_terms" required>
+                <span class="checkmark" style="margin-top: 2px;"></span>
+                <span style="line-height: 1.4; font-size: 0.82rem;">
+                  I hereby confirm the accuracy of all submitted credentials, and pledge to adhere to LMS borrowing limits and intellectual property policies. *
+                </span>
+              </label>
+            </div>
+
+            <!-- buttons (Reset & Submit) -->
+            <div class="form-actions">
+              <!-- reset button -->
+              <button type="reset" class="btn btn-secondary" id="reset-form-btn">
+                <i data-lucide="rotate-ccw" class="btn-icon"></i>
+                <span>Reset</span>
+              </button>
+              
+              <!-- submit button -->
+              <button type="submit" class="btn btn-primary" id="submit-form-btn">
+                <i data-lucide="check-circle-2" class="btn-icon"></i>
+                <div class="btn-spinner"></div>
+                <span>Create Member</span>
+              </button>
+            </div>
+
+          </div>
+        </form>
+      </section>
+
+      <!-- Right Column: Live Holographic Preview Card -->
+      <section class="preview-container">
+        <div class="preview-title">
+          <i data-lucide="id-card"></i>
+          <span>Live Digital ID Card</span>
+        </div>
+
+        <div class="card-perspective" id="card-perspective">
+          <div class="library-card" id="library-id-card">
+            <!-- Floating glows inside the card -->
+            <div class="library-card-glow"></div>
+
+            <div class="card-header">
+              <div class="card-logo">
+                <i data-lucide="book-open"></i>
+                <span class="card-logo-text">METRO LMS</span>
+              </div>
+              <div class="card-type" id="preview-tier">Standard</div>
+            </div>
+
+            <div class="card-body">
+              <div class="card-avatar-container" id="preview-avatar-container">
+                <i data-lucide="user" class="card-avatar-placeholder" id="preview-avatar-icon"></i>
+                <img src="" alt="Avatar" class="card-avatar" id="preview-avatar" style="display: none;">
+              </div>
+              
+              <div class="card-info">
+                <div class="card-name" id="preview-name">Ayon Debnath</div>
+                <div class="card-email" id="preview-email">username@domain.com</div>
+                <div class="card-tel" id="preview-phone">+1 555-0199</div>
+                
+                <div class="card-meta-row">
+                  <div>LIMIT: <span id="preview-limit" style="font-weight:700;">5 BOOKS</span></div>
+                  <div>TERM: <span id="preview-term" style="font-weight:700;">DEC 2026</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <div class="card-id-block">
+                <span class="card-id-label">Membership Key</span>
+                <span class="card-id-number" id="preview-card-key">LMS-4820-91B</span>
+              </div>
+              
+              <!-- Simulated barcode -->
+              <div class="card-barcode-container">
+                <svg class="barcode-svg" id="barcode-elem" viewBox="0 0 100 20" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Barcode stripes generated dynamically in JS or rendered as solid blocks -->
+                  <rect x="0" y="0" width="3" height="20" />
+                  <rect x="5" y="0" width="1" height="20" />
+                  <rect x="8" y="0" width="2" height="20" />
+                  <rect x="12" y="0" width="4" height="20" />
+                  <rect x="18" y="0" width="1" height="20" />
+                  <rect x="21" y="0" width="3" height="20" />
+                  <rect x="26" y="0" width="2" height="20" />
+                  <rect x="30" y="0" width="1" height="20" />
+                  <rect x="33" y="0" width="4" height="20" />
+                  <rect x="39" y="0" width="2" height="20" />
+                  <rect x="43" y="0" width="1" height="20" />
+                  <rect x="46" y="0" width="3" height="20" />
+                  <rect x="51" y="0" width="2" height="20" />
+                  <rect x="55" y="0" width="1" height="20" />
+                  <rect x="58" y="0" width="4" height="20" />
+                  <rect x="64" y="0" width="1" height="20" />
+                  <rect x="67" y="0" width="3" height="20" />
+                  <rect x="72" y="0" width="2" height="20" />
+                  <rect x="76" y="0" width="1" height="20" />
+                  <rect x="79" y="0" width="4" height="20" />
+                  <rect x="85" y="0" width="2" height="20" />
+                  <rect x="89" y="0" width="1" height="20" />
+                  <rect x="92" y="0" width="3" height="20" />
+                  <rect x="97" y="0" width="3" height="20" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-instructions">
+          <h4>
+            <i data-lucide="info"></i>
+            Holographic Interactions
+          </h4>
+          <p>Hover and move your mouse over the card preview to test the immersive 3D tilting and dynamic light reflection.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Success Toast Alert -->
+  <div class="toast-notification" id="success-toast">
+    <i data-lucide="check-circle"></i>
+    <div class="toast-content">
+      <span class="toast-title">Member Successfully Saved</span>
+      <span class="toast-desc" id="toast-message">The new credentials have been locked to LMS database.</span>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
