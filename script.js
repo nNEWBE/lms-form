@@ -968,8 +968,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCloseShareModal = document.getElementById('btn-close-share-modal');
   const shareLinkUrl = document.getElementById('share-link-url');
   const btnCopyShareLink = document.getElementById('btn-copy-share-link');
-  const shareCaption = document.getElementById('share-caption');
-  const shareCaptionCounter = document.getElementById('share-caption-counter');
+  let currentShareCaption = '';
 
   const shareFb = document.getElementById('share-fb');
   const shareTw = document.getElementById('share-tw');
@@ -977,19 +976,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const shareWa = document.getElementById('share-wa');
   const shareMsg = document.getElementById('share-msg');
   const shareDiscord = document.getElementById('share-discord');
-
-  // Character Limit Counter Helper
-  function updateCharCounter() {
-    if (shareCaption && shareCaptionCounter) {
-      const len = shareCaption.value.length;
-      shareCaptionCounter.textContent = `${len} / 280`;
-      if (len >= 280) {
-        shareCaptionCounter.classList.add('limit-reached');
-      } else {
-        shareCaptionCounter.classList.remove('limit-reached');
-      }
-    }
-  }
 
   // Fix OG image meta tags to use absolute URL at runtime (needed for GitHub Pages)
   (function fixOgImageUrls() {
@@ -1050,28 +1036,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const tierVal = previewTier.querySelector('span') ? previewTier.querySelector('span').textContent : 'Standard';
       const defaultCaption = `🎓 Check out my AETHER LMS Digital Library Card!\n\n👤 ${memberName} | ${deptVal} | ${tierVal} Member\n📚 Borrow Limit: ${previewLimit.textContent} | Valid: ${previewTerm.textContent}\n🔑 Card Key: ${previewCardKey.textContent}`;
       
-      if (shareCaption) {
-        shareCaption.value = defaultCaption;
-      }
+      currentShareCaption = defaultCaption;
 
       // Build initial social URLs
       updateSocialShareUrls(finalShareUrl, defaultCaption);
 
-      // Update character counter
-      updateCharCounter();
-
       // Open Modal
       shareModal.classList.add('open');
-    });
-  }
-
-  // Update social URLs live when caption is edited
-  if (shareCaption) {
-    shareCaption.addEventListener('input', () => {
-      const currentLink = shareLinkUrl.value;
-      const currentCaption = shareCaption.value;
-      updateSocialShareUrls(currentLink, currentCaption);
-      updateCharCounter();
     });
   }
 
@@ -1092,9 +1063,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnCopyShareLink) {
     btnCopyShareLink.addEventListener('click', () => {
       // Copy caption + link together for a complete sharing experience
-      const captionText = shareCaption ? shareCaption.value : '';
-      const linkText = shareLinkUrl.value;
-      const fullCopyText = captionText ? `${captionText}\n\n${linkText}` : linkText;
+      const fullCopyText = currentShareCaption ? `${currentShareCaption}\n\n${shareLinkUrl.value}` : shareLinkUrl.value;
 
       navigator.clipboard.writeText(fullCopyText).then(() => {
         btnCopyShareLink.innerHTML = `<i data-lucide="check"></i><span>Copied!</span>`;
@@ -1116,9 +1085,7 @@ document.addEventListener('DOMContentLoaded', () => {
     shareDiscord.addEventListener('click', (e) => {
       e.preventDefault();
       
-      const captionText = shareCaption ? shareCaption.value : '';
-      const linkText = shareLinkUrl.value;
-      const fullCopyText = captionText ? `${captionText}\n\n${linkText}` : linkText;
+      const fullCopyText = currentShareCaption ? `${currentShareCaption}\n\n${shareLinkUrl.value}` : shareLinkUrl.value;
 
       navigator.clipboard.writeText(fullCopyText).then(() => {
         // Show Success Toast Notification for copy confirmation
