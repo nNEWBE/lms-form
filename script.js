@@ -201,6 +201,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const previewAvatar = document.getElementById('preview-avatar');
   const previewAvatarIcon = document.getElementById('preview-avatar-icon');
 
+  if (previewAvatar) {
+    previewAvatar.addEventListener('error', () => {
+      console.error("Avatar failed to load. Configured src URL was:", previewAvatar.src);
+    });
+  }
+
   // Reusable Custom Select Setup Helper
   function setupCustomSelect({
     wrapperId,
@@ -1677,6 +1683,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Populate avatar
         if (decodedData.av) {
           if (previewAvatar) {
+            console.log("checkSharedLink: Raw avatar data from payload =", decodedData.av);
             let avatarSrc = decodedData.av;
             // Decode backward compatible raw base64 or construct secure Cloudinary CDN url
             if (!avatarSrc.startsWith('http://') && !avatarSrc.startsWith('https://') && !avatarSrc.includes('lms_avatars/') && !avatarSrc.includes('lms-avatars/')) {
@@ -1685,6 +1692,7 @@ document.addEventListener('DOMContentLoaded', () => {
               const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
               avatarSrc = `https://res.cloudinary.com/${cloudName}/image/upload/${avatarSrc}`;
             }
+            console.log("checkSharedLink: Final constructed avatar URL =", avatarSrc);
             previewAvatar.src = avatarSrc;
             previewAvatar.style.display = 'block';
           }
