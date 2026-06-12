@@ -34,6 +34,7 @@
   animation: theme-circle-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   clip-path: circle(0% at var(--ripple-x, 50%) var(--ripple-y, 50%));
 }
+
 :root[data-theme-transitioning="to-light"]::view-transition-old(root) {
   animation: none;
   z-index: -1;
@@ -43,14 +44,20 @@
   animation: theme-circle-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   clip-path: circle(0% at var(--ripple-x, 50%) var(--ripple-y, 50%));
 }
+
 :root[data-theme-transitioning="to-dark"]::view-transition-old(root) {
   animation: none;
   z-index: -1;
 }
 
 @keyframes theme-circle-in {
-  0%   { clip-path: circle(0%   at var(--ripple-x, 50%) var(--ripple-y, 50%)); }
-  100% { clip-path: circle(150% at var(--ripple-x, 50%) var(--ripple-y, 50%)); }
+  0% {
+    clip-path: circle(0% at var(--ripple-x, 50%) var(--ripple-y, 50%));
+  }
+
+  100% {
+    clip-path: circle(150% at var(--ripple-x, 50%) var(--ripple-y, 50%));
+  }
 }
 
 .theme-toggle.ripple-active {
@@ -58,10 +65,21 @@
 }
 
 @keyframes toggle-btn-pop {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.35); }
-  70%  { transform: scale(0.9); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.35);
+  }
+
+  70% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .required-asterisk {
@@ -293,17 +311,19 @@ body.light-mode .nav-icon-btn:hover {
 body.light-mode .skel-rail {
   background-image: repeating-linear-gradient(-45deg,
       transparent 0px,
-      transparent 18px,
-      rgba(0, 0, 0, 0.06) 18px,
-      rgba(0, 0, 0, 0.06) 19px);
+      transparent 4.2px,
+      #000 4.8px,
+      #000 6.3px,
+      transparent 6.9px,
+      transparent 10px);
 }
 
 body.light-mode .skel-rail-left {
-  border-right-color: rgba(0, 0, 0, 0.06);
+  border-right-color: #000;
 }
 
 body.light-mode .skel-rail-right {
-  border-left-color: rgba(0, 0, 0, 0.06);
+  border-left-color: #000;
 }
 
 body.light-mode header h1 {
@@ -543,13 +563,15 @@ body.light-mode .library-card {
 }
 
 body.light-mode .library-card-side {
-  background: #ffffff;
+  background-color: #ffffff;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+  background-size: 16px 16px;
   border-color: rgba(0, 0, 0, 0.08);
   box-shadow: none;
 }
 
 body.light-mode .library-card-side.card-back {
-  background: #fafafa;
+  background-color: #fafafa;
   border-color: rgba(0, 0, 0, 0.08);
 }
 
@@ -631,7 +653,7 @@ body.light-mode .card-back-address-block .addr-value {
 
 body.light-mode .qr-container {
   background: #12131a;
-  
+
   border-color: rgba(0, 0, 0, 0.08);
 }
 
@@ -841,21 +863,24 @@ body.light-mode .calendar-nav-btn:hover {
   width: 40px;
   pointer-events: none;
   z-index: 1;
+  opacity: 0.09;
   background-image: repeating-linear-gradient(-45deg,
       transparent 0px,
-      transparent 18px,
-      rgba(255, 255, 255, 0.09) 18px,
-      rgba(255, 255, 255, 0.09) 19px);
+      transparent 4.2px,
+      #fff 4.8px,
+      #fff 6.3px,
+      transparent 6.9px,
+      transparent 10px);
 }
 
 .skel-rail-left {
   left: 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid #fff;
 }
 
 .skel-rail-right {
   right: 0;
-  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 1px solid #fff;
 }
 
 @media (max-width: 1400px) {
@@ -1489,9 +1514,9 @@ input[type="file"].file-input {
 
 .select-wrapper::after {
   content: '\e9b2';
-  
+
   font-family: 'lucide' !important;
-  
+
   content: '▼';
   font-size: 0.7rem;
   position: absolute;
@@ -1605,7 +1630,7 @@ body.light-mode .placeholder-style {
 .select-search-container {
   position: sticky;
   top: -4px;
-  
+
   z-index: 10;
   background: #12131a;
   padding: 6px 8px;
@@ -2240,7 +2265,7 @@ textarea.input-control {
   grid-column: span 2;
   display: flex;
   justify-content: flex-end;
-  
+
   gap: 0.75rem;
   margin-top: 0.8rem;
   padding-top: 0.75rem;
@@ -2254,7 +2279,7 @@ textarea.input-control {
 
   .btn {
     flex: 1;
-    
+
   }
 }
 
@@ -2292,7 +2317,7 @@ textarea.input-control {
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
   outline: none;
   min-width: 120px;
-  
+
 }
 
 .btn i,
@@ -2430,7 +2455,9 @@ textarea.input-control {
   border-radius: clamp(10px, 3.5cqw, 16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: clamp(0.75rem, 4.5cqw, 1.25rem);
-  background: #08090f;
+  background-color: #08090f;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 16px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -2446,8 +2473,7 @@ textarea.input-control {
 
 .library-card-side.card-back {
   transform: rotateY(180deg);
-  background: #0a0b12;
-  
+  background-color: #0a0b12;
 }
 
 .library-card-side::after {
@@ -2849,14 +2875,14 @@ textarea.input-control {
   box-sizing: border-box;
   overflow-y: auto;
   scrollbar-width: none;
-  
+
   -ms-overflow-style: none;
-  
+
 }
 
 .share-caption-input::-webkit-scrollbar {
   display: none;
-  
+
 }
 
 .share-caption-input::placeholder {
@@ -3349,7 +3375,7 @@ textarea.input-control {
   flex-direction: column;
   gap: 0.25rem;
   min-width: 0;
-  
+
 }
 
 .card-name {
@@ -4020,6 +4046,7 @@ body.light-mode .custom-radio-card:hover .radiomark {
     flex-direction: row;
     gap: 0.4rem;
   }
+
   .custom-radio-card {
     flex: 1;
   }
@@ -4076,7 +4103,7 @@ body.light-mode #admin-details-modal h4 {
   border-bottom-color: rgba(0, 0, 0, 0.08) !important;
 }
 
-body.light-mode #admin-details-modal .share-modal-body > div:first-child {
+body.light-mode #admin-details-modal .share-modal-body>div:first-child {
   background: rgba(0, 0, 0, 0.02) !important;
   border-color: rgba(0, 0, 0, 0.08) !important;
 }

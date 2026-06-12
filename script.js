@@ -582,9 +582,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const toastMessage = document.getElementById('toast-message');
 
   const DEFAULTS = {
-    name: 'Shuvo Chandra Debnath',
-    email: 'username@domain.com',
-    phone: '+1 555-0199',
+    name: 'Your User Name',
+    email: 'example@domain.com',
+    phone: '+00 000-0000',
     tier: 'Standard',
     limit: 1,
     term: 'DEC 2026',
@@ -851,7 +851,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isViewingShared()) return;
     const file = e.target.files[0];
     if (file) {
-      const maxSize = 1 * 1024 * 1024; 
+      const maxSize = 1048576;
       if (file.size > maxSize) {
         showToast('File Too Large', 'Student photo must be less than 1MB.', true);
         inputAvatar.value = '';
@@ -860,47 +860,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const reader = new FileReader();
       reader.onload = (event) => {
-        
         previewAvatar.src = event.target.result;
         previewAvatar.style.display = 'block';
         previewAvatarIcon.style.display = 'none';
-
         dropzoneAvatar.classList.add('has-file');
-        labelFile.textContent = 'Compressing image...';
-
-        if (btnSubmit) {
-          btnSubmit.disabled = true;
-          btnSubmit.style.opacity = '0.6';
-          btnSubmit.innerHTML = `<span>Uploading avatar...</span>`;
-        }
-
-        compressAvatar(event.target.result, async (base64) => {
+        labelFile.textContent = 'Compressing...';
+        compressAvatar(event.target.result, (base64) => {
           compressedAvatarBase64 = base64;
-          labelFile.textContent = 'Uploading to Cloudinary...';
-
-          try {
-            const hostedUrl = await uploadToCloudinary(base64);
-            cloudinaryAvatarUrl = hostedUrl;
-
-            previewAvatar.src = hostedUrl;
-
-            labelFile.textContent = file.name;
-            showToast('Avatar Hosted', 'Image successfully uploaded to Cloudinary.');
-          } catch (error) {
-            console.error('Cloudinary upload failed:', error);
-            cloudinaryAvatarUrl = '';
-            labelFile.textContent = 'Using local preview fallback';
-            showToast('Cloudinary Offline', 'Upload failed. Sharing payload will fall back to local compression.', true);
-          } finally {
-            if (btnSubmit) {
-              btnSubmit.disabled = false;
-              btnSubmit.style.opacity = '';
-              btnSubmit.innerHTML = `<i data-lucide="check-circle-2" class="btn-icon"></i><span>Generate Card & Register</span>`;
-              if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-              }
-            }
-          }
+          labelFile.textContent = file.name;
         });
       };
       reader.readAsDataURL(file);
@@ -947,56 +914,35 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   let cloudinaryEnrollmentUrl = '';
+  let tempEnrollmentBase64 = '';
 
   if (inputEnrollment && dropzoneEnrollment && labelEnrollmentFile) {
-    inputEnrollment.addEventListener('change', async (e) => {
+    inputEnrollment.addEventListener('change', (e) => {
       if (isViewingShared()) return;
       const file = e.target.files[0];
       if (file) {
-        const maxSize = 1 * 1024 * 1024; 
+        const maxSize = 1048576; 
         if (file.size > maxSize) {
           showToast('File Too Large', 'Enrollment proof must be less than 1MB.', true);
           inputEnrollment.value = '';
           cloudinaryEnrollmentUrl = '';
+          tempEnrollmentBase64 = '';
           dropzoneEnrollment.classList.remove('has-file');
           labelEnrollmentFile.textContent = 'Choose PDF or Image';
           return;
         }
         dropzoneEnrollment.classList.add('has-file');
-        labelEnrollmentFile.textContent = 'Uploading to Cloudinary...';
-
-        if (btnSubmit) {
-          btnSubmit.disabled = true;
-          btnSubmit.style.opacity = '0.6';
-          btnSubmit.innerHTML = `<span>Uploading document...</span>`;
-        }
+        labelEnrollmentFile.textContent = 'Document selected';
 
         const reader = new FileReader();
-        reader.onload = async (event) => {
-          try {
-            const hostedUrl = await uploadToCloudinary(event.target.result);
-            cloudinaryEnrollmentUrl = hostedUrl;
-            labelEnrollmentFile.textContent = file.name;
-            showToast('Document Uploaded', 'Enrollment proof successfully uploaded.');
-          } catch (error) {
-            console.error('Cloudinary enrollment upload failed:', error);
-            cloudinaryEnrollmentUrl = '';
-            labelEnrollmentFile.textContent = 'Upload failed. Try again.';
-            showToast('Upload Failed', 'Failed to upload enrollment proof.', true);
-          } finally {
-            if (btnSubmit) {
-              btnSubmit.disabled = false;
-              btnSubmit.style.opacity = '';
-              btnSubmit.innerHTML = `<i data-lucide="check-circle-2" class="btn-icon"></i><span>Create Member</span>`;
-              if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-              }
-            }
-          }
+        reader.onload = (event) => {
+          tempEnrollmentBase64 = event.target.result;
+          labelEnrollmentFile.textContent = file.name;
         };
         reader.readAsDataURL(file);
       } else {
         cloudinaryEnrollmentUrl = '';
+        tempEnrollmentBase64 = '';
         dropzoneEnrollment.classList.remove('has-file');
         labelEnrollmentFile.textContent = 'Choose PDF or Image';
       }
@@ -1147,15 +1093,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (preferredContactTrigger) preferredContactTrigger.style.borderColor = '';
 
       const previewDeptEl = document.getElementById('preview-dept');
-      if (previewDeptEl) previewDeptEl.textContent = 'DEPT';
+      if (previewDeptEl) previewDeptEl.textContent = 'DEPT N/A';
       const previewSemEl = document.getElementById('preview-semester');
-      if (previewSemEl) previewSemEl.textContent = 'SEMESTER';
+      if (previewSemEl) previewSemEl.textContent = 'SEMESTER N/A';
 
       if (inputBatch) {
         inputBatch.value = '';
       }
       const previewBatchEl = document.getElementById('preview-batch');
-      if (previewBatchEl) previewBatchEl.textContent = 'BATCH 60';
+      if (previewBatchEl) previewBatchEl.textContent = 'BATCH N/A';
 
       if (dropzoneEnrollment) {
         dropzoneEnrollment.classList.remove('has-file');
@@ -1164,6 +1110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         labelEnrollmentFile.textContent = 'Choose PDF or Image';
       }
       cloudinaryEnrollmentUrl = '';
+      tempEnrollmentBase64 = '';
 
       previewTier.className = 'card-type tier-standard';
       previewTier.innerHTML = `<i data-lucide="shield"></i><span>Standard</span>`;
@@ -1222,7 +1169,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnSubmit.classList.add('is-loading');
 
-    setTimeout(() => {
+    setTimeout(async () => {
+      if (compressedAvatarBase64) {
+        try {
+          cloudinaryAvatarUrl = await uploadToCloudinary(compressedAvatarBase64);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+      if (tempEnrollmentBase64) {
+        try {
+          cloudinaryEnrollmentUrl = await uploadToCloudinary(tempEnrollmentBase64);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
       btnSubmit.classList.remove('is-loading');
 
       const first = inputFirstName ? inputFirstName.value.trim() : '';
@@ -1411,7 +1373,7 @@ document.addEventListener('DOMContentLoaded', () => {
     onChange: (val) => {
       if (isViewingShared()) return;
       const el = document.getElementById('preview-dept');
-      if (el) el.textContent = val ? val.toUpperCase() : 'DEPT';
+      if (el) el.textContent = val ? val.toUpperCase() : 'DEPT N/A';
     }
   });
 
@@ -1428,7 +1390,7 @@ document.addEventListener('DOMContentLoaded', () => {
     onChange: (val) => {
       if (isViewingShared()) return;
       const el = document.getElementById('preview-semester');
-      if (el) el.textContent = val ? val.toUpperCase() : 'SEMESTER';
+      if (el) el.textContent = val ? val.toUpperCase() : 'SEMESTER N/A';
     }
   });
 
@@ -1516,7 +1478,7 @@ document.addEventListener('DOMContentLoaded', () => {
     inputBatch.addEventListener('input', (e) => {
       if (isViewingShared()) return;
       const el = document.getElementById('preview-batch');
-      if (el) el.textContent = e.target.value.trim().toUpperCase() || 'BATCH 60';
+      if (el) el.textContent = e.target.value.trim().toUpperCase() || 'BATCH N/A';
     });
   }
 
@@ -1525,7 +1487,7 @@ document.addEventListener('DOMContentLoaded', () => {
     inputSemester.addEventListener('input', (e) => {
       if (isViewingShared()) return;
       const el = document.getElementById('preview-semester');
-      if (el) el.textContent = e.target.value.trim().toUpperCase() || 'SEMESTER';
+      if (el) el.textContent = e.target.value.trim().toUpperCase() || 'SEMESTER N/A';
     });
   }
 
@@ -1943,9 +1905,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
           decodedData = {
             n: parsed[0] || DEFAULTS.name,
-            d: parsed[1] || 'DEPT',
-            b: parsed[2] ? `Batch ${parsed[2]}` : 'Batch 60',
-            s: parsed[3] ? (semRevMap[parsed[3]] || parsed[3]) : 'SEMESTER',
+            d: parsed[1] || 'DEPT N/A',
+            b: parsed[2] ? `Batch ${parsed[2]}` : 'BATCH N/A',
+            s: parsed[3] ? (semRevMap[parsed[3]] || parsed[3]) : 'SEMESTER N/A',
             e: parsed[4] || DEFAULTS.email,
             p: parsed[5] || DEFAULTS.phone,
             l: limitText,
@@ -1957,14 +1919,13 @@ document.addEventListener('DOMContentLoaded', () => {
             av: parsed[12] || ''
           };
         } else {
-          
           const parsed = JSON.parse(decodedString);
           if (Array.isArray(parsed)) {
             decodedData = {
               n: parsed[0] || DEFAULTS.name,
-              d: parsed[1] || 'DEPT',
-              b: parsed[2] || 'Batch 60',
-              s: parsed[3] || 'SEMESTER',
+              d: parsed[1] || 'DEPT N/A',
+              b: parsed[2] || 'BATCH N/A',
+              s: parsed[3] || 'SEMESTER N/A',
               e: parsed[4] || DEFAULTS.email,
               p: parsed[5] || DEFAULTS.phone,
                l: parsed[6] || `${DEFAULTS.limit} BOOK${DEFAULTS.limit > 1 ? 'S' : ''}`,
@@ -1977,9 +1938,9 @@ document.addEventListener('DOMContentLoaded', () => {
           } else {
             decodedData = {
               n: parsed.n || DEFAULTS.name,
-              d: parsed.d || 'DEPT',
-              b: parsed.b || 'Batch 60',
-              s: parsed.s || 'SEMESTER',
+              d: parsed.d || 'DEPT N/A',
+              b: parsed.b || 'BATCH N/A',
+              s: parsed.s || 'SEMESTER N/A',
               e: parsed.e || DEFAULTS.email,
               p: parsed.p || DEFAULTS.phone,
                l: parsed.l || `${DEFAULTS.limit} BOOK${DEFAULTS.limit > 1 ? 'S' : ''}`,
