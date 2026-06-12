@@ -475,7 +475,7 @@ body.light-mode .library-card {
 body.light-mode .library-card-side {
   background: #ffffff;
   border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+  box-shadow: none;
 }
 
 body.light-mode .library-card-side.card-back {
@@ -792,7 +792,7 @@ body.light-mode .calendar-nav-btn:hover {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 1;
+  z-index: -100;
 }
 
 .beam-path {
@@ -815,6 +815,33 @@ body.light-mode .calendar-nav-btn:hover {
   animation: flow-beam-right 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
+#beam-path-top {
+  stroke: url(#beam-grad-left);
+  stroke-width: 2.5;
+  stroke-dasharray: 80 900;
+  animation: flow-beam-top 9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: 1.5s;
+  filter: drop-shadow(0 0 6px var(--accent-primary));
+}
+
+#beam-path-center {
+  stroke: url(#beam-grad-cyan);
+  stroke-width: 3;
+  stroke-dasharray: 100 1000;
+  animation: flow-beam-center 11s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: 3s;
+  filter: drop-shadow(0 0 7px var(--accent-secondary));
+}
+
+#beam-path-bottom {
+  stroke: url(#beam-grad-right);
+  stroke-width: 2.8;
+  stroke-dasharray: 90 800;
+  animation: flow-beam-bottom 10s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: 0.5s;
+  filter: drop-shadow(0 0 6px var(--accent-secondary));
+}
+
 @keyframes flow-beam-left {
   0% {
     stroke-dashoffset: 820;
@@ -832,6 +859,36 @@ body.light-mode .calendar-nav-btn:hover {
 
   100% {
     stroke-dashoffset: -820;
+  }
+}
+
+@keyframes flow-beam-top {
+  0% {
+    stroke-dashoffset: 980;
+  }
+
+  100% {
+    stroke-dashoffset: -980;
+  }
+}
+
+@keyframes flow-beam-center {
+  0% {
+    stroke-dashoffset: 1100;
+  }
+
+  100% {
+    stroke-dashoffset: -1100;
+  }
+}
+
+@keyframes flow-beam-bottom {
+  0% {
+    stroke-dashoffset: 890;
+  }
+
+  100% {
+    stroke-dashoffset: -890;
   }
 }
 
@@ -2239,7 +2296,7 @@ textarea.input-control {
   justify-content: space-between;
   overflow: hidden;
   box-sizing: border-box;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
 }
 
 .library-card-side.card-front {

@@ -49,6 +49,12 @@
         <stop offset="60%" stop-color="var(--accent-secondary)" stop-opacity="1" />
         <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.3" />
       </linearGradient>
+
+      <linearGradient id="beam-grad-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="var(--accent-secondary)" stop-opacity="0" />
+        <stop offset="50%" stop-color="var(--accent-secondary)" stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0" />
+      </linearGradient>
     </defs>
     
     <!-- Paths winding towards the container edges -->
@@ -57,6 +63,15 @@
     
     <!-- Right beam enters from top-right, runs towards center-right -->
     <path id="beam-path-right" d="M 1200 50 Q 1100 300, 950 200 T 800 450 L 720 420" class="beam-path" />
+
+    <!-- Top-left to top-right path -->
+    <path id="beam-path-top" d="M 100 -100 Q 400 150, 700 50 T 1300 -50" class="beam-path" />
+
+    <!-- Center-left to bottom-right path -->
+    <path id="beam-path-center" d="M -100 350 Q 500 200, 600 600 T 1400 750" class="beam-path" />
+
+    <!-- Bottom-left to bottom-right path -->
+    <path id="beam-path-bottom" d="M 200 900 Q 600 700, 800 850 T 1200 950" class="beam-path" />
   </svg>
 
   <!-- Technical Schematic Sidebar Rails -->
