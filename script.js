@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Wrap all required asterisks in a styled span dynamically
+  document.querySelectorAll('label').forEach(label => {
+    if (label.innerHTML.includes('*')) {
+      label.innerHTML = label.innerHTML.replace(/\*/g, '<span class="required-asterisk">*</span>');
+    }
+  });
+
   // Initialize Lucide icons safely
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
@@ -12,12 +19,69 @@ document.addEventListener('DOMContentLoaded', () => {
   if (savedTheme === 'light') {
     document.body.classList.add('light-mode');
   }
-  themeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('light-mode');
-    const isLight = document.body.classList.contains('light-mode');
-    localStorage.setItem('lms-theme', isLight ? 'light' : 'dark');
-    if (typeof lucide !== 'undefined') {
-      lucide.createIcons(); // re-render icons after toggle
+  themeToggle.addEventListener('click', (e) => {
+    const isLight = !document.body.classList.contains('light-mode');
+
+    // Get click position relative to viewport for the ripple origin
+    const rect = themeToggle.getBoundingClientRect();
+    const x = Math.round(rect.left + rect.width / 2);
+    const y = Math.round(rect.top + rect.height / 2);
+
+    // Diagonal of the screen = max radius needed
+    const maxR = Math.ceil(
+      Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y))
+    );
+
+    // Expose ripple origin to CSS
+    document.documentElement.style.setProperty('--ripple-x', x + 'px');
+    document.documentElement.style.setProperty('--ripple-y', y + 'px');
+    document.documentElement.style.setProperty('--ripple-r', maxR + 'px');
+    document.documentElement.style.setProperty(
+      '--ripple-color',
+      isLight ? '#f0f1f5' : '#05060b'
+    );
+
+    const doToggle = () => {
+      document.body.classList.toggle('light-mode');
+      localStorage.setItem('lms-theme', isLight ? 'light' : 'dark');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    };
+
+    // View Transitions API (Chrome 111+, Edge 111+)
+    if (document.startViewTransition) {
+      document.documentElement.setAttribute('data-theme-transitioning', isLight ? 'to-light' : 'to-dark');
+      const transition = document.startViewTransition(doToggle);
+      transition.finished.finally(() => {
+        document.documentElement.removeAttribute('data-theme-transitioning');
+      });
+    } else {
+      // Fallback: classic ripple overlay
+      const ripple = document.createElement('div');
+      ripple.id = 'theme-ripple-overlay';
+      ripple.style.cssText = `
+        position: fixed;
+        left: ${x}px;
+        top: ${y}px;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: ${isLight ? '#f0f1f5' : '#05060b'};
+        transform: translate(-50%, -50%);
+        z-index: 99999;
+        pointer-events: none;
+        transition: width 1.0s cubic-bezier(0.22,1,0.36,1), height 1.0s cubic-bezier(0.22,1,0.36,1);
+      `;
+      document.body.appendChild(ripple);
+      requestAnimationFrame(() => {
+        ripple.style.width = (maxR * 2) + 'px';
+        ripple.style.height = (maxR * 2) + 'px';
+      });
+      setTimeout(() => {
+        doToggle();
+        ripple.style.transition = 'opacity 0.35s ease';
+        ripple.style.opacity = '0';
+        setTimeout(() => ripple.remove(), 350);
+      }, 650);
     }
   });
 
@@ -29,8 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Helper to compress and generate the share payload
   function getSharePayload() {
-    const deptValText = document.getElementById('custom-select-value-dept') ? document.getElementById('custom-select-value-dept').textContent : 'DEPT';
-    const semValText = document.getElementById('custom-select-value-semester') ? document.getElementById('custom-select-value-semester').textContent : 'SEMESTER';
+    const deptInput = document.getElementById('department');
+    const deptValText = deptInput ? deptInput.value.trim() : 'DEPT';
+    const semInput = document.getElementById('semester');
+    const semValText = semInput ? semInput.value.trim() : 'SEMESTER';
 
     const semMap = {
       '1st Sem': '1', '2nd Sem': '2', '3rd Sem': '3', '4th Sem': '4', '5th Sem': '5',
@@ -40,10 +106,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Compress URL payload by omitting defaults/placeholders and using a joined control-character separator
     const nameVal = previewName.textContent === DEFAULTS.name ? "" : previewName.textContent;
-    const deptVal = (deptValText === 'DEPT' || deptValText === 'Select Department') ? "" : deptValText;
-    const batchValText = inputBatch ? inputBatch.value : 'Batch 60';
-    const batchVal = batchValText === 'Batch 60' ? "" : batchValText.replace(/Batch\s+/i, '');
-    const semVal = (semValText === 'SEMESTER' || semValText === 'Select Semester') ? "" : (semMap[semValText] || semValText);
+    const deptVal = (deptValText === 'DEPT' || deptValText === 'Select Department' || deptValText === "") ? "" : deptValText;
+    const sessionInput = document.getElementById('admission_session');
+    const batchValText = sessionInput ? sessionInput.value.trim() : 'Batch 60';
+    const batchVal = (batchValText === 'Batch 60' || batchValText === "") ? "" : batchValText.replace(/Batch\s+/i, '');
+    const semVal = (semValText === 'SEMESTER' || semValText === 'Select Semester' || semValText === "") ? "" : (semMap[semValText] || semValText);
     const emailVal = previewEmail.textContent === DEFAULTS.email ? "" : previewEmail.textContent;
     const phoneVal = previewPhone.textContent === DEFAULTS.phone ? "" : previewPhone.textContent;
     const limitValText = previewLimit.textContent;
@@ -102,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     window.addEventListener('resize', resizeHandler);
 
-    const colors = ['#8b5cf6', '#06b6d4', '#ec4899', '#eab308', '#22c55e', '#3b82f6'];
+    const colors = ['#06b6d4', '#8b5cf6', '#ec4899', '#eab308', '#22c55e', '#3b82f6'];
     const particles = [];
 
     // Shoot from bottom corners
@@ -165,7 +232,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Elements - Form Inputs
   const form = document.getElementById('library-member-form');
-  const inputName = document.getElementById('full_name');
+  const inputFirstName = document.getElementById('first_name');
+  const inputLastName = document.getElementById('last_name');
   const inputEmail = document.getElementById('email');
   const inputPhone = document.getElementById('phone');
   const inputPassword = document.getElementById('password');
@@ -173,6 +241,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const dropzoneAvatar = document.getElementById('avatar-dropzone');
   const labelFile = document.getElementById('file-label');
   const inputProfileUrl = document.getElementById('profile_url');
+
+  const inputEnrollment = document.getElementById('enrollment_proof');
+  const dropzoneEnrollment = document.getElementById('enrollment-dropzone');
+  const labelEnrollmentFile = document.getElementById('enrollment-file-label');
 
   const inputDob = document.getElementById('dob');
   const inputMembershipStart = document.getElementById('membership_start');
@@ -183,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const inputBorrowLimit = document.getElementById('borrow_limit');
   const labelLimitValue = document.getElementById('borrow-limit-val');
   const ticksElements = document.querySelectorAll('.slider-scale-ticks .tick');
-  const inputBatch = document.getElementById('batch');
+  const inputBatch = document.getElementById('admission_session'); // Map session to inputBatch for compat
 
   const inputAddress = document.getElementById('address');
   const inputAgree = document.getElementById('agree_terms');
@@ -203,6 +275,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (previewAvatar) {
     previewAvatar.addEventListener('error', () => {
+      const rawSrc = previewAvatar.getAttribute('src');
+      if (!rawSrc || rawSrc === '' || previewAvatar.style.display === 'none') {
+        return;
+      }
       console.error("Avatar failed to load. Configured src URL was:", previewAvatar.src);
       showToast("Avatar Load Failed", "Failed to load: " + previewAvatar.src, true);
     });
@@ -280,6 +356,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const isOpen = wrapper.classList.contains('open');
       closeAllDropdowns();
       if (!isOpen) {
+        const rect = trigger.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const dropdownHeight = 230; // approx max height of dropdown
+        if (spaceBelow < dropdownHeight && rect.top > spaceBelow) {
+          wrapper.classList.add('open-top');
+        } else {
+          wrapper.classList.remove('open-top');
+        }
         wrapper.classList.add('open');
         if (searchInput) {
           searchInput.value = '';
@@ -288,6 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     });
+
 
     // Listen to changes on the hidden select to update the custom UI dynamically
     hiddenSelect.addEventListener('change', () => {
@@ -321,6 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hiddenSelect.dispatchEvent(new Event('input'));
 
         wrapper.classList.remove('open');
+        wrapper.classList.remove('open-top');
       });
     });
 
@@ -384,6 +470,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const isOpen = wrapper.classList.contains('open');
       closeAllDropdowns();
       if (!isOpen) {
+        const rect = trigger.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const dropdownHeight = 330; // approx max height of datepicker calendar
+        if (spaceBelow < dropdownHeight && rect.top > spaceBelow) {
+          wrapper.classList.add('open-top');
+        } else {
+          wrapper.classList.remove('open-top');
+        }
         wrapper.classList.add('open');
         render();
       }
@@ -450,6 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
       hidden.dispatchEvent(new Event('change'));
 
       wrapper.classList.remove('open');
+      wrapper.classList.remove('open-top');
 
       if (onSelect) {
         onSelect(selectedDate);
@@ -476,6 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
       hidden.dispatchEvent(new Event('input'));
       hidden.dispatchEvent(new Event('change'));
       wrapper.classList.remove('open');
+      wrapper.classList.remove('open-top');
       if (onSelect) {
         onSelect(null);
       }
@@ -513,9 +609,9 @@ document.addEventListener('DOMContentLoaded', () => {
     email: 'username@domain.com',
     phone: '+1 555-0199',
     tier: 'Standard',
-    limit: 5,
+    limit: 1,
     term: 'DEC 2026',
-    theme: '#8b5cf6'
+    theme: '#06b6d4'
   };
 
   // Generate a random membership card key on load
@@ -536,10 +632,18 @@ document.addEventListener('DOMContentLoaded', () => {
   generateCardKey();
 
   // Live Syncing Input Handlers
-  inputName.addEventListener('input', (e) => {
+  const updatePreviewName = () => {
     if (isViewingShared()) return;
-    previewName.textContent = e.target.value.trim() || DEFAULTS.name;
-  });
+    const first = inputFirstName ? inputFirstName.value.trim() : '';
+    const last = inputLastName ? inputLastName.value.trim() : '';
+    if (!first && !last) {
+      previewName.textContent = DEFAULTS.name;
+    } else {
+      previewName.textContent = `${first} ${last}`.trim();
+    }
+  };
+  if (inputFirstName) inputFirstName.addEventListener('input', updatePreviewName);
+  if (inputLastName) inputLastName.addEventListener('input', updatePreviewName);
 
   inputEmail.addEventListener('input', (e) => {
     if (isViewingShared()) return;
@@ -640,6 +744,13 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSliderTicks(parseInt(inputBorrowLimit.value));
   updateSliderProgress(inputBorrowLimit);
 
+  // Clear error border on radio select change
+  document.querySelectorAll('input[name="card_status"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      highlightInputError(radio, false);
+    });
+  });
+
   // Sync Expiry Term Date Input (e.g. "2026-12-15" -> "DEC 2026")
   inputMembershipExpiry.addEventListener('input', (e) => {
     if (isViewingShared()) return;
@@ -675,7 +786,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const formData = new FormData();
-    formData.append('file', `data:image/jpeg;base64,${base64Data}`);
+    if (base64Data.startsWith('data:')) {
+      formData.append('file', base64Data);
+    } else {
+      formData.append('file', `data:image/jpeg;base64,${base64Data}`);
+    }
 
     if (uploadPreset) {
       // Unsigned Upload (Safe for public GitHub Pages)
@@ -779,6 +894,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isViewingShared()) return;
     const file = e.target.files[0];
     if (file) {
+      const maxSize = 1 * 1024 * 1024; // 1MB in bytes
+      if (file.size > maxSize) {
+        showToast('File Too Large', 'Student photo must be less than 1MB.', true);
+        inputAvatar.value = '';
+        resetAvatarPreview();
+        return;
+      }
       const reader = new FileReader();
       reader.onload = (event) => {
         // Render local preview instantly for visual feedback
@@ -848,7 +970,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dropzoneAvatar.addEventListener(eventName, (e) => {
       e.preventDefault();
       dropzoneAvatar.style.borderColor = 'var(--accent-secondary)';
-      dropzoneAvatar.style.background = 'rgba(6, 182, 212, 0.04)';
+      dropzoneAvatar.style.background = 'rgba(139, 92, 246, 0.04)';
     }, false);
   });
 
@@ -870,6 +992,92 @@ document.addEventListener('DOMContentLoaded', () => {
       inputAvatar.dispatchEvent(event);
     }
   });
+
+  // Enrollment proof Upload Handler
+  let cloudinaryEnrollmentUrl = '';
+
+  if (inputEnrollment && dropzoneEnrollment && labelEnrollmentFile) {
+    inputEnrollment.addEventListener('change', async (e) => {
+      if (isViewingShared()) return;
+      const file = e.target.files[0];
+      if (file) {
+        const maxSize = 1 * 1024 * 1024; // 1MB in bytes
+        if (file.size > maxSize) {
+          showToast('File Too Large', 'Enrollment proof must be less than 1MB.', true);
+          inputEnrollment.value = '';
+          cloudinaryEnrollmentUrl = '';
+          dropzoneEnrollment.classList.remove('has-file');
+          labelEnrollmentFile.textContent = 'Choose PDF or Image';
+          return;
+        }
+        dropzoneEnrollment.classList.add('has-file');
+        labelEnrollmentFile.textContent = 'Uploading to Cloudinary...';
+
+        // Temporarily disable form submission during cloud upload
+        if (btnSubmit) {
+          btnSubmit.disabled = true;
+          btnSubmit.style.opacity = '0.6';
+          btnSubmit.innerHTML = `<span>Uploading document...</span>`;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          try {
+            const hostedUrl = await uploadToCloudinary(event.target.result);
+            cloudinaryEnrollmentUrl = hostedUrl;
+            labelEnrollmentFile.textContent = file.name;
+            showToast('Document Uploaded', 'Enrollment proof successfully uploaded.');
+          } catch (error) {
+            console.error('Cloudinary enrollment upload failed:', error);
+            cloudinaryEnrollmentUrl = '';
+            labelEnrollmentFile.textContent = 'Upload failed. Try again.';
+            showToast('Upload Failed', 'Failed to upload enrollment proof.', true);
+          } finally {
+            if (btnSubmit) {
+              btnSubmit.disabled = false;
+              btnSubmit.style.opacity = '';
+              btnSubmit.innerHTML = `<i data-lucide="check-circle-2" class="btn-icon"></i><span>Create Member</span>`;
+              if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+              }
+            }
+          }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        cloudinaryEnrollmentUrl = '';
+        dropzoneEnrollment.classList.remove('has-file');
+        labelEnrollmentFile.textContent = 'Choose PDF or Image';
+      }
+    });
+
+    // Drag and drop event listeners for enrollment proof dropzone
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzoneEnrollment.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropzoneEnrollment.style.borderColor = 'var(--accent-secondary)';
+        dropzoneEnrollment.style.background = 'rgba(139, 92, 246, 0.04)';
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzoneEnrollment.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropzoneEnrollment.style.borderColor = '';
+        dropzoneEnrollment.style.background = '';
+      }, false);
+    });
+
+    dropzoneEnrollment.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const file = dt.files[0];
+      if (file) {
+        inputEnrollment.files = dt.files;
+        const event = new Event('change');
+        inputEnrollment.dispatchEvent(event);
+      }
+    });
+  }
 
   // Immersive 3D Tilt & Holographic reflection card calculations
   let isFlipping = false;
@@ -921,7 +1129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     libraryCard.style.transform = `rotateX(0deg) rotateY(${isFlipped ? 180 : 0}deg)`;
     const shineOverlays = libraryCard.querySelectorAll('.library-card-glow');
     shineOverlays.forEach(overlay => {
-      overlay.style.background = `radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)`;
+      overlay.style.background = `radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--user-card-theme, var(--accent-primary)) 8%, transparent) 0%, transparent 50%)`;
     });
   };
 
@@ -946,7 +1154,7 @@ document.addEventListener('DOMContentLoaded', () => {
       previewPhone.textContent = DEFAULTS.phone;
       previewTier.textContent = DEFAULTS.tier;
 
-      previewLimit.textContent = `${DEFAULTS.limit} BOOKS`;
+      previewLimit.textContent = `${DEFAULTS.limit} BOOK${DEFAULTS.limit > 1 ? 'S' : ''}`;
       labelLimitValue.textContent = DEFAULTS.limit;
       updateSliderTicks(DEFAULTS.limit);
       updateSliderProgress(inputBorrowLimit);
@@ -971,12 +1179,36 @@ document.addEventListener('DOMContentLoaded', () => {
       // Reset custom selects
       if (deptSelect) deptSelect.reset();
       if (semesterSelect) semesterSelect.reset();
+      if (degreeLevelSelect) degreeLevelSelect.reset();
+      if (campusSelect) campusSelect.reset();
+      if (genderSelect) genderSelect.reset();
+      if (bloodGroupSelect) bloodGroupSelect.reset();
+      if (membershipTypeSelect) membershipTypeSelect.reset();
+      if (preferredBranchSelect) preferredBranchSelect.reset();
+      if (borrowingCategorySelect) borrowingCategorySelect.reset();
+      if (preferredContactSelect) preferredContactSelect.reset();
 
       // Clear select trigger error borders if any
       const deptTrigger = document.getElementById('custom-select-trigger-dept');
       if (deptTrigger) deptTrigger.style.borderColor = '';
       const semesterTrigger = document.getElementById('custom-select-trigger-semester');
       if (semesterTrigger) semesterTrigger.style.borderColor = '';
+      const degreeLevelTrigger = document.getElementById('custom-select-trigger-degree-level');
+      if (degreeLevelTrigger) degreeLevelTrigger.style.borderColor = '';
+      const campusTrigger = document.getElementById('custom-select-trigger-campus');
+      if (campusTrigger) campusTrigger.style.borderColor = '';
+      const genderTrigger = document.getElementById('custom-select-trigger-gender');
+      if (genderTrigger) genderTrigger.style.borderColor = '';
+      const bloodGroupTrigger = document.getElementById('custom-select-trigger-blood-group');
+      if (bloodGroupTrigger) bloodGroupTrigger.style.borderColor = '';
+      const membershipTypeTrigger = document.getElementById('custom-select-trigger-membership-type');
+      if (membershipTypeTrigger) membershipTypeTrigger.style.borderColor = '';
+      const preferredBranchTrigger = document.getElementById('custom-select-trigger-preferred-branch');
+      if (preferredBranchTrigger) preferredBranchTrigger.style.borderColor = '';
+      const borrowingCategoryTrigger = document.getElementById('custom-select-trigger-borrowing-category');
+      if (borrowingCategoryTrigger) borrowingCategoryTrigger.style.borderColor = '';
+      const preferredContactTrigger = document.getElementById('custom-select-trigger-preferred-contact');
+      if (preferredContactTrigger) preferredContactTrigger.style.borderColor = '';
 
       // Reset preview card texts for selects
       const previewDeptEl = document.getElementById('preview-dept');
@@ -984,12 +1216,22 @@ document.addEventListener('DOMContentLoaded', () => {
       const previewSemEl = document.getElementById('preview-semester');
       if (previewSemEl) previewSemEl.textContent = 'SEMESTER';
 
+
       // Reset batch input
       if (inputBatch) {
-        inputBatch.value = 'Batch 60';
+        inputBatch.value = '';
       }
       const previewBatchEl = document.getElementById('preview-batch');
       if (previewBatchEl) previewBatchEl.textContent = 'BATCH 60';
+
+      // Reset enrollment proof dropzone
+      if (dropzoneEnrollment) {
+        dropzoneEnrollment.classList.remove('has-file');
+      }
+      if (labelEnrollmentFile) {
+        labelEnrollmentFile.textContent = 'Choose PDF or Image';
+      }
+      cloudinaryEnrollmentUrl = '';
 
       // Reset tier badge
       previewTier.className = 'card-type tier-standard';
@@ -1011,12 +1253,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isFormValid = true;
 
-    // Validate required text fields
+    // Validate required text, checkbox, and radio fields
     const requiredInputs = form.querySelectorAll('[required]');
+    const validatedRadioNames = new Set();
     requiredInputs.forEach(input => {
-      const group = input.closest('.field-group');
+      let hasError = false;
+      if (input.type === 'checkbox') {
+        hasError = !input.checked;
+      } else if (input.type === 'radio') {
+        if (validatedRadioNames.has(input.name)) return;
+        validatedRadioNames.add(input.name);
+        const checkedRadio = form.querySelector(`input[name="${input.name}"]:checked`);
+        hasError = !checkedRadio;
+      } else {
+        hasError = !input.value.trim();
+      }
 
-      if (!input.value.trim() || (input.type === 'checkbox' && !input.checked)) {
+      if (hasError) {
         isFormValid = false;
         highlightInputError(input, true);
       } else {
@@ -1047,7 +1300,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       btnSubmit.classList.remove('is-loading');
 
-      const nameVal = inputName.value.trim() || 'Member';
+      const first = inputFirstName ? inputFirstName.value.trim() : '';
+      const last = inputLastName ? inputLastName.value.trim() : '';
+      const nameVal = `${first} ${last}`.trim() || 'Member';
       const tierVal = document.querySelector('input[name="tier"]:checked')?.value || 'Standard';
       const keyVal = previewCardKey.textContent;
 
@@ -1060,11 +1315,43 @@ document.addEventListener('DOMContentLoaded', () => {
       const payload = getSharePayload();
 
       // Save member record to the database
-      const deptValText = document.getElementById('custom-select-value-dept') ? document.getElementById('custom-select-value-dept').textContent : 'DEPT';
-      const semValText = document.getElementById('custom-select-value-semester') ? document.getElementById('custom-select-value-semester').textContent : 'SEMESTER';
+      const deptInput = document.getElementById('department');
+      const deptValText = deptInput ? deptInput.value.trim() : 'DEPT';
+      const semInput = document.getElementById('semester');
+      const semValText = semInput ? semInput.value.trim() : 'SEMESTER';
       const limitValText = previewLimit.textContent;
       const themeValText = libraryCard.style.getPropertyValue('--user-card-theme') || DEFAULTS.theme;
       const addrText = document.getElementById('preview-address') ? document.getElementById('preview-address').textContent : '';
+
+      // Emergency details
+      const emergencyName = document.getElementById('emergency_name') ? document.getElementById('emergency_name').value.trim() : '';
+      const emergencyRelationship = document.getElementById('emergency_relationship') ? document.getElementById('emergency_relationship').value.trim() : '';
+      const emergencyPhone = document.getElementById('emergency_phone') ? document.getElementById('emergency_phone').value.trim() : '';
+      const emergencyAddress = document.getElementById('emergency_address') ? document.getElementById('emergency_address').value.trim() : '';
+
+      // Personal Details
+      const gender = document.getElementById('gender') ? document.getElementById('gender').value : '';
+      const bloodGroup = document.getElementById('blood_group') ? document.getElementById('blood_group').value : '';
+      const nationality = document.getElementById('nationality') ? document.getElementById('nationality').value.trim() : '';
+      const nidPassport = document.getElementById('nid_passport') ? document.getElementById('nid_passport').value.trim() : '';
+      const altPhone = document.getElementById('alt_phone') ? document.getElementById('alt_phone').value.trim() : '';
+      const permanentAddress = document.getElementById('permanent_address') ? document.getElementById('permanent_address').value.trim() : '';
+      const city = document.getElementById('city') ? document.getElementById('city').value.trim() : '';
+      const postcode = document.getElementById('postcode') ? document.getElementById('postcode').value.trim() : '';
+      const country = document.getElementById('country') ? document.getElementById('country').value.trim() : '';
+      const dob = inputDob ? inputDob.value : '';
+
+      // Membership Details
+      const membershipType = document.getElementById('membership_type') ? document.getElementById('membership_type').value : '';
+      const preferredBranch = document.getElementById('preferred_branch') ? document.getElementById('preferred_branch').value : '';
+      const borrowingCategory = document.getElementById('borrowing_category') ? document.getElementById('borrowing_category').value : '';
+      const preferredContact = document.getElementById('preferred_contact') ? document.getElementById('preferred_contact').value : '';
+      const cardStatus = document.querySelector('input[name="card_status"]:checked')?.value || 'New Card';
+      
+      const researchInterestsArray = [];
+      document.querySelectorAll('input[name="interest"]:checked').forEach(cb => {
+        researchInterestsArray.push(cb.value);
+      });
 
       const memberRecord = {
         n: nameVal,
@@ -1079,7 +1366,49 @@ document.addEventListener('DOMContentLoaded', () => {
         th: themeValText,
         a: (addrText === '' || addrText === 'No specific special clearances or address declared.') ? '' : addrText,
         tr: tierVal,
-        av: cloudinaryAvatarUrl || compressedAvatarBase64
+        av: cloudinaryAvatarUrl || compressedAvatarBase64,
+        ep: cloudinaryEnrollmentUrl || '',
+
+        // Detailed university profile
+        student_info: {
+          first_name: first,
+          last_name: last,
+          student_id: document.getElementById('student_id') ? document.getElementById('student_id').value.trim() : '',
+          degree_level: document.getElementById('degree_level') ? document.getElementById('degree_level').value : '',
+          faculty: document.getElementById('faculty') ? document.getElementById('faculty').value.trim() : '',
+          program: document.getElementById('program') ? document.getElementById('program').value.trim() : '',
+          campus: document.getElementById('campus') ? document.getElementById('campus').value : '',
+          advisor: document.getElementById('academic_advisor') ? document.getElementById('academic_advisor').value.trim() : ''
+        },
+        personal_info: {
+          dob: dob,
+          gender: gender,
+          blood_group: bloodGroup,
+          nationality: nationality,
+          nid_passport: nidPassport,
+          alt_phone: altPhone,
+          present_address: inputAddress ? inputAddress.value.trim() : '',
+          permanent_address: permanentAddress,
+          city: city,
+          postcode: postcode,
+          country: country
+        },
+        emergency_contact: {
+          name: emergencyName,
+          relationship: emergencyRelationship,
+          phone: emergencyPhone,
+          address: emergencyAddress
+        },
+        membership_details: {
+          type: membershipType,
+          branch: preferredBranch,
+          category: borrowingCategory,
+          interests: researchInterestsArray,
+          status: cardStatus,
+          contact_method: preferredContact,
+          start_date: inputMembershipStart ? inputMembershipStart.value : '',
+          expiry_date: inputMembershipExpiry ? inputMembershipExpiry.value : ''
+        }
       };
 
       DB.saveMember(memberRecord);
@@ -1124,6 +1453,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (input.tagName === 'SELECT') {
       target = input.closest('.custom-select-wrapper') ? input.closest('.custom-select-wrapper').querySelector('.custom-select-trigger') : input;
     }
+    if (input.type === 'radio') {
+      const group = input.closest('.radio-card-group');
+      if (group) {
+        const radioCards = group.querySelectorAll('.custom-radio-card');
+        radioCards.forEach(card => {
+          if (hasError) {
+            card.style.borderColor = 'var(--accent-error)';
+          } else {
+            card.style.borderColor = '';
+          }
+        });
+      }
+      return;
+    }
     if (hasError) {
       target.style.borderColor = 'var(--accent-error)';
     } else {
@@ -1138,8 +1481,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ---- Close All Dropdowns Helper ----
   function closeAllDropdowns() {
-    document.querySelectorAll('.custom-select-wrapper.open, .custom-datepicker-wrapper.open').forEach(wrapper => {
+    document.querySelectorAll('.custom-select-wrapper, .custom-datepicker-wrapper').forEach(wrapper => {
       wrapper.classList.remove('open');
+      wrapper.classList.remove('open-top');
     });
   }
 
@@ -1157,9 +1501,11 @@ document.addEventListener('DOMContentLoaded', () => {
     onChange: (val) => {
       if (isViewingShared()) return;
       const el = document.getElementById('preview-dept');
-      if (el) el.textContent = val || 'DEPT';
+      if (el) el.textContent = val ? val.toUpperCase() : 'DEPT';
     }
   });
+
+
 
   const semesterSelect = setupCustomSelect({
     wrapperId: 'custom-select-semester',
@@ -1178,12 +1524,106 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  const degreeLevelSelect = setupCustomSelect({
+    wrapperId: 'custom-select-degree-level',
+    triggerId: 'custom-select-trigger-degree-level',
+    valueId: 'custom-select-value-degree-level',
+    optionsContainerId: 'custom-select-options-degree-level',
+    hiddenSelectId: 'degree_level',
+    defaultValue: '',
+    placeholderText: 'Select level'
+  });
+
+  const campusSelect = setupCustomSelect({
+    wrapperId: 'custom-select-campus',
+    triggerId: 'custom-select-trigger-campus',
+    valueId: 'custom-select-value-campus',
+    optionsContainerId: 'custom-select-options-campus',
+    hiddenSelectId: 'campus',
+    defaultValue: 'Main Campus',
+    placeholderText: 'Main Campus'
+  });
+
+  const genderSelect = setupCustomSelect({
+    wrapperId: 'custom-select-gender',
+    triggerId: 'custom-select-trigger-gender',
+    valueId: 'custom-select-value-gender',
+    optionsContainerId: 'custom-select-options-gender',
+    hiddenSelectId: 'gender',
+    defaultValue: '',
+    placeholderText: 'Select'
+  });
+
+  const bloodGroupSelect = setupCustomSelect({
+    wrapperId: 'custom-select-blood-group',
+    triggerId: 'custom-select-trigger-blood-group',
+    valueId: 'custom-select-value-blood-group',
+    optionsContainerId: 'custom-select-options-blood-group',
+    hiddenSelectId: 'blood_group',
+    defaultValue: '',
+    placeholderText: 'Select'
+  });
+
+  const membershipTypeSelect = setupCustomSelect({
+    wrapperId: 'custom-select-membership-type',
+    triggerId: 'custom-select-trigger-membership-type',
+    valueId: 'custom-select-value-membership-type',
+    optionsContainerId: 'custom-select-options-membership-type',
+    hiddenSelectId: 'membership_type',
+    defaultValue: '',
+    placeholderText: 'Select type'
+  });
+
+  const preferredBranchSelect = setupCustomSelect({
+    wrapperId: 'custom-select-preferred-branch',
+    triggerId: 'custom-select-trigger-preferred-branch',
+    valueId: 'custom-select-value-preferred-branch',
+    optionsContainerId: 'custom-select-options-preferred-branch',
+    hiddenSelectId: 'preferred_branch',
+    defaultValue: '',
+    placeholderText: 'Select branch'
+  });
+
+  const borrowingCategorySelect = setupCustomSelect({
+    wrapperId: 'custom-select-borrowing-category',
+    triggerId: 'custom-select-trigger-borrowing-category',
+    valueId: 'custom-select-value-borrowing-category',
+    optionsContainerId: 'custom-select-options-borrowing-category',
+    hiddenSelectId: 'borrowing_category',
+    defaultValue: 'General Collection',
+    placeholderText: 'General Collection'
+  });
+
+  const preferredContactSelect = setupCustomSelect({
+    wrapperId: 'custom-select-preferred-contact',
+    triggerId: 'custom-select-trigger-preferred-contact',
+    valueId: 'custom-select-value-preferred-contact',
+    optionsContainerId: 'custom-select-options-preferred-contact',
+    hiddenSelectId: 'preferred_contact',
+    defaultValue: 'Email',
+    placeholderText: 'Email'
+  });
+
+
+
+
+
   // Sync Batch normal text input
   if (inputBatch) {
     inputBatch.addEventListener('input', (e) => {
       if (isViewingShared()) return;
       const el = document.getElementById('preview-batch');
       if (el) el.textContent = e.target.value.trim().toUpperCase() || 'BATCH 60';
+    });
+  }
+
+  // Sync Semester normal text input
+  const inputSemester = document.getElementById('semester');
+  if (inputSemester) {
+    inputSemester.addEventListener('input', (e) => {
+      if (isViewingShared()) return;
+      const el = document.getElementById('preview-semester');
+      if (el) el.textContent = e.target.value.trim().toUpperCase() || 'SEMESTER';
     });
   }
 
@@ -1240,6 +1680,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (!wrapper.contains(e.target)) {
         wrapper.classList.remove('open');
+        wrapper.classList.remove('open-top');
       }
     });
   });
@@ -1647,7 +2088,7 @@ document.addEventListener('DOMContentLoaded', () => {
               s: parsed[3] || 'SEMESTER',
               e: parsed[4] || DEFAULTS.email,
               p: parsed[5] || DEFAULTS.phone,
-              l: parsed[6] || `${DEFAULTS.limit} BOOKS`,
+               l: parsed[6] || `${DEFAULTS.limit} BOOK${DEFAULTS.limit > 1 ? 'S' : ''}`,
               t: parsed[7] || DEFAULTS.term,
               k: parsed[8],
               th: parsed[9] || DEFAULTS.theme,
@@ -1662,7 +2103,7 @@ document.addEventListener('DOMContentLoaded', () => {
               s: parsed.s || 'SEMESTER',
               e: parsed.e || DEFAULTS.email,
               p: parsed.p || DEFAULTS.phone,
-              l: parsed.l || `${DEFAULTS.limit} BOOKS`,
+               l: parsed.l || `${DEFAULTS.limit} BOOK${DEFAULTS.limit > 1 ? 'S' : ''}`,
               t: parsed.t || DEFAULTS.term,
               k: parsed.k,
               th: parsed.th || DEFAULTS.theme,
@@ -1805,6 +2246,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (beamContainer) beamContainer.style.display = '';
       skelRails.forEach(rail => rail.style.display = '');
 
+      // Generate a new card key to prevent overwriting existing shared/admin-viewed cards
+      generateCardKey();
+
       // Move card back to form preview placement if it is currently inside the viewer
       if (formCardPlacement && libraryCard && libraryCard.parentElement !== formCardPlacement) {
         formCardPlacement.appendChild(libraryCard);
@@ -1817,7 +2261,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Re-trigger visual sync from input fields to card preview
-      if (inputName) inputName.dispatchEvent(new Event('input'));
+      if (inputFirstName) inputFirstName.dispatchEvent(new Event('input'));
+      if (inputLastName) inputLastName.dispatchEvent(new Event('input'));
       if (inputEmail) inputEmail.dispatchEvent(new Event('input'));
       if (inputPhone) inputPhone.dispatchEvent(new Event('input'));
       if (inputBatch) inputBatch.dispatchEvent(new Event('input'));
@@ -1874,6 +2319,46 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
       console.error("Firebase/Firestore initialization failed:", e);
     }
+  }
+
+  // Listen to Firebase Auth state changes to handle async initialization and re-load data once ready
+  if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth()) {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        isAdminAuthenticated = true;
+        sessionStorage.setItem('isAdminAuthenticated', 'true');
+        if (window.location.hash === '#admin') {
+          const adminPanelMode = document.getElementById('admin-panel-mode');
+          if (adminPanelMode && adminPanelMode.style.display !== 'flex') {
+            const adminLoginMode = document.getElementById('admin-login-mode');
+            const appWrapper = document.querySelector('.app-wrapper');
+            const mainNavbar = document.getElementById('main-navbar');
+            const beamContainer = document.querySelector('.beam-container');
+            const skelRails = document.querySelectorAll('.skel-rail');
+
+            if (appWrapper) appWrapper.style.display = 'none';
+            if (mainNavbar) mainNavbar.style.display = 'none';
+            if (beamContainer) beamContainer.style.display = 'none';
+            skelRails.forEach(rail => rail.style.display = 'none');
+            if (adminLoginMode) adminLoginMode.style.display = 'none';
+            adminPanelMode.style.display = 'flex';
+
+            renderAdminDirectory();
+          } else if (adminPanelMode && adminPanelMode.style.display === 'flex') {
+            // Already showing dashboard but fetched without auth on reload, re-render with auth now active
+            renderAdminDirectory();
+          }
+        }
+      } else {
+        if (sessionStorage.getItem('isAdminAuthenticated') === 'true') {
+          isAdminAuthenticated = false;
+          sessionStorage.removeItem('isAdminAuthenticated');
+          if (window.location.hash === '#admin') {
+            checkSharedLink();
+          }
+        }
+      }
+    });
   }
 
   // Unified Minimal Database Helper (Firestore SDK with fallback to LocalStorage / Realtime DB REST API)
@@ -1958,7 +2443,8 @@ document.addEventListener('DOMContentLoaded', () => {
           });
           return members;
         } catch (err) {
-          console.warn('Firestore fetch failed, attempting fallback:', err);
+          console.error('Firestore fetch failed:', err);
+          throw err;
         }
       }
 
@@ -2118,6 +2604,159 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Detailed modal popup handler
+  function showMemberDetailsModal(m) {
+    const detailsModal = document.getElementById('admin-details-modal');
+    if (!detailsModal) return;
+
+    // Set modal title & key
+    const fullNameEl = document.getElementById('details-full-name');
+    if (fullNameEl) fullNameEl.textContent = m.n || 'N/A';
+    const keyEl = document.getElementById('details-key');
+    if (keyEl) keyEl.textContent = m.k || 'N/A';
+    const studentIdEl = document.getElementById('details-student-id');
+    if (studentIdEl) studentIdEl.textContent = m.student_info?.student_id || 'N/A';
+
+    // Populate avatar
+    const detailsAvatar = document.getElementById('details-avatar');
+    const detailsAvatarPlaceholder = document.getElementById('details-avatar-placeholder');
+    if (detailsAvatar) {
+      if (m.av) {
+        let src = m.av;
+        if (src.startsWith('c:')) {
+          const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
+          src = `https://res.cloudinary.com/${cloudName}/image/upload/${src.substring(2)}`;
+        } else if (src.startsWith('http://') || src.startsWith('https://')) {
+          // full URL, use as-is
+        } else if (src.includes('lms_avatars/') || src.includes('lms-avatars/')) {
+          const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
+          src = `https://res.cloudinary.com/${cloudName}/image/upload/${src}`;
+        } else {
+          src = 'data:image/jpeg;base64,' + src;
+        }
+        detailsAvatar.src = src;
+        detailsAvatar.style.display = 'block';
+        if (detailsAvatarPlaceholder) detailsAvatarPlaceholder.style.display = 'none';
+      } else {
+        detailsAvatar.src = '';
+        detailsAvatar.style.display = 'none';
+        if (detailsAvatarPlaceholder) detailsAvatarPlaceholder.style.display = 'block';
+      }
+    }
+
+    // Academic Info
+    const degreeEl = document.getElementById('details-degree-level');
+    if (degreeEl) degreeEl.textContent = m.student_info?.degree_level || 'N/A';
+    const facultyEl = document.getElementById('details-faculty');
+    if (facultyEl) facultyEl.textContent = m.student_info?.faculty || 'N/A';
+    const deptEl = document.getElementById('details-dept');
+    if (deptEl) deptEl.textContent = m.d || m.student_info?.department || 'N/A';
+    const programEl = document.getElementById('details-program');
+    if (programEl) programEl.textContent = m.student_info?.program || 'N/A';
+    const semesterEl = document.getElementById('details-semester');
+    if (semesterEl) semesterEl.textContent = m.s || m.student_info?.semester || 'N/A';
+    const sessionEl = document.getElementById('details-session');
+    if (sessionEl) sessionEl.textContent = m.b || m.student_info?.session || 'N/A';
+    const campusEl = document.getElementById('details-campus');
+    if (campusEl) campusEl.textContent = m.student_info?.campus || 'N/A';
+    const advisorEl = document.getElementById('details-advisor');
+    if (advisorEl) advisorEl.textContent = m.student_info?.advisor || 'N/A';
+
+    // Personal Info
+    const dobEl = document.getElementById('details-dob');
+    if (dobEl) dobEl.textContent = m.personal_info?.dob || 'N/A';
+    const genderEl = document.getElementById('details-gender');
+    if (genderEl) genderEl.textContent = m.personal_info?.gender || 'N/A';
+    const bloodEl = document.getElementById('details-blood');
+    if (bloodEl) bloodEl.textContent = m.personal_info?.blood_group || 'N/A';
+    const nationalityEl = document.getElementById('details-nationality');
+    if (nationalityEl) nationalityEl.textContent = m.personal_info?.nationality || 'N/A';
+    const nidEl = document.getElementById('details-nid');
+    if (nidEl) nidEl.textContent = m.personal_info?.nid_passport || 'N/A';
+    const altPhoneEl = document.getElementById('details-alt-phone');
+    if (altPhoneEl) altPhoneEl.textContent = m.personal_info?.alt_phone || 'N/A';
+    const presentAddrEl = document.getElementById('details-present-addr');
+    if (presentAddrEl) presentAddrEl.textContent = m.a || m.personal_info?.present_address || 'N/A';
+    const permanentAddrEl = document.getElementById('details-permanent-addr');
+    if (permanentAddrEl) permanentAddrEl.textContent = m.personal_info?.permanent_address || 'N/A';
+    
+    const cityPostCountryEl = document.getElementById('details-city-post-country');
+    if (cityPostCountryEl) {
+      const city = m.personal_info?.city || 'N/A';
+      const postcode = m.personal_info?.postcode || 'N/A';
+      const country = m.personal_info?.country || 'N/A';
+      cityPostCountryEl.textContent = `${city} / ${postcode} / ${country}`;
+    }
+
+    // Emergency Contact
+    const emNameEl = document.getElementById('details-emergency-name');
+    if (emNameEl) emNameEl.textContent = m.emergency_contact?.name || 'N/A';
+    const emRelationEl = document.getElementById('details-emergency-relation');
+    if (emRelationEl) emRelationEl.textContent = m.emergency_contact?.relationship || 'N/A';
+    const emPhoneEl = document.getElementById('details-emergency-phone');
+    if (emPhoneEl) emPhoneEl.textContent = m.emergency_contact?.phone || 'N/A';
+    const emAddrEl = document.getElementById('details-emergency-addr');
+    if (emAddrEl) emAddrEl.textContent = m.emergency_contact?.address || 'N/A';
+
+    // Membership Details
+    const mTypeEl = document.getElementById('details-membership-type');
+    if (mTypeEl) mTypeEl.textContent = m.membership_details?.type || m.tr || 'Standard';
+    const branchEl = document.getElementById('details-branch');
+    if (branchEl) branchEl.textContent = m.membership_details?.branch || 'N/A';
+    const categoryEl = document.getElementById('details-category');
+    if (categoryEl) categoryEl.textContent = m.membership_details?.category || 'N/A';
+    
+    const interestsEl = document.getElementById('details-interests');
+    if (interestsEl) {
+      const interests = m.membership_details?.interests;
+      interestsEl.textContent = (interests && interests.length > 0) ? interests.join(', ') : 'None';
+    }
+
+    const cardStatusEl = document.getElementById('details-card-status');
+    if (cardStatusEl) cardStatusEl.textContent = m.membership_details?.status || 'N/A';
+    const contactMethodEl = document.getElementById('details-contact-method');
+    if (contactMethodEl) contactMethodEl.textContent = m.membership_details?.contact_method || 'N/A';
+
+    const borrowLimitEl = document.getElementById('details-borrow-limit');
+    if (borrowLimitEl) borrowLimitEl.textContent = m.l || '5';
+    const themeColorEl = document.getElementById('details-theme-color');
+    if (themeColorEl) themeColorEl.textContent = m.th || '#06b6d4';
+    
+    const startDateEl = document.getElementById('details-start-date');
+    if (startDateEl) startDateEl.textContent = m.membership_details?.start_date || 'N/A';
+    const expiryDateEl = document.getElementById('details-expiry-date');
+    if (expiryDateEl) expiryDateEl.textContent = m.t || m.membership_details?.expiry_date || 'N/A';
+
+    // Open Modal
+    detailsModal.style.display = 'flex';
+    
+    // Reinitialize icons in modal
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  }
+
+  // Bind Close Actions for Details Modal
+  const detailsModal = document.getElementById('admin-details-modal');
+  const btnCloseDetailsModal = document.getElementById('btn-close-details-modal');
+  const btnCloseDetailsFooter = document.getElementById('btn-close-details-footer');
+
+  function closeDetailsModal() {
+    if (detailsModal) {
+      detailsModal.style.display = 'none';
+    }
+  }
+
+  if (btnCloseDetailsModal) btnCloseDetailsModal.addEventListener('click', closeDetailsModal);
+  if (btnCloseDetailsFooter) btnCloseDetailsFooter.addEventListener('click', closeDetailsModal);
+  if (detailsModal) {
+    detailsModal.addEventListener('click', (e) => {
+      if (e.target === detailsModal) {
+        closeDetailsModal();
+      }
+    });
+  }
+
   // Render Admin Dashboard directory table rows dynamically
   async function renderAdminDirectory() {
     const tableBody = document.getElementById('admin-table-body');
@@ -2132,10 +2771,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
       const filtered = Object.values(members).filter(m => {
-        return m.n.toLowerCase().includes(query) ||
-          m.k.toLowerCase().includes(query) ||
-          (m.e && m.e.toLowerCase().includes(query)) ||
-          (m.d && m.d.toLowerCase().includes(query));
+        if (!m) return false;
+        const name = (m.n || '').toLowerCase();
+        const key = (m.k || '').toLowerCase();
+        const email = (m.e || '').toLowerCase();
+        const dept = (m.d || '').toLowerCase();
+        return name.includes(query) ||
+               key.includes(query) ||
+               email.includes(query) ||
+               dept.includes(query);
       });
 
       if (filtered.length === 0) {
@@ -2196,7 +2840,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </td>
           <td style="padding: 0.85rem 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--member-theme); font-weight: 600;">
-            LMS-${m.k.replace('LMS-', '')}
+            LMS-${(m.k || '').replace('LMS-', '')}
           </td>
           <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem;">
             ${m.e || 'N/A'}
@@ -2224,8 +2868,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         row.querySelector('.view-btn').addEventListener('click', () => {
-          const payload = serializeMemberToPayload(m);
-          window.location.hash = `share=${payload}`;
+          showMemberDetailsModal(m);
         });
 
         row.querySelector('.delete-btn').addEventListener('click', async (e) => {
@@ -2242,8 +2885,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (typeof lucide !== 'undefined') lucide.createIcons();
     } catch (err) {
-      console.error(err);
-      tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--accent-error); padding: 2rem 1rem;"><i data-lucide="alert-circle" style="width: 2rem; height: 2rem; margin-bottom: 0.5rem; display: inline-block;"></i><p style="margin: 0; font-size: 0.85rem;">Failed to load directory table rows.</p></td></tr>';
+      console.error("renderAdminDirectory failed:", err);
+      tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--accent-error); padding: 2rem 1rem;"><i data-lucide="alert-circle" style="width: 2rem; height: 2rem; margin-bottom: 0.5rem; display: inline-block;"></i><p style="margin: 0; font-size: 0.85rem;">Failed to load directory: ${err.message || err}</p></td></tr>`;
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
   }

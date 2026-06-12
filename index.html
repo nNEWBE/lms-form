@@ -46,19 +46,19 @@
       <linearGradient id="beam-grad-left" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="0" />
         <stop offset="60%" stop-color="var(--accent-primary)" stop-opacity="1" />
-        <stop offset="100%" stop-color="var(--accent-secondary)" stop-opacity="0.3" />
+        <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.3" />
       </linearGradient>
 
       <linearGradient id="beam-grad-right" x1="100%" y1="100%" x2="0%" y2="0%">
-        <stop offset="0%" stop-color="var(--accent-secondary)" stop-opacity="0" />
-        <stop offset="60%" stop-color="var(--accent-secondary)" stop-opacity="1" />
+        <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="0" />
+        <stop offset="60%" stop-color="var(--accent-primary)" stop-opacity="1" />
         <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.3" />
       </linearGradient>
 
       <linearGradient id="beam-grad-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="var(--accent-secondary)" stop-opacity="0" />
-        <stop offset="50%" stop-color="var(--accent-secondary)" stop-opacity="1" />
-        <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0" />
+        <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="0" />
+        <stop offset="50%" stop-color="var(--accent-primary)" stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.3" />
       </linearGradient>
     </defs>
 
@@ -89,8 +89,8 @@
         <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="logo-grad-primary-nav" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="var(--accent-primary)" />
-              <stop offset="100%" stop-color="var(--accent-secondary)" />
+              <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="1" />
+              <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.25" />
             </linearGradient>
             <linearGradient id="logo-grad-dark-nav" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="rgba(0, 0, 0, 0.5)" />
@@ -104,7 +104,7 @@
           <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-nav)" />
           <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-nav)" />
           <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-nav)" />
-          <path d="M12 12V22" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round" />
+          <path d="M12 12V22" stroke="var(--accent-primary)" stroke-width="1.5" stroke-linecap="round" />
           <path d="M12 12L2 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
           <path d="M12 12L22 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
         </svg>
@@ -140,116 +140,588 @@
         <form id="library-member-form" novalidate>
           <div class="form-grid">
 
-            <!-- Section 1: Account Identity -->
+            <!-- Section 1: Student Information -->
             <div class="form-section">
               <h3 class="form-section-title">
-                <i data-lucide="fingerprint"></i>
-                Account Identity
+                <i data-lucide="graduation-cap"></i>
+                Student Information
               </h3>
             </div>
 
-            <!-- text -->
+            <!-- First Name -->
             <div class="field-group">
-              <label for="full_name">
-                <i data-lucide="user"></i> Full Name *
+              <label for="first_name">
+                <i data-lucide="user"></i> First Name *
               </label>
-              <input type="text" id="full_name" name="full_name" class="input-control"
-                placeholder="E.g. Shuvo Chandra Debnath" required minlength="3">
+              <input type="text" id="first_name" name="first_name" class="input-control"
+                placeholder="E.g. Shuvo" required minlength="2">
             </div>
 
-            <!-- email -->
+            <!-- Last Name -->
             <div class="field-group">
-              <label for="email">
-                <i data-lucide="mail"></i> Email Address *
+              <label for="last_name">
+                <i data-lucide="user"></i> Last Name *
               </label>
-              <input type="email" id="email" name="email" class="input-control" placeholder="username@domain.com"
-                required>
+              <input type="text" id="last_name" name="last_name" class="input-control"
+                placeholder="E.g. Debnath" required minlength="2">
             </div>
 
-            <!-- password -->
-            <div class="field-group">
-              <label for="password">
-                <i data-lucide="lock"></i> Access Security PIN *
-              </label>
-              <input type="password" id="password" name="password" class="input-control"
-                placeholder="4-8 digit passcode" required minlength="4">
-            </div>
-
-            <!-- file -->
-            <div class="field-group">
-              <label for="avatar">
-                <i data-lucide="image"></i> Member Avatar
-              </label>
-              <div class="file-upload-wrapper">
-                <div class="file-dropzone" id="avatar-dropzone">
-                  <i data-lucide="upload-cloud"></i>
-                  <span id="file-label">Choose image or drag here</span>
-                  <input type="file" id="avatar" name="avatar" class="file-input" accept="image/*">
-                </div>
-              </div>
-            </div>
-
-            <!-- url -->
+            <!-- 3-col Student ID, Email, Phone -->
             <div class="field-group full-width">
-              <label for="profile_url">
-                <i data-lucide="link-2"></i> Academic Portfolio / URL
-              </label>
-              <input type="url" id="profile_url" name="profile_url" class="input-control"
-                placeholder="https://github.com/username">
-            </div>
-
-
-            <!-- Section 2: Contact & Borrowing Access -->
-            <div class="form-section">
-              <h3 class="form-section-title">
-                <i data-lucide="calendar-range"></i>
-                Contact & Scheduling
-              </h3>
-            </div>
-
-            <!-- tel -->
-            <div class="field-group">
-              <label for="phone">
-                <i data-lucide="phone"></i> Contact Number *
-              </label>
-              <input type="tel" id="phone" name="phone" class="input-control" placeholder="E.g. +1 555-0199" required>
-            </div>
-
-            <!-- date -->
-            <div class="field-group">
-              <label for="dob-display">
-                <i data-lucide="calendar"></i> Date of Birth
-              </label>
-              <div class="custom-datepicker-wrapper" id="custom-datepicker-dob">
-                <div class="datepicker-trigger" id="datepicker-dob-trigger">
-                  <input type="text" id="dob-display" class="input-control" placeholder="mm/dd/yyyy" readonly>
-                  <i data-lucide="calendar" class="datepicker-icon"></i>
+              <div class="triple-select-grid">
+                <div class="student-select-col">
+                  <label for="student_id">
+                    <i data-lucide="credit-card"></i> Student ID *
+                  </label>
+                  <input type="text" id="student_id" name="student_id" class="input-control"
+                    placeholder="LIB-2026-001" required>
                 </div>
-                <div class="datepicker-calendar" id="datepicker-dob-calendar">
-                  <div class="calendar-header">
-                    <button type="button" class="calendar-nav-btn prev-month" id="calendar-prev-month">
-                      <i data-lucide="chevron-left" class="calendar-nav-icon"></i>
-                    </button>
-                    <span class="calendar-month-year" id="calendar-month-year">June 2026</span>
-                    <button type="button" class="calendar-nav-btn next-month" id="calendar-next-month">
-                      <i data-lucide="chevron-right" class="calendar-nav-icon"></i>
-                    </button>
-                  </div>
-                  <div class="calendar-weekdays">
-                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-                  </div>
-                  <div class="calendar-days" id="calendar-days-grid"></div>
-                  <div class="calendar-footer">
-                    <button type="button" class="calendar-footer-btn clear-date" id="calendar-clear-date">Clear</button>
-                    <button type="button" class="calendar-footer-btn select-today"
-                      id="calendar-select-today">Today</button>
-                  </div>
+                <div class="student-select-col">
+                  <label for="email">
+                    <i data-lucide="mail"></i> University Email *
+                  </label>
+                  <input type="email" id="email" name="email" class="input-control"
+                    placeholder="name@university.edu" required>
                 </div>
-                <input type="hidden" id="dob" name="dob">
+                <div class="student-select-col">
+                  <label for="phone">
+                    <i data-lucide="phone"></i> Phone Number *
+                  </label>
+                  <input type="tel" id="phone" name="phone" class="input-control"
+                    placeholder="E.g. +1 555-0199" required>
+                </div>
               </div>
             </div>
 
-            <!-- membership start date -->
+            <!-- 3-col Degree, Faculty, Department -->
+            <div class="field-group full-width">
+              <div class="triple-select-grid">
+                <div class="student-select-col">
+                  <label for="degree_level">
+                    <i data-lucide="award"></i> Degree Level *
+                  </label>
+                  <div class="custom-select-wrapper" id="custom-select-degree-level">
+                    <div class="custom-select-trigger" id="custom-select-trigger-degree-level">
+                      <span id="custom-select-value-degree-level">Select level</span>
+                      <i data-lucide="chevron-down" class="select-arrow-icon"></i>
+                    </div>
+                    <div class="custom-select-options" id="custom-select-options-degree-level">
+                      <div class="custom-option" data-value="BSc">BSc</div>
+                      <div class="custom-option" data-value="MSc">MSc</div>
+                      <div class="custom-option" data-value="PhD">PhD</div>
+                      <div class="custom-option" data-value="Other">Other</div>
+                    </div>
+                    <select id="degree_level" name="degree_level" class="input-control" style="display: none;" required>
+                      <option value="" disabled selected>Select level</option>
+                      <option value="BSc">BSc</option>
+                      <option value="MSc">MSc</option>
+                      <option value="PhD">PhD</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="student-select-col">
+                  <label for="faculty">
+                    <i data-lucide="building-2"></i> Faculty *
+                  </label>
+                  <input type="text" id="faculty" name="faculty" class="input-control"
+                    placeholder="Faculty of Science" required>
+                </div>
+                <div class="student-select-col">
+                  <label for="department">
+                    <i data-lucide="graduation-cap"></i> Department *
+                  </label>
+                  <div class="custom-select-wrapper" id="custom-select-dept">
+                    <div class="custom-select-trigger" id="custom-select-trigger-dept">
+                      <span id="custom-select-value-dept">Select Department</span>
+                      <i data-lucide="chevron-down" class="select-arrow-icon"></i>
+                    </div>
+                    <div class="custom-select-options" id="custom-select-options-dept">
+                      <div class="custom-option" data-value="Computer Science">Computer Science</div>
+                      <div class="custom-option" data-value="Software Engineering">Software Engineering</div>
+                      <div class="custom-option" data-value="Electrical Engineering">Electrical Engineering</div>
+                      <div class="custom-option" data-value="Mechanical Engineering">Mechanical Engineering</div>
+                      <div class="custom-option" data-value="Civil Engineering">Civil Engineering</div>
+                      <div class="custom-option" data-value="Business Administration">Business Administration</div>
+                      <div class="custom-option" data-value="English">English</div>
+                      <div class="custom-option" data-value="Mathematics">Mathematics</div>
+                    </div>
+                    <select id="department" name="department" class="input-control" style="display: none;" required>
+                      <option value="" disabled selected>Select Department</option>
+                      <option value="Computer Science">Computer Science</option>
+                      <option value="Software Engineering">Software Engineering</option>
+                      <option value="Electrical Engineering">Electrical Engineering</option>
+                      <option value="Mechanical Engineering">Mechanical Engineering</option>
+                      <option value="Civil Engineering">Civil Engineering</option>
+                      <option value="Business Administration">Business Administration</option>
+                      <option value="English">English</option>
+                      <option value="Mathematics">Mathematics</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3-col Program, Semester, Session -->
+            <div class="field-group full-width">
+              <div class="triple-select-grid">
+                <div class="student-select-col">
+                  <label for="program">
+                    <i data-lucide="book-open"></i> Program / Major *
+                  </label>
+                  <input type="text" id="program" name="program" class="input-control"
+                    placeholder="BSc in CSE" required>
+                </div>
+                <div class="student-select-col">
+                  <label for="semester">
+                    <i data-lucide="calendar"></i> Semester / Year *
+                  </label>
+                  <input type="text" id="semester" name="semester" class="input-control"
+                    placeholder="5th" required>
+                </div>
+                <div class="student-select-col">
+                  <label for="admission_session">
+                    <i data-lucide="clock"></i> Batch No *
+                  </label>
+                  <input type="text" id="admission_session" name="admission_session" class="input-control"
+                    placeholder="E.g. Batch 60" required>
+                </div>
+              </div>
+            </div>
+
+            <!-- Campus & Advisor -->
+            <div class="field-group">
+              <label for="campus">
+                <i data-lucide="map-pin"></i> Campus
+              </label>
+              <div class="custom-select-wrapper" id="custom-select-campus">
+                <div class="custom-select-trigger" id="custom-select-trigger-campus">
+                  <span id="custom-select-value-campus">Main Campus</span>
+                  <i data-lucide="chevron-down" class="select-arrow-icon"></i>
+                </div>
+                <div class="custom-select-options" id="custom-select-options-campus">
+                  <div class="custom-option" data-value="Main Campus">Main Campus</div>
+                  <div class="custom-option" data-value="Permanent Campus">Permanent Campus</div>
+                  <div class="custom-option" data-value="City Campus">City Campus</div>
+                </div>
+                <select id="campus" name="campus" class="input-control" style="display: none;">
+                  <option value="Main Campus">Main Campus</option>
+                  <option value="Permanent Campus">Permanent Campus</option>
+                  <option value="City Campus">City Campus</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label for="academic_advisor">
+                <i data-lucide="user-check"></i> Academic Advisor
+              </label>
+              <input type="text" id="academic_advisor" name="academic_advisor" class="input-control"
+                placeholder="Advisor name">
+            </div>
+
+            <!-- Section 2: Personal Information -->
+            <div class="form-section">
+              <h3 class="form-section-title">
+                <i data-lucide="user-cog"></i>
+                Personal Information
+              </h3>
+            </div>
+
+             <!-- 3-col DOB, Gender, Blood Group -->
+             <div class="field-group full-width">
+               <div class="triple-select-grid">
+                 <div class="student-select-col">
+                   <label for="dob-display">
+                     <i data-lucide="calendar"></i> Date of Birth *
+                   </label>
+                   <div class="custom-datepicker-wrapper" id="custom-datepicker-dob">
+                     <div class="datepicker-trigger" id="datepicker-dob-trigger">
+                       <input type="text" id="dob-display" class="input-control" placeholder="mm/dd/yyyy" readonly required>
+                       <i data-lucide="calendar" class="datepicker-icon"></i>
+                     </div>
+                     <div class="datepicker-calendar" id="datepicker-dob-calendar">
+                       <div class="calendar-header">
+                         <button type="button" class="calendar-nav-btn prev-month" id="calendar-prev-month">
+                           <i data-lucide="chevron-left" class="calendar-nav-icon"></i>
+                         </button>
+                         <span class="calendar-month-year" id="calendar-month-year">June 2026</span>
+                         <button type="button" class="calendar-nav-btn next-month" id="calendar-next-month">
+                           <i data-lucide="chevron-right" class="calendar-nav-icon"></i>
+                         </button>
+                       </div>
+                       <div class="calendar-weekdays">
+                         <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                       </div>
+                       <div class="calendar-days" id="calendar-days-grid"></div>
+                       <div class="calendar-footer">
+                         <button type="button" class="calendar-footer-btn clear-date"
+                           id="calendar-clear-date">Clear</button>
+                         <button type="button" class="calendar-footer-btn select-today"
+                           id="calendar-select-today">Today</button>
+                       </div>
+                     </div>
+                     <input type="hidden" id="dob" name="dob">
+                   </div>
+                 </div>
+                 <div class="student-select-col">
+                   <label for="gender">
+                     <i data-lucide="users"></i> Gender
+                   </label>
+                   <div class="custom-select-wrapper" id="custom-select-gender">
+                     <div class="custom-select-trigger" id="custom-select-trigger-gender">
+                       <span id="custom-select-value-gender">Select</span>
+                       <i data-lucide="chevron-down" class="select-arrow-icon"></i>
+                     </div>
+                     <div class="custom-select-options" id="custom-select-options-gender">
+                       <div class="custom-option" data-value="Male">Male</div>
+                       <div class="custom-option" data-value="Female">Female</div>
+                       <div class="custom-option" data-value="Other">Other</div>
+                     </div>
+                     <select id="gender" name="gender" class="input-control" style="display: none;">
+                       <option value="" disabled selected>Select</option>
+                       <option value="Male">Male</option>
+                       <option value="Female">Female</option>
+                       <option value="Other">Other</option>
+                     </select>
+                   </div>
+                 </div>
+                 <div class="student-select-col">
+                   <label for="blood_group">
+                     <i data-lucide="droplet"></i> Blood Group
+                   </label>
+                   <div class="custom-select-wrapper" id="custom-select-blood-group">
+                     <div class="custom-select-trigger" id="custom-select-trigger-blood-group">
+                       <span id="custom-select-value-blood-group">Select</span>
+                       <i data-lucide="chevron-down" class="select-arrow-icon"></i>
+                     </div>
+                     <div class="custom-select-options" id="custom-select-options-blood-group">
+                       <div class="custom-option" data-value="A+">A+</div>
+                       <div class="custom-option" data-value="A-">A-</div>
+                       <div class="custom-option" data-value="B+">B+</div>
+                       <div class="custom-option" data-value="B-">B-</div>
+                       <div class="custom-option" data-value="AB+">AB+</div>
+                       <div class="custom-option" data-value="AB-">AB-</div>
+                       <div class="custom-option" data-value="O+">O+</div>
+                       <div class="custom-option" data-value="O-">O-</div>
+                     </div>
+                     <select id="blood_group" name="blood_group" class="input-control" style="display: none;">
+                       <option value="" disabled selected>Select</option>
+                       <option value="A+">A+</option>
+                       <option value="A-">A-</option>
+                       <option value="B+">B+</option>
+                       <option value="B-">B-</option>
+                       <option value="AB+">AB+</option>
+                       <option value="AB-">AB-</option>
+                       <option value="O+">O+</option>
+                       <option value="O-">O-</option>
+                     </select>
+                   </div>
+                 </div>
+               </div>
+             </div>
+
+            <!-- 3-col Nationality, NID/Passport, Alt Phone -->
+            <div class="field-group full-width">
+              <div class="triple-select-grid">
+                <div class="student-select-col">
+                  <label for="nationality">
+                    <i data-lucide="globe"></i> Nationality *
+                  </label>
+                  <input type="text" id="nationality" name="nationality" class="input-control" required placeholder="E.g. Bangladeshi">
+                </div>
+                <div class="student-select-col">
+                  <label for="nid_passport">
+                    <i data-lucide="file-text"></i> National ID / Passport
+                  </label>
+                  <input type="text" id="nid_passport" name="nid_passport" class="input-control" placeholder="Optional identity reference">
+                </div>
+                <div class="student-select-col">
+                  <label for="alt_phone">
+                    <i data-lucide="phone-forwarded"></i> Alternate Phone
+                  </label>
+                  <input type="tel" id="alt_phone" name="alt_phone" class="input-control" placeholder="Optional alternate contact">
+                </div>
+              </div>
+            </div>
+
+            <!-- Address Textareas -->
+            <div class="field-group full-width">
+              <label for="address">
+                <i data-lucide="home"></i> Present Address *
+              </label>
+              <textarea id="address" name="address" class="input-control" required placeholder="Enter present mailing address..."></textarea>
+            </div>
+
+            <div class="field-group full-width">
+              <label for="permanent_address">
+                <i data-lucide="home"></i> Permanent Address
+              </label>
+              <textarea id="permanent_address" name="permanent_address" class="input-control" placeholder="Enter permanent address..."></textarea>
+            </div>
+
+            <!-- 3-col City, Postcode, Country -->
+            <div class="field-group full-width">
+              <div class="triple-select-grid">
+                <div class="student-select-col">
+                  <label for="city">
+                    <i data-lucide="map"></i> City *
+                  </label>
+                  <input type="text" id="city" name="city" class="input-control" required placeholder="City name">
+                </div>
+                <div class="student-select-col">
+                  <label for="postcode">
+                    <i data-lucide="hash"></i> Postcode
+                  </label>
+                  <input type="text" id="postcode" name="postcode" class="input-control" placeholder="Postcode">
+                </div>
+                <div class="student-select-col">
+                  <label for="country">
+                    <i data-lucide="globe-2"></i> Country *
+                  </label>
+                  <input type="text" id="country" name="country" class="input-control" required placeholder="Country name">
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 3: Emergency Contact -->
+            <div class="form-section">
+              <h3 class="form-section-title">
+                <i data-lucide="phone-call"></i>
+                Emergency Contact
+              </h3>
+            </div>
+
+            <!-- 3-col Emergency Contact Name, Relationship, Phone -->
+            <div class="field-group full-width">
+              <div class="triple-select-grid">
+                <div class="student-select-col">
+                  <label for="emergency_name">
+                    <i data-lucide="user"></i> Contact Name *
+                  </label>
+                  <input type="text" id="emergency_name" name="emergency_name" class="input-control" required placeholder="Emergency contact name">
+                </div>
+                <div class="student-select-col">
+                  <label for="emergency_relationship">
+                    <i data-lucide="heart-handshake"></i> Relationship *
+                  </label>
+                  <input type="text" id="emergency_relationship" name="emergency_relationship" class="input-control" required placeholder="Parent, guardian, spouse">
+                </div>
+                <div class="student-select-col">
+                  <label for="emergency_phone">
+                    <i data-lucide="phone"></i> Contact Phone *
+                  </label>
+                  <input type="tel" id="emergency_phone" name="emergency_phone" class="input-control" required placeholder="Contact number">
+                </div>
+              </div>
+            </div>
+
+            <div class="field-group full-width">
+              <label for="emergency_address">
+                <i data-lucide="map-pin"></i> Contact Address
+              </label>
+              <textarea id="emergency_address" name="emergency_address" class="input-control" placeholder="Contact physical address..."></textarea>
+            </div>
+
+            <!-- Section 4: Membership Details & Card Settings -->
+            <div class="form-section">
+              <h3 class="form-section-title">
+                <i data-lucide="settings"></i>
+                Membership Details & Settings
+              </h3>
+            </div>
+
+            <!-- 3-col Membership Type, Branch, Category -->
+            <div class="field-group full-width">
+              <div class="triple-select-grid">
+                <div class="student-select-col">
+                  <label for="membership_type">
+                    <i data-lucide="user-check"></i> Membership Type *
+                  </label>
+                  <div class="custom-select-wrapper" id="custom-select-membership-type">
+                    <div class="custom-select-trigger" id="custom-select-trigger-membership-type">
+                      <span id="custom-select-value-membership-type">Select type</span>
+                      <i data-lucide="chevron-down" class="select-arrow-icon"></i>
+                    </div>
+                    <div class="custom-select-options" id="custom-select-options-membership-type">
+                      <div class="custom-option" data-value="Student">Student</div>
+                      <div class="custom-option" data-value="Faculty">Faculty</div>
+                      <div class="custom-option" data-value="Staff">Staff</div>
+                    </div>
+                    <select id="membership_type" name="membership_type" class="input-control" style="display: none;" required>
+                      <option value="" disabled selected>Select type</option>
+                      <option value="Student">Student</option>
+                      <option value="Faculty">Faculty</option>
+                      <option value="Staff">Staff</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="student-select-col">
+                  <label for="preferred_branch">
+                    <i data-lucide="library"></i> Preferred Branch *
+                  </label>
+                  <div class="custom-select-wrapper" id="custom-select-preferred-branch">
+                    <div class="custom-select-trigger" id="custom-select-trigger-preferred-branch">
+                      <span id="custom-select-value-preferred-branch">Select branch</span>
+                      <i data-lucide="chevron-down" class="select-arrow-icon"></i>
+                    </div>
+                    <div class="custom-select-options" id="custom-select-options-preferred-branch">
+                      <div class="custom-option" data-value="Main Library">Main Library</div>
+                      <div class="custom-option" data-value="Science Branch">Science Branch</div>
+                      <div class="custom-option" data-value="City Campus Library">City Campus Library</div>
+                    </div>
+                    <select id="preferred_branch" name="preferred_branch" class="input-control" style="display: none;" required>
+                      <option value="" disabled selected>Select branch</option>
+                      <option value="Main Library">Main Library</option>
+                      <option value="Science Branch">Science Branch</option>
+                      <option value="City Campus Library">City Campus Library</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="student-select-col">
+                  <label for="borrowing_category">
+                    <i data-lucide="book-open"></i> Borrowing Category
+                  </label>
+                  <div class="custom-select-wrapper" id="custom-select-borrowing-category">
+                    <div class="custom-select-trigger" id="custom-select-trigger-borrowing-category">
+                      <span id="custom-select-value-borrowing-category">General Collection</span>
+                      <i data-lucide="chevron-down" class="select-arrow-icon"></i>
+                    </div>
+                    <div class="custom-select-options" id="custom-select-options-borrowing-category">
+                      <div class="custom-option" data-value="General Collection">General Collection</div>
+                      <div class="custom-option" data-value="Reference Collection">Reference Collection</div>
+                      <div class="custom-option" data-value="Special Collection">Special Collection</div>
+                    </div>
+                    <select id="borrowing_category" name="borrowing_category" class="input-control" style="display: none;">
+                      <option value="General Collection">General Collection</option>
+                      <option value="Reference Collection">Reference Collection</option>
+                      <option value="Special Collection">Special Collection</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Research Interests -->
+            <div class="field-group full-width">
+              <label><i data-lucide="book-marked"></i> Research Interests</label>
+              <div class="checkbox-grid">
+                <label class="custom-checkbox-card">
+                  <input type="checkbox" name="interest" value="Science">
+                  <span class="checkmark"></span>
+                  <span>Science</span>
+                </label>
+                <label class="custom-checkbox-card">
+                  <input type="checkbox" name="interest" value="Technology">
+                  <span class="checkmark"></span>
+                  <span>Technology</span>
+                </label>
+                <label class="custom-checkbox-card">
+                  <input type="checkbox" name="interest" value="Business">
+                  <span class="checkmark"></span>
+                  <span>Business</span>
+                </label>
+                <label class="custom-checkbox-card">
+                  <input type="checkbox" name="interest" value="Arts">
+                  <span class="checkmark"></span>
+                  <span>Arts</span>
+                </label>
+                <label class="custom-checkbox-card">
+                  <input type="checkbox" name="interest" value="Law">
+                  <span class="checkmark"></span>
+                  <span>Law</span>
+                </label>
+                <label class="custom-checkbox-card">
+                  <input type="checkbox" name="interest" value="Medicine">
+                  <span class="checkmark"></span>
+                  <span>Medicine</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Card Status, Contact Method, Access Security PIN -->
+            <div class="field-group full-width">
+              <div class="triple-select-grid">
+                <div class="student-select-col">
+                  <label><i data-lucide="id-card"></i> Card Status *</label>
+                  <div class="radio-card-group">
+                    <label class="custom-radio-card">
+                      <input type="radio" name="card_status" value="New Card" required>
+                      <span class="radiomark"></span>
+                      <span>New card</span>
+                    </label>
+                    <label class="custom-radio-card">
+                      <input type="radio" name="card_status" value="Renewal" required>
+                      <span class="radiomark"></span>
+                      <span>Renewal</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="student-select-col">
+                  <label for="preferred_contact">
+                    <i data-lucide="message-square"></i> Contact Method
+                  </label>
+                  <div class="custom-select-wrapper" id="custom-select-preferred-contact">
+                    <div class="custom-select-trigger" id="custom-select-trigger-preferred-contact">
+                      <span id="custom-select-value-preferred-contact">Email</span>
+                      <i data-lucide="chevron-down" class="select-arrow-icon"></i>
+                    </div>
+                    <div class="custom-select-options" id="custom-select-options-preferred-contact">
+                      <div class="custom-option" data-value="Email">Email</div>
+                      <div class="custom-option" data-value="Phone">Phone</div>
+                    </div>
+                    <select id="preferred_contact" name="preferred_contact" class="input-control" style="display: none;">
+                      <option value="Email">Email</option>
+                      <option value="Phone">Phone</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="student-select-col">
+                  <label for="password">
+                    <i data-lucide="lock"></i> Access Security PIN *
+                  </label>
+                  <input type="password" id="password" name="password" class="input-control"
+                    placeholder="4-8 digit passcode" required minlength="4">
+                </div>
+              </div>
+            </div>
+
+            <!-- Slider settings & color theme -->
+            <div class="field-group">
+              <label for="card_theme">
+                <i data-lucide="palette"></i> Card Theme Color
+              </label>
+              <div class="color-picker-container" id="color-picker-trigger">
+                <div class="color-picker-wrapper">
+                  <input type="color" id="card_theme" name="card_theme" class="input-color" value="#06b6d4">
+                </div>
+                <span class="color-picker-value" id="color-hex-label">#06b6d4</span>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label for="borrow_limit">
+                <i data-lucide="book-open"></i> Max Borrow Limit
+              </label>
+              <div class="range-slider-wrapper"
+                style="display: flex; flex-direction: column; align-items: stretch; gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 1rem; width: 100%;">
+                  <input type="range" id="borrow_limit" name="borrow_limit" class="range-slider" min="1" max="25"
+                    value="1">
+                  <span class="range-value" id="borrow-limit-val">1</span>
+                </div>
+                <div class="slider-scale-ticks" id="slider-ticks">
+                  <span class="tick" data-value="1">1</span>
+                  <span class="tick" data-value="5">5</span>
+                  <span class="tick" data-value="10">10</span>
+                  <span class="tick" data-value="15">15</span>
+                  <span class="tick" data-value="20">20</span>
+                  <span class="tick" data-value="25">25</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Datepickers for Membership Start and End -->
             <div class="field-group">
               <label for="start-date-display">
                 <i data-lucide="calendar"></i> Membership Start Date
@@ -284,7 +756,6 @@
               </div>
             </div>
 
-            <!-- membership expiry date -->
             <div class="field-group">
               <label for="expiry-date-display">
                 <i data-lucide="calendar-check-2"></i> Membership Expiry Date
@@ -319,200 +790,67 @@
               </div>
             </div>
 
+            <!-- Radio Tiers -->
+            <div class="field-group full-width" style="display: none;">
+              <input type="radio" name="tier" value="Standard" checked>
+              <input type="radio" name="tier" value="Premium">
+              <input type="radio" name="tier" value="VIP">
+            </div>
 
-            <!-- Section 3: Preferences & Security Config -->
+            <!-- Section 5: Documents & Declaration -->
             <div class="form-section">
               <h3 class="form-section-title">
-                <i data-lucide="sliders"></i>
-                Preferences & Bounds
+                <i data-lucide="shield-alert"></i>
+                Documents & Declaration
               </h3>
             </div>
 
-            <!-- radio -->
-            <div class="field-group full-width">
-              <label><i data-lucide="shield-check"></i> Membership Tier *</label>
-              <div class="radio-group">
-                <label class="custom-radio">
-                  <input type="radio" name="tier" value="Standard" checked>
-                  <span class="radiomark"></span>
-                  <span>Standard</span>
-                </label>
-                <label class="custom-radio">
-                  <input type="radio" name="tier" value="Premium">
-                  <span class="radiomark"></span>
-                  <span>Premium</span>
-                </label>
-                <label class="custom-radio">
-                  <input type="radio" name="tier" value="VIP">
-                  <span class="radiomark"></span>
-                  <span>VIP Special</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- color -->
+            <!-- Member Avatar / Photo Upload -->
             <div class="field-group">
-              <label for="card_theme">
-                <i data-lucide="palette"></i> Card Theme Color
+              <label for="avatar">
+                <i data-lucide="image"></i> Student Photo
               </label>
-              <div class="color-picker-container" id="color-picker-trigger">
-                <div class="color-picker-wrapper">
-                  <input type="color" id="card_theme" name="card_theme" class="input-color" value="#8b5cf6">
+              <div class="file-upload-wrapper">
+                <div class="file-dropzone" id="avatar-dropzone">
+                  <i data-lucide="upload-cloud"></i>
+                  <span id="file-label">Choose image or drag here</span>
+                  <input type="file" id="avatar" name="avatar" class="file-input" accept="image/*">
                 </div>
-                <span class="color-picker-value" id="color-hex-label">#8b5cf6</span>
               </div>
             </div>
 
-            <!-- range -->
+            <!-- Student ID / Enrollment Proof -->
             <div class="field-group">
-              <label for="borrow_limit">
-                <i data-lucide="book-open"></i> Max Borrow Limit
+              <label for="enrollment_proof">
+                <i data-lucide="file-check"></i> Student ID / Enrollment Proof
               </label>
-              <div class="range-slider-wrapper"
-                style="display: flex; flex-direction: column; align-items: stretch; gap: 0.5rem;">
-                <div style="display: flex; align-items: center; gap: 1rem; width: 100%;">
-                  <input type="range" id="borrow_limit" name="borrow_limit" class="range-slider" min="1" max="25"
-                    value="5">
-                  <span class="range-value" id="borrow-limit-val">5</span>
-                </div>
-                <div class="slider-scale-ticks" id="slider-ticks">
-                  <span class="tick" data-value="1">1</span>
-                  <span class="tick" data-value="5">5</span>
-                  <span class="tick" data-value="10">10</span>
-                  <span class="tick" data-value="15">15</span>
-                  <span class="tick" data-value="20">20</span>
-                  <span class="tick" data-value="25">25</span>
+              <div class="file-upload-wrapper">
+                <div class="file-dropzone" id="enrollment-dropzone">
+                  <i data-lucide="file-text"></i>
+                  <span id="enrollment-file-label">Choose PDF or Image</span>
+                  <input type="file" id="enrollment_proof" name="enrollment_proof" class="file-input" accept="image/*,application/pdf">
                 </div>
               </div>
             </div>
 
-            <!-- academic student selects -->
-            <div class="field-group full-width">
-              <div class="triple-select-grid">
-                <!-- Department select -->
-                <div class="student-select-col">
-                  <label for="custom-select-trigger-dept">
-                    <i data-lucide="graduation-cap"></i> Department *
-                  </label>
-                  <div class="custom-select-wrapper" id="custom-select-dept">
-                    <div class="custom-select-trigger" id="custom-select-trigger-dept">
-                      <span id="custom-select-value-dept" class="placeholder-style">Select Department</span>
-                      <i data-lucide="chevron-down" class="select-arrow-icon"></i>
-                    </div>
-                    <div class="custom-select-options" id="custom-select-options-dept">
-                      <div class="custom-option" data-value="CSE">CSE (Computer Science)</div>
-                      <div class="custom-option" data-value="EEE">EEE (Electrical Eng.)</div>
-                      <div class="custom-option" data-value="SWE">SWE (Software Eng.)</div>
-                      <div class="custom-option" data-value="BBA">BBA (Business Admin.)</div>
-                      <div class="custom-option" data-value="CE">CE (Civil Eng.)</div>
-                      <div class="custom-option" data-value="ENG">ENG (English Lit.)</div>
-                      <div class="custom-option" data-value="LAW">LAW (Bachelor of Laws)</div>
-                      <div class="custom-option" data-value="PHR">PHR (Pharmacy)</div>
-                    </div>
-                    <select id="department" name="department" style="display: none;" required>
-                      <option value="" disabled selected>Select Department</option>
-                      <option value="CSE">CSE</option>
-                      <option value="EEE">EEE</option>
-                      <option value="SWE">SWE</option>
-                      <option value="BBA">BBA</option>
-                      <option value="CE">CE</option>
-                      <option value="ENG">ENG</option>
-                      <option value="LAW">LAW</option>
-                      <option value="PHR">PHR</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Batch input -->
-                <div class="student-select-col">
-                  <label for="batch">
-                    <i data-lucide="users"></i> Batch *
-                  </label>
-                  <input type="text" id="batch" name="batch" class="input-control" placeholder="E.g. Batch 60"
-                    value="Batch 60" required>
-                </div>
-
-                <!-- Semester select -->
-                <div class="student-select-col">
-                  <label for="custom-select-trigger-semester">
-                    <i data-lucide="award"></i> Semester *
-                  </label>
-                  <div class="custom-select-wrapper" id="custom-select-semester">
-                    <div class="custom-select-trigger" id="custom-select-trigger-semester">
-                      <span id="custom-select-value-semester" class="placeholder-style">Select Semester</span>
-                      <i data-lucide="chevron-down" class="select-arrow-icon"></i>
-                    </div>
-                    <div class="custom-select-options" id="custom-select-options-semester">
-                      <div class="custom-option" data-value="1st Sem">1st Semester</div>
-                      <div class="custom-option" data-value="2nd Sem">2nd Semester</div>
-                      <div class="custom-option" data-value="3rd Sem">3rd Semester</div>
-                      <div class="custom-option" data-value="4th Sem">4th Semester</div>
-                      <div class="custom-option" data-value="5th Sem">5th Semester</div>
-                      <div class="custom-option" data-value="6th Sem">6th Semester</div>
-                      <div class="custom-option" data-value="7th Sem">7th Semester</div>
-                      <div class="custom-option" data-value="8th Sem">8th Semester</div>
-                      <div class="custom-option" data-value="9th Sem">9th Semester</div>
-                      <div class="custom-option" data-value="10th Sem">10th Semester</div>
-                    </div>
-                    <select id="semester" name="semester" style="display: none;" required>
-                      <option value="" disabled selected>Select Semester</option>
-                      <option value="1st Sem">1st Sem</option>
-                      <option value="2nd Sem">2nd Sem</option>
-                      <option value="3rd Sem">3rd Sem</option>
-                      <option value="4th Sem">4th Sem</option>
-                      <option value="5th Sem">5th Sem</option>
-                      <option value="6th Sem">6th Sem</option>
-                      <option value="7th Sem">7th Sem</option>
-                      <option value="8th Sem">8th Sem</option>
-                      <option value="9th Sem">9th Sem</option>
-                      <option value="10th Sem">10th Sem</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-
-
-
-            <!-- Section 4: Bio / Terms -->
-            <div class="form-section">
-              <h3 class="form-section-title">
-                <i data-lucide="file-text"></i>
-                Verify & Terms
-              </h3>
-            </div>
-
-            <!-- textarea -->
-            <div class="field-group full-width">
-              <label for="address">
-                <i data-lucide="home"></i> Residential Address / Bio Note
-              </label>
-              <textarea id="address" name="address" class="input-control"
-                placeholder="Enter physical mailing address or note special academic clearance status..."></textarea>
-            </div>
-
-            <!-- Terms checkbox -->
+            <!-- Consent Checkbox -->
             <div class="field-group full-width">
               <label class="custom-checkbox" style="align-items: flex-start; padding: 0.75rem 1rem;">
                 <input type="checkbox" id="agree_terms" name="agree_terms" required>
                 <span class="checkmark" style="margin-top: 2px;"></span>
-                <span style="line-height: 1.4; font-size: 0.82rem;">
-                  I hereby confirm the accuracy of all submitted credentials, and pledge to adhere to LMS borrowing
-                  limits and intellectual property policies. *
+                <span style="line-height: 1.4; font-size: 0.82rem; color: var(--text-main);">
+                  I confirm that the information provided is accurate and I agree to follow Gono Bishwabidyalay library borrowing and conduct rules. *
                 </span>
               </label>
             </div>
 
-            <!-- buttons (Reset & Submit) -->
+            <!-- Buttons -->
             <div class="form-actions">
-              <!-- reset button -->
               <button type="reset" class="btn btn-secondary" id="reset-form-btn">
                 <i data-lucide="rotate-ccw" class="btn-icon"></i>
                 <span>Reset</span>
               </button>
 
-              <!-- submit button -->
               <button type="submit" class="btn btn-primary" id="submit-form-btn">
                 <i data-lucide="check-circle-2" class="btn-icon"></i>
                 <div class="btn-spinner"></div>
@@ -527,7 +865,7 @@
       <!-- Right Column: Live Holographic Preview Card -->
       <section class="preview-container">
         <div class="preview-title">
-          <i data-lucide="id-card"></i>
+          <i data-lucide="eye"></i>
           <span>Live Digital ID Card</span>
         </div>
 
@@ -543,8 +881,8 @@
                   <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                       <linearGradient id="logo-grad-primary-card" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="var(--user-card-theme, var(--accent-primary))" />
-                        <stop offset="100%" stop-color="var(--accent-secondary)" />
+                        <stop offset="0%" stop-color="var(--user-card-theme, var(--accent-primary))" stop-opacity="1" />
+                        <stop offset="100%" stop-color="var(--user-card-theme, var(--accent-primary))" stop-opacity="0.25" />
                       </linearGradient>
                       <linearGradient id="logo-grad-dark-card" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stop-color="rgba(0, 0, 0, 0.5)" />
@@ -558,7 +896,7 @@
                     <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-card)" />
                     <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-card)" />
                     <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-card)" />
-                    <path d="M12 12V22" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round" />
+                    <path d="M12 12V22" stroke="var(--user-card-theme, var(--accent-primary))" stroke-width="1.5" stroke-linecap="round" />
                     <path d="M12 12L2 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
                     <path d="M12 12L22 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
                   </svg>
@@ -586,7 +924,7 @@
                   <div class="card-tel" id="preview-phone">+1 555-0199</div>
 
                   <div class="card-meta-row">
-                    <div>LIMIT: <span id="preview-limit" style="font-weight:700;">5 BOOKS</span></div>
+                    <div>LIMIT: <span id="preview-limit" style="font-weight:700;">1 BOOK</span></div>
                     <div>TERM: <span id="preview-term" style="font-weight:700;">DEC 2026</span></div>
                   </div>
                 </div>
@@ -641,13 +979,16 @@
                     <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-card)" />
                     <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-card)" />
                     <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-card)" />
-                    <path d="M12 12V22" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round" />
+                    <path d="M12 12V22" stroke="var(--user-card-theme, var(--accent-primary))" stroke-width="1.5" stroke-linecap="round" />
                     <path d="M12 12L2 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
                     <path d="M12 12L22 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
                   </svg>
                   <span class="card-logo-text">AETHER LMS</span>
                 </div>
-                <div class="card-back-badge">SECURITY SEAL</div>
+                <div class="card-back-badge">
+                  <i data-lucide="lock"></i>
+                  <span>SECURITY SEAL</span>
+                </div>
               </div>
 
               <div class="card-body-back">
@@ -681,7 +1022,10 @@
               </div>
 
               <div class="card-footer-back">
-                <span class="security-token">SECURE PROTOCOL V1.82</span>
+                <span class="security-token">
+                  <i data-lucide="shield-check"></i>
+                  <span>SECURE PROTOCOL V1.82</span>
+                </span>
                 <span class="card-back-glow-seal">
                   <i data-lucide="verified" class="verified-icon"></i>
                   OFFICIAL ACCESS
@@ -810,7 +1154,7 @@
       <div class="viewer-header">
         <div class="viewer-logo">
           <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-            style="width: 2.2rem; height: 2.2rem; filter: drop-shadow(0 2px 8px rgba(139, 92, 246, 0.45));">
+            style="width: 2.2rem; height: 2.2rem; filter: drop-shadow(0 2px 8px rgba(6, 182, 212, 0.45));">
             <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-card)" />
             <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-card)" />
             <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-card)" />
@@ -891,8 +1235,15 @@
     <div class="viewer-content" style="max-width: 900px; width: 95%; gap: 1.25rem;">
       <div class="viewer-header">
         <div class="viewer-logo">
-          <i data-lucide="layout-dashboard" style="width: 2.2rem; height: 2.2rem; color: var(--accent-primary);"></i>
-          <h2>ADMIN DASHBOARD</h2>
+          <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 2.2rem; height: 2.2rem; filter: drop-shadow(0 2px 8px rgba(6, 182, 212, 0.45));">
+            <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-nav)" />
+            <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-nav)" />
+            <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-nav)" />
+            <path d="M12 12V22" stroke="var(--accent-primary)" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M12 12L2 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
+            <path d="M12 12L22 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
+          </svg>
+          <h2>AETHER LMS - ADMIN DASHBOARD</h2>
         </div>
         <p class="viewer-tagline">Central Member Directory & Database Control</p>
       </div>
@@ -979,6 +1330,199 @@
           <i data-lucide="eye"></i>
           <span>View Card</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Member Details Modal -->
+  <div class="share-modal-overlay" id="admin-details-modal" style="display: none;">
+    <div class="share-modal-content" style="max-width: 650px; width: 95%;">
+      <div class="share-modal-header">
+        <h3>Member Audit Profile</h3>
+        <button type="button" class="close-modal-btn" id="btn-close-details-modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="share-modal-body" style="max-height: 70vh; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem; padding-right: 0.5rem; text-align: left;">
+        
+        <!-- Summary Info Header -->
+        <div style="display: flex; gap: 1rem; align-items: center; background: rgba(255, 255, 255, 0.03); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);">
+          <div id="details-avatar-container" style="width: 70px; height: 70px; border-radius: 8px; border: 1px solid var(--accent-primary); overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); flex-shrink: 0;">
+            <i data-lucide="user" id="details-avatar-placeholder" style="width: 2rem; height: 2rem; color: var(--text-muted);"></i>
+            <img id="details-avatar" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+          </div>
+          <div>
+            <h4 id="details-full-name" style="margin: 0 0 0.25rem 0; font-size: 1.1rem; color: var(--text-main);">Full Name</h4>
+            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <span>Key: <strong id="details-key" style="color: var(--accent-secondary);">KEY</strong></span>
+              <span>ID: <strong id="details-student-id" style="color: var(--text-main);">ID</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+          
+          <!-- Student Details -->
+          <div>
+            <h4 style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.25rem;">
+              <i data-lucide="graduation-cap" style="width: 1rem; height: 1rem;"></i> Academic & Student Info
+            </h4>
+            <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted); width: 40%;">Degree Level:</td>
+                <td id="details-degree-level" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Faculty:</td>
+                <td id="details-faculty" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Department:</td>
+                <td id="details-dept" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Program / Major:</td>
+                <td id="details-program" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Semester / Year:</td>
+                <td id="details-semester" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Session:</td>
+                <td id="details-session" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Campus:</td>
+                <td id="details-campus" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Academic Advisor:</td>
+                <td id="details-advisor" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Personal Details -->
+          <div>
+            <h4 style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.25rem;">
+              <i data-lucide="user-cog" style="width: 1rem; height: 1rem;"></i> Personal Profile
+            </h4>
+            <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted); width: 40%;">Date of Birth:</td>
+                <td id="details-dob" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Gender:</td>
+                <td id="details-gender" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Blood Group:</td>
+                <td id="details-blood" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Nationality:</td>
+                <td id="details-nationality" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">NID / Passport:</td>
+                <td id="details-nid" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Alternate Phone:</td>
+                <td id="details-alt-phone" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Present Address:</td>
+                <td id="details-present-addr" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500; word-break: break-word;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Permanent Address:</td>
+                <td id="details-permanent-addr" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500; word-break: break-word;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">City / Postcode / Country:</td>
+                <td id="details-city-post-country" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Emergency Contact Info -->
+          <div>
+            <h4 style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.25rem;">
+              <i data-lucide="phone-call" style="width: 1rem; height: 1rem;"></i> Emergency Contact
+            </h4>
+            <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted); width: 40%;">Contact Name:</td>
+                <td id="details-emergency-name" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Relationship:</td>
+                <td id="details-emergency-relation" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Contact Phone:</td>
+                <td id="details-emergency-phone" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Contact Address:</td>
+                <td id="details-emergency-addr" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500; word-break: break-word;">-</td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Membership & System details -->
+          <div>
+            <h4 style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.25rem;">
+              <i data-lucide="settings" style="width: 1rem; height: 1rem;"></i> Membership Details
+            </h4>
+            <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted); width: 40%;">Membership Type:</td>
+                <td id="details-membership-type" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Preferred Branch:</td>
+                <td id="details-branch" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Borrowing Category:</td>
+                <td id="details-category" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Research Interests:</td>
+                <td id="details-interests" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Card Status:</td>
+                <td id="details-card-status" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Preferred Contact:</td>
+                <td id="details-contact-method" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Borrow Limit / Theme:</td>
+                <td style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">
+                  Max <span id="details-borrow-limit">-</span> books &bull; Theme: <span id="details-theme-color">-</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 0.35rem 0; color: var(--text-muted);">Validity Period:</td>
+                <td style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">
+                  <span id="details-start-date">-</span> to <span id="details-expiry-date">-</span>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+        </div>
+
+      </div>
+      <div class="share-modal-footer" style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
+        <button type="button" class="btn btn-secondary" id="btn-close-details-footer" style="padding: 0.6rem 1.2rem;">Close</button>
       </div>
     </div>
   </div>

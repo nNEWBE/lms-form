@@ -2,8 +2,8 @@
   <defs>
     <!-- Use concrete colors matching CSS variables for standalone rendering -->
     <linearGradient id="logo-grad-primary-fav" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#8b5cf6" />
-      <stop offset="100%" stop-color="#06b6d4" />
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="1" />
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.25" />
     </linearGradient>
     <linearGradient id="logo-grad-dark-fav" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="rgba(0, 0, 0, 0.5)" />

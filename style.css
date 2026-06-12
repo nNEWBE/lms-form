@@ -4,20 +4,84 @@
   --bg-primary: #0a0a0f;
   --bg-secondary: rgba(18, 18, 29, 0.75);
   --bg-card: rgba(22, 22, 38, 0.45);
-  --accent-primary: #8b5cf6;
-  --accent-secondary: #06b6d4;
+  --accent-primary: #06b6d4;
+  --accent-secondary: #8b5cf6;
   --accent-success: #10b981;
   --accent-error: #f43f5e;
   --text-main: #ffffff;
   --text-muted: #9ca3af;
   --border-color: rgba(255, 255, 255, 0.08);
-  --border-focus: rgba(139, 92, 246, 0.5);
-  --glow-intensity: 0 0 20px rgba(139, 92, 246, 0.25);
-  --glow-cyan: 0 0 20px rgba(6, 182, 212, 0.25);
+  --border-focus: color-mix(in srgb, var(--accent-primary) 50%, transparent);
+  --glow-intensity: 0 0 20px color-mix(in srgb, var(--accent-primary) 25%, transparent);
+  --glow-cyan: 0 0 20px color-mix(in srgb, var(--accent-secondary) 25%, transparent);
   --card-glow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   --card-radius: 16px;
 
-  --user-card-theme: #8b5cf6;
+  --user-card-theme: #06b6d4;
+}
+
+/* ==========================================================================
+   Theme-Toggle — Circle Reveal Animation (View Transitions API)
+   ========================================================================== */
+
+/* Enable view-transitions on the root */
+@view-transition {
+  navigation: none;
+}
+
+/* Suppress the default cross-fade */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* --- To Light Mode: new snapshot clips in as a growing circle --- */
+:root[data-theme-transitioning="to-light"]::view-transition-new(root) {
+  animation: theme-circle-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  clip-path: circle(0% at var(--ripple-x, 50%) var(--ripple-y, 50%));
+}
+:root[data-theme-transitioning="to-light"]::view-transition-old(root) {
+  animation: none;
+  z-index: -1;
+}
+
+/* --- To Dark Mode: new snapshot clips in as a growing circle --- */
+:root[data-theme-transitioning="to-dark"]::view-transition-new(root) {
+  animation: theme-circle-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  clip-path: circle(0% at var(--ripple-x, 50%) var(--ripple-y, 50%));
+}
+:root[data-theme-transitioning="to-dark"]::view-transition-old(root) {
+  animation: none;
+  z-index: -1;
+}
+
+@keyframes theme-circle-in {
+  0%   { clip-path: circle(0%   at var(--ripple-x, 50%) var(--ripple-y, 50%)); }
+  100% { clip-path: circle(150% at var(--ripple-x, 50%) var(--ripple-y, 50%)); }
+}
+
+/* Navbar button pulse on click */
+.theme-toggle.ripple-active {
+  animation: toggle-btn-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes toggle-btn-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* ==========================================================================
+   End Theme-Toggle Animation
+   ========================================================================== */
+
+.required-asterisk {
+  color: var(--accent-primary);
+  margin-left: 3px;
+  font-weight: 700;
+  transition: color 0.2s ease;
 }
 
 * {
@@ -40,7 +104,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.3);
+  background: color-mix(in srgb, var(--accent-primary) 30%, transparent);
   border-radius: 10px;
 }
 
@@ -201,6 +265,12 @@ body.light-mode .theme-toggle .theme-icon-dark {
 body.light-mode {
   background-color: #f0f1f5;
   color: #1a1a2e;
+  --text-main: #1a1a2e;
+  --text-muted: #6b7280;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --bg-primary: #f0f1f5;
+  --bg-secondary: rgba(240, 241, 245, 0.9);
+  --bg-card: #ffffff;
 }
 
 body.light-mode .fixed-navbar {
@@ -256,7 +326,7 @@ body.light-mode .skel-rail-right {
 }
 
 body.light-mode header h1 {
-  background: linear-gradient(135deg, #1a1a2e 30%, var(--accent-primary) 70%, var(--accent-secondary) 100%);
+  background: linear-gradient(135deg, #1a1a2e 30%, var(--accent-primary) 70%, color-mix(in srgb, var(--accent-primary) 30%, transparent) 100%);
   -webkit-background-clip: text;
   background-clip: text;
 }
@@ -301,9 +371,8 @@ body.light-mode .field-group label {
   color: #6b7280;
 }
 
-body.light-mode .field-group:focus-within label {
-  color: var(--accent-primary);
-}
+
+
 
 body.light-mode .input-control {
   background: #f8f8fb;
@@ -373,7 +442,7 @@ body.light-mode input[type="range"].range-slider:active::-moz-range-thumb {
 
 body.light-mode .range-value {
   color: var(--accent-primary);
-  background: rgba(139, 92, 246, 0.08);
+  background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
 }
 
 body.light-mode .slider-scale-ticks .tick {
@@ -437,17 +506,36 @@ body.light-mode .custom-radio .radiomark {
 }
 
 body.light-mode .custom-checkbox:has(input:checked) {
-  background: rgba(139, 92, 246, 0.06);
+  background: color-mix(in srgb, var(--accent-primary) 6%, transparent);
   border-color: var(--accent-primary);
 }
 
 body.light-mode .custom-radio:has(input:checked) {
-  background: rgba(6, 182, 212, 0.06);
+  background: color-mix(in srgb, var(--accent-secondary) 6%, transparent);
   border-color: var(--accent-secondary);
 }
 
 body.light-mode .btn-primary {
-  box-shadow: none;
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #ffffff;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-primary) 25%, transparent);
+}
+
+body.light-mode .btn-primary:hover {
+  background: color-mix(in srgb, var(--accent-primary) 85%, #000000);
+  border-color: color-mix(in srgb, var(--accent-primary) 85%, #000000);
+  color: #ffffff;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent-primary) 35%, transparent);
+}
+
+body.light-mode .btn-primary:active {
+  transform: translateY(0);
+}
+
+body.light-mode .btn-primary .btn-spinner {
+  border-color: rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
 }
 
 body.light-mode .btn-secondary {
@@ -459,6 +547,11 @@ body.light-mode .btn-secondary {
 body.light-mode .btn-secondary:hover {
   background: #f0f0f5;
   color: #1a1a2e;
+}
+
+body.light-mode .btn-secondary .btn-spinner {
+  border-color: rgba(107, 114, 128, 0.3);
+  border-top-color: #6b7280;
 }
 
 /* Light mode - Preview Card */
@@ -579,6 +672,19 @@ body.light-mode .card-footer-back {
   color: #6b7280;
 }
 
+body.light-mode .action-btn {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #4b5563;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+body.light-mode .action-btn:hover {
+  background: #f9fafb;
+  border-color: var(--user-card-theme, var(--accent-primary));
+  color: var(--user-card-theme, var(--accent-primary));
+}
+
 body.light-mode .card-instructions {
   background: #f8f8fb;
   border-color: rgba(0, 0, 0, 0.06);
@@ -603,7 +709,7 @@ body.light-mode .toast-desc {
 }
 
 body.light-mode .beam-path {
-  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.15));
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent-primary) 15%, transparent));
 }
 
 /* Light mode overrides for Custom Select and Date Picker */
@@ -833,7 +939,7 @@ body.light-mode .calendar-nav-btn:hover {
   stroke-dasharray: 100 1000;
   animation: flow-beam-center 11s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   animation-delay: 3s;
-  filter: drop-shadow(0 0 7px var(--accent-secondary));
+  filter: drop-shadow(0 0 7px var(--accent-primary));
 }
 
 #beam-path-bottom {
@@ -842,7 +948,7 @@ body.light-mode .calendar-nav-btn:hover {
   stroke-dasharray: 90 800;
   animation: flow-beam-bottom 10s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   animation-delay: 0.5s;
-  filter: drop-shadow(0 0 6px var(--accent-secondary));
+  filter: drop-shadow(0 0 6px var(--accent-primary));
 }
 
 @keyframes flow-beam-left {
@@ -913,8 +1019,8 @@ header {
 
 header h1 {
   font-size: 2.8rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #ffffff 30%, var(--accent-primary) 70%, var(--accent-secondary) 100%);
+  font-weight: 600;
+  background: linear-gradient(135deg, #ffffff 30%, var(--accent-primary) 70%, color-mix(in srgb, var(--accent-primary) 30%, transparent) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -961,14 +1067,17 @@ header p {
   body {
     padding: 4.5rem 0.75rem 1.5rem;
   }
+
   header p {
     font-size: 0.9rem;
     margin-top: 0.8rem;
   }
+
   .glass-panel {
     padding: 0.85rem;
     border-radius: 12px;
   }
+
   .datepicker-calendar {
     width: 290px;
     right: calc(50% - 145px);
@@ -990,6 +1099,7 @@ header p {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
+
   .preview-container {
     order: -1;
   }
@@ -1002,8 +1112,13 @@ header p {
   border-radius: 10px;
   padding: 1.15rem;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   transition: border-color 0.3s ease;
+}
+
+/* Only clip overflow on non-form panels (preview, instructions, etc.) */
+.glass-panel:not(.form-container) {
+  overflow: hidden;
 }
 
 .glass-panel:hover {
@@ -1061,7 +1176,7 @@ header p {
 .form-section-title svg {
   width: 0.85rem;
   height: 0.85rem;
-  color: var(--accent-secondary);
+  color: var(--accent-primary);
   stroke-width: 2.2px;
 }
 
@@ -1077,7 +1192,6 @@ header p {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  position: relative;
 }
 
 .field-group.full-width {
@@ -1088,9 +1202,11 @@ header p {
   .form-grid {
     grid-template-columns: 1fr;
   }
+
   .form-section {
     grid-column: span 1;
   }
+
   .field-group.full-width {
     grid-column: span 1;
   }
@@ -1115,9 +1231,8 @@ header p {
   stroke-width: 2.2px;
 }
 
-.field-group:focus-within label {
-  color: var(--text-main);
-}
+
+
 
 /* Custom styled generic inputs */
 .input-control {
@@ -1459,7 +1574,7 @@ input[type="file"].file-input {
   gap: 0.25rem;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .triple-select-grid {
     grid-template-columns: 1fr;
   }
@@ -1672,6 +1787,56 @@ body.light-mode .placeholder-style {
   animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.custom-select-wrapper.open,
+.custom-datepicker-wrapper.open {
+  z-index: 999 !important;
+}
+
+.field-group:has(.custom-select-wrapper.open),
+.field-group:has(.custom-datepicker-wrapper.open) {
+  z-index: 999 !important;
+}
+
+/* Upward opening select dropdowns and datepickers when vertical space below is restricted */
+.custom-select-wrapper.open-top .custom-select-options {
+  top: auto;
+  bottom: calc(100% + 5px);
+  box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.custom-select-wrapper.open-top.open .custom-select-options {
+  animation: dropdownFadeInUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.custom-datepicker-wrapper.open-top .datepicker-calendar {
+  top: auto;
+  bottom: calc(100% + 5px);
+  box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.custom-datepicker-wrapper.open-top.open .datepicker-calendar {
+  animation: dropdownFadeInUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Light mode shadow overrides for upward-facing dropdowns */
+body.light-mode .custom-select-wrapper.open-top .custom-select-options,
+body.light-mode .custom-datepicker-wrapper.open-top .datepicker-calendar {
+  box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.05);
+}
+
+
 .calendar-header {
   display: flex;
   align-items: center;
@@ -1779,13 +1944,14 @@ body.light-mode .placeholder-style {
 }
 
 .calendar-day-cell.today {
-  background: color-mix(in srgb, var(--accent-secondary) 15%, transparent);
-  color: var(--accent-secondary);
+  background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  color: var(--accent-primary);
   font-weight: 600;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 30%, transparent);
 }
 
 .calendar-day-cell.selected {
-  background: color-mix(in srgb, var(--accent-primary) 15%, transparent);
+  background: color-mix(in srgb, var(--accent-primary) 18%, transparent);
   color: var(--accent-primary) !important;
   font-weight: 700;
   border: 1px solid var(--accent-primary);
@@ -1835,12 +2001,12 @@ body.light-mode .placeholder-style {
 }
 
 .calendar-footer-btn.select-today {
-  color: var(--accent-success);
-  background: rgba(16, 185, 129, 0.08);
+  color: var(--accent-primary);
+  background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
 }
 
 .calendar-footer-btn.select-today:hover {
-  background: rgba(16, 185, 129, 0.16);
+  background: color-mix(in srgb, var(--accent-primary) 16%, transparent);
 }
 
 /* Custom Month Picker Grid styling */
@@ -1981,7 +2147,9 @@ body.light-mode .placeholder-style {
 }
 
 .custom-checkbox input,
-.custom-radio input {
+.custom-checkbox-card input[type="checkbox"],
+.custom-radio input,
+.custom-radio-card input[type="radio"] {
   position: absolute;
   opacity: 0;
   cursor: pointer;
@@ -1991,12 +2159,15 @@ body.light-mode .placeholder-style {
 
 /* Checked text coloring */
 .custom-checkbox input:checked~span,
-.custom-radio input:checked~span {
+.custom-checkbox-card input:checked~span,
+.custom-radio input:checked~span,
+.custom-radio-card input:checked~span {
   color: var(--text-main);
 }
 
 /* Checkbox specific active/checked state */
-.custom-checkbox:has(input:checked) {
+.custom-checkbox:has(input:checked),
+.custom-checkbox-card:has(input:checked) {
   border-color: var(--accent-primary);
   background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
 }
@@ -2004,14 +2175,14 @@ body.light-mode .placeholder-style {
 /* Dynamic Tier-based Radio Button Styling */
 /* Standard Tier */
 .custom-radio:has(input[value="Standard"]):has(input:checked) {
-  border-color: #06b6d4;
-  background: rgba(6, 182, 212, 0.08);
+  border-color: var(--accent-secondary);
+  background: color-mix(in srgb, var(--accent-secondary) 8%, transparent);
 }
 
 /* Premium Tier */
 .custom-radio:has(input[value="Premium"]):has(input:checked) {
-  border-color: #8b5cf6;
-  background: rgba(139, 92, 246, 0.08);
+  border-color: var(--accent-primary);
+  background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
 }
 
 /* VIP Tier */
@@ -2021,9 +2192,17 @@ body.light-mode .placeholder-style {
   box-shadow: 0 0 12px rgba(251, 191, 36, 0.15);
 }
 
+/* Custom Radio Card Checked State */
+.custom-radio-card:has(input:checked) {
+  border-color: var(--accent-primary);
+  background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
+}
+
 /* Decorative Indicators */
 .custom-checkbox .checkmark,
-.custom-radio .radiomark {
+.custom-checkbox-card .checkmark,
+.custom-radio .radiomark,
+.custom-radio-card .radiomark {
   width: 14px;
   height: 14px;
   border: 1.5px solid rgba(255, 255, 255, 0.25);
@@ -2033,12 +2212,14 @@ body.light-mode .placeholder-style {
   flex-shrink: 0;
 }
 
-.custom-checkbox .checkmark {
+.custom-checkbox .checkmark,
+.custom-checkbox-card .checkmark {
   display: inline-block;
   border-radius: 4px;
 }
 
-.custom-radio .radiomark {
+.custom-radio .radiomark,
+.custom-radio-card .radiomark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2046,21 +2227,25 @@ body.light-mode .placeholder-style {
 }
 
 /* Hover over indicator */
-.custom-checkbox:hover .checkmark {
+.custom-checkbox:hover .checkmark,
+.custom-checkbox-card:hover .checkmark {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-.custom-radio:hover .radiomark {
+.custom-radio:hover .radiomark,
+.custom-radio-card:hover .radiomark {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* Checkbox checkmark fill */
-.custom-checkbox input:checked~.checkmark {
+.custom-checkbox input:checked~.checkmark,
+.custom-checkbox-card input:checked~.checkmark {
   background-color: var(--accent-primary);
   border-color: var(--accent-primary);
 }
 
-.custom-checkbox input:checked~.checkmark::after {
+.custom-checkbox input:checked~.checkmark::after,
+.custom-checkbox-card input:checked~.checkmark::after {
   content: '';
   position: absolute;
   left: 4px;
@@ -2074,20 +2259,20 @@ body.light-mode .placeholder-style {
 
 /* Radio dynamic dot colors */
 .custom-radio:has(input[value="Standard"]) input:checked~.radiomark {
-  border-color: #06b6d4;
+  border-color: var(--accent-secondary);
 }
 
 .custom-radio:has(input[value="Standard"]) input:checked~.radiomark::after {
-  background-color: #06b6d4;
+  background-color: var(--accent-secondary);
 }
 
 
 .custom-radio:has(input[value="Premium"]) input:checked~.radiomark {
-  border-color: #8b5cf6;
+  border-color: var(--accent-primary);
 }
 
 .custom-radio:has(input[value="Premium"]) input:checked~.radiomark::after {
-  background-color: #8b5cf6;
+  background-color: var(--accent-primary);
 }
 
 .custom-radio:has(input[value="VIP"]) input:checked~.radiomark {
@@ -2096,6 +2281,19 @@ body.light-mode .placeholder-style {
 
 .custom-radio:has(input[value="VIP"]) input:checked~.radiomark::after {
   background-color: #fbbf24;
+}
+
+/* Custom Radio Card Check Fill */
+.custom-radio-card input:checked~.radiomark {
+  border-color: var(--accent-primary);
+}
+
+.custom-radio-card input:checked~.radiomark::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--accent-primary);
 }
 
 /* General Radio Dot Placement */
@@ -2116,7 +2314,8 @@ textarea.input-control {
 .form-actions {
   grid-column: span 2;
   display: flex;
-  justify-content: flex-end; /* Align buttons to the right on large devices */
+  justify-content: flex-end;
+  /* Align buttons to the right on large devices */
   gap: 0.75rem;
   margin-top: 0.8rem;
   padding-top: 0.75rem;
@@ -2127,8 +2326,10 @@ textarea.input-control {
   .form-actions {
     grid-column: span 1;
   }
+
   .btn {
-    flex: 1; /* Stretch buttons on tablet and mobile */
+    flex: 1;
+    /* Stretch buttons on tablet and mobile */
   }
 }
 
@@ -2138,15 +2339,18 @@ textarea.input-control {
   .form-actions {
     gap: 0.5rem;
   }
+
   .btn {
     padding: 0.35rem 0.5rem;
     font-size: 0.75rem;
   }
+
   .btn i,
   .btn svg {
     width: 11px;
     height: 11px;
   }
+
   .btn-text-full {
     display: none;
   }
@@ -2164,7 +2368,8 @@ textarea.input-control {
   gap: 0.4rem;
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
   outline: none;
-  min-width: 120px; /* Prevent overly tiny buttons while fitting content */
+  min-width: 120px;
+  /* Prevent overly tiny buttons while fitting content */
 }
 
 .btn i,
@@ -2219,6 +2424,11 @@ textarea.input-control {
   animation: spin 0.8s linear infinite;
 }
 
+.btn-primary .btn-spinner {
+  border-color: rgba(12, 13, 20, 0.3);
+  border-top-color: #0c0d14;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -2247,7 +2457,7 @@ textarea.input-control {
   top: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.75rem;
   width: 100%;
   max-width: 460px;
   margin: 0 auto;
@@ -2260,6 +2470,14 @@ textarea.input-control {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.preview-title i,
+.preview-title svg {
+  opacity: 0.55;
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
 }
 
 /* Card 3D Wrap */
@@ -2339,7 +2557,6 @@ textarea.input-control {
   background-position: 100% 100%;
 }
 
-/* Ambient glow matching chosen picker color */
 .library-card-glow {
   position: absolute;
   top: -50%;
@@ -2347,7 +2564,7 @@ textarea.input-control {
   width: 200%;
   height: 200%;
   background: radial-gradient(circle at 50% 50%,
-      rgba(139, 92, 246, 0.08) 0%,
+      color-mix(in srgb, var(--user-card-theme, var(--accent-primary)) 8%, transparent) 0%,
       transparent 50%);
   pointer-events: none;
   z-index: 0;
@@ -2355,15 +2572,27 @@ textarea.input-control {
 
 /* Card Back Design Layout */
 .card-back-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   font-size: clamp(8px, 2.2cqw, 0.64rem);
   font-family: 'JetBrains Mono', monospace;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-muted);
+  background: color-mix(in srgb, var(--user-card-theme, var(--accent-primary)) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--user-card-theme, var(--accent-primary)) 20%, transparent);
+  color: var(--user-card-theme, var(--accent-primary));
   padding: clamp(0.1rem, 1cqw, 0.15rem) clamp(0.25rem, 1.5cqw, 0.4rem);
   border-radius: 4px;
   letter-spacing: 0.05em;
   font-weight: 700;
+}
+
+.card-back-badge i,
+.card-back-badge svg {
+  width: clamp(8px, 2cqw, 0.58rem);
+  height: clamp(8px, 2cqw, 0.58rem);
+  color: var(--user-card-theme, var(--accent-primary));
+  opacity: 0.75;
+  stroke-width: 2.5px;
 }
 
 .card-body-back {
@@ -2399,11 +2628,13 @@ textarea.input-control {
 }
 
 .guidelines-list li::before {
-  content: '•';
+  content: '✔';
   color: var(--user-card-theme, var(--accent-primary));
   position: absolute;
   left: 0;
+  top: 0;
   font-weight: bold;
+  font-size: clamp(7px, 1.8cqw, 0.65rem);
 }
 
 .card-back-address-block {
@@ -2495,14 +2726,27 @@ textarea.input-control {
   z-index: 1;
 }
 
+.security-token {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--user-card-theme, var(--accent-primary));
+  opacity: 1;
+}
+
+.security-token i,
+.security-token svg {
+  width: clamp(0.45rem, 2.2cqw, 0.65rem);
+  height: clamp(0.45rem, 2.2cqw, 0.65rem);
+  stroke-width: 2.2px;
+}
+
 .card-back-glow-seal {
   display: flex;
   align-items: center;
   gap: 0.2rem;
   color: var(--user-card-theme, var(--accent-primary));
-  font-weight: 700;
-  text-shadow: 0 0 8px color-mix(in srgb, var(--user-card-theme, var(--accent-primary)) 40%, transparent);
-  font-size: clamp(7px, 2cqw, 0.58rem);
+  opacity: 0.95;
 }
 
 .card-back-glow-seal i,
@@ -2546,19 +2790,9 @@ textarea.input-control {
 
 .action-btn:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.16);
-  color: var(--text-main);
+  border-color: var(--user-card-theme, var(--accent-primary));
+  color: var(--user-card-theme, var(--accent-primary));
   transform: translateY(-1px);
-}
-
-.action-btn.btn-flip:hover {
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
-}
-
-.action-btn.btn-share:hover {
-  border-color: var(--accent-secondary);
-  color: var(--accent-secondary);
 }
 
 /* Share Modal overlay */
@@ -2590,14 +2824,14 @@ textarea.input-control {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top: 3px solid var(--accent-primary, #8b5cf6);
+  border-top: 3px solid var(--accent-primary, #06b6d4);
   border-radius: 16px;
   width: 90%;
   max-width: 460px;
   padding: 1.75rem;
   box-shadow:
     0 24px 80px rgba(0, 0, 0, 0.8),
-    0 0 40px color-mix(in srgb, var(--accent-primary, #8b5cf6) 12%, transparent);
+    0 0 40px color-mix(in srgb, var(--accent-primary, #06b6d4) 12%, transparent);
   transform: translateY(20px) scale(0.95);
   transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -2719,8 +2953,8 @@ textarea.input-control {
 }
 
 .share-caption-input:focus {
-  border-color: var(--accent-primary, #8b5cf6);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--accent-primary, #8b5cf6) 15%, transparent);
+  border-color: var(--accent-primary, #06b6d4);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent-primary, #06b6d4) 15%, transparent);
 }
 
 /* Info note at bottom of modal */
@@ -2739,7 +2973,7 @@ textarea.input-control {
 .share-info-note svg {
   width: 0.85rem;
   height: 0.85rem;
-  color: var(--accent-secondary, #06b6d4);
+  color: var(--accent-secondary, #8b5cf6);
   flex-shrink: 0;
   margin-top: 1px;
 }
@@ -2763,8 +2997,8 @@ textarea.input-control {
 }
 
 .share-link-input-wrapper:focus-within {
-  border-color: var(--accent-primary, #8b5cf6);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--accent-primary, #8b5cf6) 20%, transparent);
+  border-color: var(--accent-primary, #06b6d4);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent-primary, #06b6d4) 20%, transparent);
 }
 
 .share-link-input {
@@ -2780,7 +3014,7 @@ textarea.input-control {
 }
 
 .btn-copy-link {
-  background: linear-gradient(135deg, var(--accent-primary, #8b5cf6), color-mix(in srgb, var(--accent-primary, #8b5cf6) 80%, #000));
+  background: linear-gradient(135deg, var(--accent-primary, #06b6d4), color-mix(in srgb, var(--accent-primary, #06b6d4) 80%, #000));
   border: none;
   color: white;
   font-size: 0.72rem;
@@ -2792,7 +3026,7 @@ textarea.input-control {
   align-items: center;
   gap: 0.35rem;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 3px 10px color-mix(in srgb, var(--accent-primary, #8b5cf6) 20%, transparent);
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--accent-primary, #06b6d4) 20%, transparent);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -2800,7 +3034,7 @@ textarea.input-control {
 .btn-copy-link:hover {
   filter: brightness(1.1);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--accent-primary, #8b5cf6) 35%, transparent);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--accent-primary, #06b6d4) 35%, transparent);
 }
 
 .btn-copy-link:active {
@@ -3053,7 +3287,7 @@ textarea.input-control {
   width: 80%;
   height: 70%;
   transform: translate(-50%, -50%);
-  background: radial-gradient(ellipse, color-mix(in srgb, var(--accent-primary, #8b5cf6) 15%, transparent) 0%, transparent 70%);
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--accent-primary, #06b6d4) 15%, transparent) 0%, transparent 70%);
   filter: blur(40px);
   pointer-events: none;
   z-index: 0;
@@ -3153,9 +3387,9 @@ textarea.input-control {
 }
 
 .card-type.tier-standard {
-  background: rgba(6, 182, 212, 0.08);
-  border: 1px solid rgba(6, 182, 212, 0.25);
-  color: #06b6d4;
+  background: color-mix(in srgb, var(--user-card-theme, var(--accent-primary)) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--user-card-theme, var(--accent-primary)) 25%, transparent);
+  color: var(--user-card-theme, var(--accent-primary));
 }
 
 
@@ -3313,11 +3547,19 @@ textarea.input-control {
 .card-instructions h4 {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--accent-secondary);
+  color: var(--accent-primary);
   margin-bottom: 0.4rem;
   display: flex;
   align-items: center;
   gap: 0.4rem;
+}
+
+.card-instructions h4 i,
+.card-instructions h4 svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  stroke-width: 2.2px;
+  flex-shrink: 0;
 }
 
 .card-instructions p {
@@ -3378,15 +3620,19 @@ textarea.input-control {
     -webkit-backdrop-filter: none !important;
     background: rgba(5, 6, 11, 0.98) !important;
   }
-  .custom-select-options, .datepicker-calendar {
+
+  .custom-select-options,
+  .datepicker-calendar {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     background: rgba(18, 19, 26, 0.99) !important;
   }
+
   body.light-mode .fixed-navbar {
     background: rgba(240, 241, 245, 0.99) !important;
   }
-  body.light-mode .custom-select-options, 
+
+  body.light-mode .custom-select-options,
   body.light-mode .datepicker-calendar {
     background: rgba(255, 255, 255, 0.99) !important;
   }
@@ -3428,7 +3674,7 @@ textarea.input-control {
   padding: 2.25rem 1.75rem;
   box-shadow:
     0 24px 80px rgba(0, 0, 0, 0.8),
-    0 0 40px color-mix(in srgb, var(--accent-success, #10b981) 12%, transparent);
+    0 0 40px rgba(16, 185, 129, 0.12);
   transform: translateY(20px) scale(0.95);
   transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   text-align: center;
@@ -3447,19 +3693,19 @@ textarea.input-control {
   width: 68px;
   height: 68px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--accent-success, #10b981) 12%, transparent);
+  background: rgba(16, 185, 129, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.25rem;
-  border: 1px solid color-mix(in srgb, var(--accent-success, #10b981) 25%, transparent);
+  border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
 .success-modal-icon {
   width: 32px;
   height: 32px;
   color: var(--accent-success, #10b981);
-  filter: drop-shadow(0 2px 8px color-mix(in srgb, var(--accent-success, #10b981) 40%, transparent));
+  filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.40));
 }
 
 .success-modal-pulse-ring {
@@ -3480,6 +3726,7 @@ textarea.input-control {
     transform: scale(1);
     opacity: 0.5;
   }
+
   100% {
     transform: scale(1.4);
     opacity: 0;
@@ -3533,7 +3780,7 @@ textarea.input-control {
 
 #success-summary-key {
   font-family: 'JetBrains Mono', monospace;
-  color: var(--accent-secondary, #06b6d4);
+  color: var(--accent-secondary, #8b5cf6);
 }
 
 /* Actions */
@@ -3653,7 +3900,7 @@ body.light-mode .admin-members-table tbody tr:hover {
 
 .table-member-name {
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   color: white;
   margin: 0;
 }
@@ -3675,20 +3922,21 @@ body.light-mode .table-member-name {
   letter-spacing: 0.03em;
 }
 
-.table-tier-badge i {
-  width: 0.7rem;
-  height: 0.7rem;
+.table-tier-badge i,
+.table-tier-badge svg {
+  width: 0.75rem;
+  height: 0.75rem;
 }
 
 .table-tier-badge.tier-standard {
-  background: rgba(139, 92, 246, 0.08);
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 20%, transparent);
   color: var(--accent-primary);
 }
 
 .table-tier-badge.tier-premium {
-  background: rgba(6, 182, 212, 0.08);
-  border: 1px solid rgba(6, 182, 212, 0.2);
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.2);
   color: var(--accent-secondary);
 }
 
@@ -3778,4 +4026,183 @@ body.light-mode #admin-login-mode .input-control {
 
 body.light-mode #admin-login-mode input {
   color: #1a1a2e !important;
+}
+
+/* Expanded Form Grid & Card Styles */
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  width: 100%;
+}
+
+.custom-checkbox-card {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.78rem;
+  color: var(--text-main);
+  user-select: none;
+}
+
+.custom-checkbox-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--accent-primary);
+}
+
+.custom-checkbox-card input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: var(--accent-primary);
+}
+
+.radio-card-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  width: 100%;
+}
+
+.custom-radio-card {
+  flex: 1 1 95px;
+  min-width: 95px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: var(--text-main);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.custom-radio-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--accent-primary);
+}
+
+.custom-radio-card input[type="radio"] {
+  cursor: pointer;
+  accent-color: var(--accent-primary);
+}
+
+/* Light mode overrides for checkbox & radio cards */
+body.light-mode .custom-checkbox-card,
+body.light-mode .custom-radio-card {
+  background: #f8f8fb;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #1a1a2e;
+}
+
+body.light-mode .custom-checkbox-card:hover,
+body.light-mode .custom-radio-card:hover {
+  background: #f0f1f5;
+  border-color: var(--accent-primary);
+}
+
+body.light-mode .custom-checkbox-card:has(input:checked),
+body.light-mode .custom-radio-card:has(input:checked) {
+  background: color-mix(in srgb, var(--accent-primary) 6%, transparent);
+  border-color: var(--accent-primary);
+}
+
+body.light-mode .custom-checkbox-card .checkmark,
+body.light-mode .custom-radio-card .radiomark {
+  border-color: rgba(0, 0, 0, 0.25);
+}
+
+body.light-mode .custom-checkbox-card:hover .checkmark,
+body.light-mode .custom-radio-card:hover .radiomark {
+  border-color: rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 600px) {
+  .checkbox-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .radio-card-group {
+    flex-direction: row;
+    gap: 0.4rem;
+  }
+  .custom-radio-card {
+    flex: 1;
+  }
+}
+
+/* Light mode overrides for share & details modal */
+body.light-mode .share-modal-content {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.15),
+    0 0 40px color-mix(in srgb, var(--accent-primary) 6%, transparent);
+}
+
+body.light-mode .share-modal-header {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-mode .share-modal-header h3 {
+  color: #1a1a2e;
+}
+
+body.light-mode .share-label {
+  color: #6b7280;
+}
+
+body.light-mode .share-caption-input,
+body.light-mode .share-link-input-wrapper {
+  background: #f8f8fb;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .share-caption-input {
+  color: #1a1a2e;
+}
+
+body.light-mode .share-caption-input::placeholder {
+  color: rgba(0, 0, 0, 0.35);
+}
+
+body.light-mode .share-link-input {
+  color: #6b7280;
+}
+
+body.light-mode .share-info-note {
+  background: #f8f8fb;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-mode .share-info-note span {
+  color: #6b7280;
+}
+
+body.light-mode #admin-details-modal h4 {
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode #admin-details-modal .share-modal-body > div:first-child {
+  background: rgba(0, 0, 0, 0.02) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode #details-avatar-container {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+body.light-mode #details-avatar-placeholder {
+  color: #9ca3af !important;
 }
