@@ -21,6 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Helper to check if viewing a shared card link
+  function isViewingShared() {
+    const hash = window.location.hash;
+    return hash && decodeURIComponent(hash).startsWith('#share=');
+  }
+
   // Elements - Form Inputs
   const form = document.getElementById('library-member-form');
   const inputName = document.getElementById('full_name');
@@ -388,14 +394,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Live Syncing Input Handlers
   inputName.addEventListener('input', (e) => {
+    if (isViewingShared()) return;
     previewName.textContent = e.target.value.trim() || DEFAULTS.name;
   });
 
   inputEmail.addEventListener('input', (e) => {
+    if (isViewingShared()) return;
     previewEmail.textContent = e.target.value.trim() || DEFAULTS.email;
   });
 
   inputPhone.addEventListener('input', (e) => {
+    if (isViewingShared()) return;
     previewPhone.textContent = e.target.value.trim() || DEFAULTS.phone;
   });
 
@@ -409,6 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   radioTiers.forEach(radio => {
     radio.addEventListener('change', (e) => {
+      if (isViewingShared()) return;
       if (e.target.checked) {
         const tierData = tierMap[e.target.value] || tierMap['Standard'];
         
@@ -434,6 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Sync Card Accent Color Picker
   inputCardTheme.addEventListener('input', (e) => {
+    if (isViewingShared()) return;
     const chosenColor = e.target.value;
     labelColorHex.textContent = chosenColor;
     
@@ -465,6 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   inputBorrowLimit.addEventListener('input', (e) => {
+    if (isViewingShared()) return;
     const value = parseInt(e.target.value);
     labelLimitValue.textContent = value;
     previewLimit.textContent = `${value} BOOK${value > 1 ? 'S' : ''}`;
@@ -487,6 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Sync Expiry Term Date Input (e.g. "2026-12-15" -> "DEC 2026")
   inputMembershipExpiry.addEventListener('input', (e) => {
+    if (isViewingShared()) return;
     if (!e.target.value) {
       previewTerm.textContent = DEFAULTS.term;
       return;
@@ -499,6 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Avatar Upload Handler
   inputAvatar.addEventListener('change', (e) => {
+    if (isViewingShared()) return;
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -781,6 +795,7 @@ document.addEventListener('DOMContentLoaded', () => {
     hasSearch: true,
     searchPlaceholder: 'Search department...',
     onChange: (val) => {
+      if (isViewingShared()) return;
       const el = document.getElementById('preview-dept');
       if (el) el.textContent = val || 'DEPT';
     }
@@ -797,6 +812,7 @@ document.addEventListener('DOMContentLoaded', () => {
     hasSearch: true,
     searchPlaceholder: 'Search semester...',
     onChange: (val) => {
+      if (isViewingShared()) return;
       const el = document.getElementById('preview-semester');
       if (el) el.textContent = val ? val.toUpperCase() : 'SEMESTER';
     }
@@ -805,6 +821,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Sync Batch normal text input
   if (inputBatch) {
     inputBatch.addEventListener('input', (e) => {
+      if (isViewingShared()) return;
       const el = document.getElementById('preview-batch');
       if (el) el.textContent = e.target.value.trim().toUpperCase() || 'BATCH 60';
     });
@@ -870,6 +887,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---- Dynamic Back-card Address / Clearance Notes Sync ----
   if (inputAddress) {
     inputAddress.addEventListener('input', (e) => {
+      if (isViewingShared()) return;
       const el = document.getElementById('preview-address');
       if (el) el.textContent = e.target.value.trim() || 'No specific special clearances or address declared.';
     });
@@ -1039,16 +1057,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })();
 
-  // Helper to update all social share URLs based on current caption and link
-  function updateSocialShareUrls(shareUrl, captionText) {
+  // Helper to update all social share URLs with only the direct link
+  function updateSocialShareUrls(shareUrl) {
     const encodedUrl = encodeURIComponent(shareUrl);
-    const encodedCaption = encodeURIComponent(captionText);
-    const fullMessage = encodeURIComponent(captionText + '\n\n' + shareUrl);
 
-    if (shareFb) shareFb.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedCaption}`;
-    if (shareTw) shareTw.href = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedCaption}`;
+    if (shareFb) shareFb.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+    if (shareTw) shareTw.href = `https://twitter.com/intent/tweet?url=${encodedUrl}`;
     if (shareLn) shareLn.href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
-    if (shareWa) shareWa.href = `https://api.whatsapp.com/send?text=${fullMessage}`;
+    if (shareWa) shareWa.href = `https://api.whatsapp.com/send?text=${encodedUrl}`;
     if (shareMsg) shareMsg.href = `https://www.facebook.com/dialog/send?link=${encodedUrl}&app_id=966242223397117&redirect_uri=${encodedUrl}`;
     if (shareDiscord) shareDiscord.href = `https://discord.com/channels/@me`;
   }
@@ -1108,15 +1124,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       shareLinkUrl.value = finalShareUrl;
 
-      // Auto-populate caption with member details
-      const memberName = previewName.textContent || 'Member';
-      const tierValText = previewTier.querySelector('span') ? previewTier.querySelector('span').textContent : 'Standard';
-      const defaultCaption = `🎓 Check out my AETHER LMS Digital Library Card!\n\n👤 ${memberName} | ${deptValText} | ${tierValText} Member\n📚 Borrow Limit: ${previewLimit.textContent} | Valid: ${previewTerm.textContent}\n🔑 Card Key: ${previewCardKey.textContent}`;
-      
-      currentShareCaption = defaultCaption;
-
-      // Build initial social URLs
-      updateSocialShareUrls(finalShareUrl, defaultCaption);
+      // Build initial social URLs with only the link (no caption)
+      updateSocialShareUrls(finalShareUrl);
 
       // Open Modal
       shareModal.classList.add('open');
@@ -1139,10 +1148,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnCopyShareLink) {
     btnCopyShareLink.addEventListener('click', () => {
-      // Copy caption + link together for a complete sharing experience
-      const fullCopyText = currentShareCaption ? `${currentShareCaption}\n\n${shareLinkUrl.value}` : shareLinkUrl.value;
-
-      navigator.clipboard.writeText(fullCopyText).then(() => {
+      // Copy only the link text (no caption)
+      navigator.clipboard.writeText(shareLinkUrl.value).then(() => {
         btnCopyShareLink.innerHTML = `<i data-lucide="check"></i><span>Copied!</span>`;
         if (typeof lucide !== 'undefined') {
           lucide.createIcons();
@@ -1162,12 +1169,10 @@ document.addEventListener('DOMContentLoaded', () => {
     shareDiscord.addEventListener('click', (e) => {
       e.preventDefault();
       
-      const fullCopyText = currentShareCaption ? `${currentShareCaption}\n\n${shareLinkUrl.value}` : shareLinkUrl.value;
-
-      navigator.clipboard.writeText(fullCopyText).then(() => {
+      navigator.clipboard.writeText(shareLinkUrl.value).then(() => {
         // Show Success Toast Notification for copy confirmation
         if (successToast && toastMessage) {
-          toastMessage.textContent = "Share link & details copied! Opening Discord...";
+          toastMessage.textContent = "Share link copied! Opening Discord...";
           successToast.classList.add('show');
           setTimeout(() => {
             successToast.classList.remove('show');
@@ -1192,7 +1197,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const skelRails = document.querySelectorAll('.skel-rail');
 
   function checkSharedLink() {
-    const hash = window.location.hash;
+    const rawHash = window.location.hash;
+    const hash = rawHash ? decodeURIComponent(rawHash) : '';
     const appWrapper = document.querySelector('.app-wrapper');
     const sharedViewerMode = document.getElementById('shared-viewer-mode');
 
