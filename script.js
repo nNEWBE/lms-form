@@ -791,30 +791,55 @@ document.addEventListener('DOMContentLoaded', () => {
     return match ? 'c:' + match[1] : 'c:' + url;
   }
 
-  function showToast(titleText, descText, isError = false) {
+  let toastTimeout = null;
+  function showToast(titleText, descText, typeOrError = false) {
     if (successToast && toastMessage) {
+      if (toastTimeout) {
+        clearTimeout(toastTimeout);
+      }
       const titleEl = successToast.querySelector('.toast-title');
       if (titleEl) titleEl.textContent = titleText;
       toastMessage.textContent = descText;
 
-      const iconEl = successToast.querySelector('i');
-      if (iconEl) {
-        if (isError) {
-          iconEl.setAttribute('data-lucide', 'alert-circle');
-          successToast.style.borderColor = 'var(--accent-error)';
-        } else {
-          iconEl.setAttribute('data-lucide', 'check-circle');
-          successToast.style.borderColor = '';
+      const wrapper = successToast.querySelector('.toast-icon-wrapper');
+      if (wrapper) {
+        let iconName = 'check-circle';
+        if (typeOrError === 'loading') {
+          iconName = 'loader-2';
+        } else if (typeOrError === 'error' || typeOrError === true) {
+          iconName = 'alert-circle';
+        }
+        wrapper.innerHTML = `<i data-lucide="${iconName}"></i>`;
+        const iconEl = wrapper.querySelector('i');
+        if (typeOrError === 'loading' && iconEl) {
+          iconEl.classList.add('spin');
         }
         if (typeof lucide !== 'undefined') {
           lucide.createIcons();
         }
+        const svgEl = wrapper.querySelector('svg');
+        if (svgEl) {
+          if (typeOrError === 'loading') {
+            svgEl.classList.add('spin');
+            svgEl.style.color = 'var(--accent-primary)';
+            successToast.style.borderColor = 'var(--accent-primary)';
+          } else if (typeOrError === 'error' || typeOrError === true) {
+            svgEl.style.color = 'var(--accent-error)';
+            successToast.style.borderColor = 'var(--accent-error)';
+          } else {
+            svgEl.style.color = 'var(--accent-primary)';
+            successToast.style.borderColor = 'var(--accent-primary)';
+          }
+        }
       }
 
       successToast.classList.add('show');
-      setTimeout(() => {
-        successToast.classList.remove('show');
-      }, 4000);
+      if (typeOrError !== 'loading') {
+        toastTimeout = setTimeout(() => {
+          successToast.classList.remove('show');
+          toastTimeout = null;
+        }, 4000);
+      }
     }
   }
 
@@ -1612,20 +1637,118 @@ document.addEventListener('DOMContentLoaded', () => {
     side.style.visibility = saved.visibility;
   }
 
-  function triggerBlobDownload(canvas, filename) {
-    return new Promise((resolve) => {
-      canvas.toBlob((blob) => {
-        if (!blob) { resolve(); return; }
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        resolve();
-      }, 'image/png');
+  function triggerDownload(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  const COLOR_PROPS = ['color', 'backgroundColor', 'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor', 'outlineColor', 'boxShadow', 'textShadow', 'fill', 'stroke'];
+
+  function cssColorToRgba(colorStr) {
+    if (!colorStr) return '';
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return colorStr;
+    ctx.fillStyle = 'rgba(253, 254, 255, 0.123)';
+    ctx.fillStyle = colorStr;
+    if (ctx.fillStyle === 'rgba(253, 254, 255, 0.123)' || ctx.fillStyle === 'rgba(253, 254, 255, 0.12)') {
+      return colorStr;
+    }
+    ctx.clearRect(0, 0, 1, 1);
+    ctx.fillRect(0, 0, 1, 1);
+    const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+    return `rgba(${r}, ${g}, ${b}, ${a / 255})`;
+  }
+
+  function resolveCssColors(str) {
+    if (typeof str !== 'string') return str;
+    const allColorFuncs = ['color-mix', 'color', 'oklch', 'oklab', 'lch', 'lab', 'hwb', 'light-dark'];
+    let result = '';
+    let i = 0;
+    while (i < str.length) {
+      let foundFunc = null;
+      for (const func of allColorFuncs) {
+        if (str.startsWith(func + '(', i)) {
+          foundFunc = func;
+          break;
+        }
+      }
+      if (foundFunc) {
+        let startIdx = i + foundFunc.length + 1;
+        let parenCount = 1;
+        let j = startIdx;
+        while (j < str.length && parenCount > 0) {
+          if (str[j] === '(') {
+            parenCount++;
+          } else if (str[j] === ')') {
+            parenCount--;
+          }
+          j++;
+        }
+        if (parenCount === 0) {
+          const fullFuncStr = str.substring(i, j);
+          const resolvedColor = cssColorToRgba(fullFuncStr);
+          result += resolvedColor;
+          i = j;
+        } else {
+          result += str[i];
+          i++;
+        }
+      } else {
+        result += str[i];
+        i++;
+      }
+    }
+    return result;
+  }
+
+  function resolveColorMix(root) {
+    const snapshots = [];
+    const all = [root, ...root.querySelectorAll('*')];
+    all.forEach(el => {
+      const computed = getComputedStyle(el);
+      const overrides = {};
+      COLOR_PROPS.forEach(prop => {
+        const val = computed[prop];
+        if (val && (val.includes('color-mix') || val.includes('color(') || val.includes('oklch') || val.includes('oklab') || val.includes('lch') || val.includes('lab'))) {
+          const resolved = resolveCssColors(val);
+          if (resolved !== val) {
+            overrides[prop] = resolved;
+          }
+        }
+      });
+      const bgImage = computed.backgroundImage;
+      if (bgImage && (bgImage.includes('color-mix') || bgImage.includes('color(') || bgImage.includes('oklch') || bgImage.includes('oklab') || bgImage.includes('lch') || bgImage.includes('lab'))) {
+        const resolved = resolveCssColors(bgImage);
+        if (resolved !== bgImage) {
+          overrides.backgroundImage = resolved;
+        }
+      }
+      if (Object.keys(overrides).length) {
+        const saved = {};
+        Object.keys(overrides).forEach(prop => {
+          saved[prop] = el.style[prop];
+          el.style[prop] = overrides[prop];
+        });
+        snapshots.push({ el, saved });
+      }
+    });
+    return snapshots;
+  }
+
+  function restoreColorMix(snapshots) {
+    snapshots.forEach(({ el, saved }) => {
+      Object.keys(saved).forEach(prop => {
+        el.style[prop] = saved[prop];
+      });
     });
   }
 
@@ -1640,44 +1763,87 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnDownloadImg) {
     btnDownloadImg.addEventListener('click', async () => {
       const cardEl = document.getElementById('library-id-card');
-      const frontSide = document.querySelector('.card-front');
-      const backSide = document.querySelector('.card-back');
+      if (!cardEl) return;
+      const frontSide = cardEl.querySelector('.card-front');
+      const backSide = cardEl.querySelector('.card-back');
       if (!frontSide || !backSide) return;
+
+      showToast('Downloading Images', 'Compiling card assets...', 'loading');
 
       btnDownloadImg.style.opacity = '0.5';
       btnDownloadImg.style.pointerEvents = 'none';
 
-      const savedCard = { transformStyle: cardEl.style.transformStyle, transform: cardEl.style.transform };
-      cardEl.style.transformStyle = 'flat';
-      cardEl.style.transform = 'none';
+      const containerFront = document.createElement('div');
+      containerFront.style.position = 'fixed';
+      containerFront.style.left = '-9999px';
+      containerFront.style.top = '-9999px';
+      containerFront.style.width = getComputedStyle(cardEl).width;
+      containerFront.style.height = getComputedStyle(cardEl).height;
+      containerFront.style.opacity = '1';
+      containerFront.style.visibility = 'visible';
+
+      const containerBack = document.createElement('div');
+      containerBack.style.position = 'fixed';
+      containerBack.style.left = '-9999px';
+      containerBack.style.top = '-9999px';
+      containerBack.style.width = getComputedStyle(cardEl).width;
+      containerBack.style.height = getComputedStyle(cardEl).height;
+      containerBack.style.opacity = '1';
+      containerBack.style.visibility = 'visible';
+
+      const frontClone = frontSide.cloneNode(true);
+      const backClone = backSide.cloneNode(true);
+
+      containerFront.appendChild(frontClone);
+      containerBack.appendChild(backClone);
+
+      document.body.appendChild(containerFront);
+      document.body.appendChild(containerBack);
+
+      const snapsFront = resolveColorMix(frontClone);
+      const snapsBack = resolveColorMix(backClone);
+
+      const savedFront = prepareCardForCapture(frontClone);
+      const savedBack = prepareCardForCapture(backClone);
 
       try {
-        
-        const savedFront = prepareCardForCapture(frontSide);
-        const savedBackHide = { display: backSide.style.display };
-        backSide.style.display = 'none';
-        const canvasFront = await html2canvas(frontSide, renderOpts);
-        restoreCardAfterCapture(frontSide, savedFront);
-        backSide.style.display = savedBackHide.display;
+        const [canvasFront, canvasBack] = await Promise.all([
+          html2canvas(frontClone, renderOpts),
+          html2canvas(backClone, renderOpts)
+        ]);
 
-        const savedBack = prepareCardForCapture(backSide);
-        const savedFrontHide = { display: frontSide.style.display };
-        frontSide.style.display = 'none';
-        const canvasBack = await html2canvas(backSide, renderOpts);
-        restoreCardAfterCapture(backSide, savedBack);
-        frontSide.style.display = savedFrontHide.display;
+        restoreColorMix(snapsFront);
+        restoreCardAfterCapture(frontClone, savedFront);
+        restoreColorMix(snapsBack);
+        restoreCardAfterCapture(backClone, savedBack);
 
-        cardEl.style.transformStyle = savedCard.transformStyle;
-        cardEl.style.transform = savedCard.transform;
+        document.body.removeChild(containerFront);
+        document.body.removeChild(containerBack);
 
-        await triggerBlobDownload(canvasFront, 'AETHER-LMS-Card-Front.png');
-        await new Promise(r => setTimeout(r, 200));
-        await triggerBlobDownload(canvasBack, 'AETHER-LMS-Card-Back.png');
+        const zip = new JSZip();
+
+        const [frontBlob, backBlob] = await Promise.all([
+          new Promise(resolve => canvasFront.toBlob(resolve, 'image/png')),
+          new Promise(resolve => canvasBack.toBlob(resolve, 'image/png'))
+        ]);
+
+        zip.file('AETHER-LMS-Card-Front.png', frontBlob);
+        zip.file('AETHER-LMS-Card-Back.png', backBlob);
+
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+        triggerDownload(zipBlob, 'AETHER-LMS-Card-Images.zip');
+
+        showToast('Download Complete', 'Your card images ZIP has been saved.', 'success');
       } catch (err) {
         console.error('Image rendering failed:', err);
-        
-        cardEl.style.transformStyle = savedCard.transformStyle;
-        cardEl.style.transform = savedCard.transform;
+        if (containerFront.parentNode) {
+          document.body.removeChild(containerFront);
+        }
+        if (containerBack.parentNode) {
+          document.body.removeChild(containerBack);
+        }
+        showToast('Download Failed', 'Could not compile card images.', 'error');
       }
       btnDownloadImg.style.opacity = '';
       btnDownloadImg.style.pointerEvents = '';
@@ -1688,35 +1854,62 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnDownloadPdf) {
     btnDownloadPdf.addEventListener('click', async () => {
       const cardEl = document.getElementById('library-id-card');
-      const frontSide = document.querySelector('.card-front');
-      const backSide = document.querySelector('.card-back');
+      if (!cardEl) return;
+      const frontSide = cardEl.querySelector('.card-front');
+      const backSide = cardEl.querySelector('.card-back');
       if (!frontSide || !backSide) return;
+
+      showToast('Downloading PDF', 'Compiling high-quality PDF...', 'loading');
 
       btnDownloadPdf.style.opacity = '0.5';
       btnDownloadPdf.style.pointerEvents = 'none';
 
-      const savedCard = { transformStyle: cardEl.style.transformStyle, transform: cardEl.style.transform };
-      cardEl.style.transformStyle = 'flat';
-      cardEl.style.transform = 'none';
+      const containerFront = document.createElement('div');
+      containerFront.style.position = 'fixed';
+      containerFront.style.left = '-9999px';
+      containerFront.style.top = '-9999px';
+      containerFront.style.width = getComputedStyle(cardEl).width;
+      containerFront.style.height = getComputedStyle(cardEl).height;
+      containerFront.style.opacity = '1';
+      containerFront.style.visibility = 'visible';
+
+      const containerBack = document.createElement('div');
+      containerBack.style.position = 'fixed';
+      containerBack.style.left = '-9999px';
+      containerBack.style.top = '-9999px';
+      containerBack.style.width = getComputedStyle(cardEl).width;
+      containerBack.style.height = getComputedStyle(cardEl).height;
+      containerBack.style.opacity = '1';
+      containerBack.style.visibility = 'visible';
+
+      const frontClone = frontSide.cloneNode(true);
+      const backClone = backSide.cloneNode(true);
+
+      containerFront.appendChild(frontClone);
+      containerBack.appendChild(backClone);
+
+      document.body.appendChild(containerFront);
+      document.body.appendChild(containerBack);
+
+      const snapsFront = resolveColorMix(frontClone);
+      const snapsBack = resolveColorMix(backClone);
+
+      const savedFront = prepareCardForCapture(frontClone);
+      const savedBack = prepareCardForCapture(backClone);
 
       try {
-        
-        const savedFront = prepareCardForCapture(frontSide);
-        const savedBackHide = { display: backSide.style.display };
-        backSide.style.display = 'none';
-        const canvasFront = await html2canvas(frontSide, renderOpts);
-        restoreCardAfterCapture(frontSide, savedFront);
-        backSide.style.display = savedBackHide.display;
+        const [canvasFront, canvasBack] = await Promise.all([
+          html2canvas(frontClone, renderOpts),
+          html2canvas(backClone, renderOpts)
+        ]);
 
-        const savedBack = prepareCardForCapture(backSide);
-        const savedFrontHide = { display: frontSide.style.display };
-        frontSide.style.display = 'none';
-        const canvasBack = await html2canvas(backSide, renderOpts);
-        restoreCardAfterCapture(backSide, savedBack);
-        frontSide.style.display = savedFrontHide.display;
+        restoreColorMix(snapsFront);
+        restoreCardAfterCapture(frontClone, savedFront);
+        restoreColorMix(snapsBack);
+        restoreCardAfterCapture(backClone, savedBack);
 
-        cardEl.style.transformStyle = savedCard.transformStyle;
-        cardEl.style.transform = savedCard.transform;
+        document.body.removeChild(containerFront);
+        document.body.removeChild(containerBack);
 
         const frontImg = canvasFront.toDataURL('image/png');
         const backImg = canvasBack.toDataURL('image/png');
@@ -1737,11 +1930,20 @@ document.addEventListener('DOMContentLoaded', () => {
         pdf.addPage();
         pdf.addImage(backImg, 'PNG', x, y, cardW, cardH);
 
-        pdf.save('AETHER-LMS-Card.pdf');
+        const pdfBlob = pdf.output('blob');
+
+        triggerDownload(pdfBlob, 'AETHER-LMS-Card.pdf');
+
+        showToast('Download Complete', 'Your library card PDF has been saved.', 'success');
       } catch (err) {
         console.error('PDF generation failed:', err);
-        cardEl.style.transformStyle = savedCard.transformStyle;
-        cardEl.style.transform = savedCard.transform;
+        if (containerFront.parentNode) {
+          document.body.removeChild(containerFront);
+        }
+        if (containerBack.parentNode) {
+          document.body.removeChild(containerBack);
+        }
+        showToast('Download Failed', 'Could not compile card PDF.', 'error');
       }
       btnDownloadPdf.style.opacity = '';
       btnDownloadPdf.style.pointerEvents = '';
@@ -1837,14 +2039,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
 
       navigator.clipboard.writeText(shareLinkUrl.value).then(() => {
-        
-        if (successToast && toastMessage) {
-          toastMessage.textContent = "Share link copied! Opening Discord...";
-          successToast.classList.add('show');
-          setTimeout(() => {
-            successToast.classList.remove('show');
-          }, 4000);
-        }
+        showToast('Link Copied', 'Share link copied! Opening Discord...', 'success');
 
         setTimeout(() => {
           window.open('https://discord.com/channels/@me', '_blank');

@@ -679,8 +679,8 @@ body.light-mode .action-btn {
 
 body.light-mode .action-btn:hover {
   background: #f9fafb;
-  border-color: var(--user-card-theme, var(--accent-primary));
-  color: var(--user-card-theme, var(--accent-primary));
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
 }
 
 body.light-mode .card-instructions {
@@ -690,12 +690,6 @@ body.light-mode .card-instructions {
 
 body.light-mode .card-instructions p {
   color: #6b7280;
-}
-
-body.light-mode .toast-notification {
-  background: #ffffff;
-  border-color: var(--accent-success);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 body.light-mode .toast-title {
@@ -2731,8 +2725,8 @@ textarea.input-control {
 
 .action-btn:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: var(--user-card-theme, var(--accent-primary));
-  color: var(--user-card-theme, var(--accent-primary));
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
   transform: translateY(-1px);
 }
 
@@ -3498,14 +3492,16 @@ textarea.input-control {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: #11111d;
-  border: 1px solid var(--accent-success);
+  background: var(--bg-secondary);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--accent-primary);
   border-radius: 8px;
   padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25), 0 0 15px color-mix(in srgb, var(--accent-primary) 12%, transparent);
   z-index: 100;
   transform: translateY(150%) scale(0.9);
   opacity: 0;
@@ -3517,8 +3513,9 @@ textarea.input-control {
   opacity: 1;
 }
 
-.toast-notification i {
-  color: var(--accent-success);
+.toast-notification i,
+.toast-notification svg {
+  color: var(--accent-primary);
   font-size: 1.25rem;
 }
 
@@ -4114,4 +4111,13 @@ body.light-mode #details-avatar-container {
 
 body.light-mode #details-avatar-placeholder {
   color: #9ca3af !important;
+}
+
+.toast-notification i.spin,
+.toast-notification svg.spin {
+  animation: toast-spin 1s linear infinite;
+}
+@keyframes toast-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

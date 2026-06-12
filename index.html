@@ -24,7 +24,7 @@
   <meta name="twitter:image" id="twitter-image" content="https://nnewbe.github.io/lms-form/og-preview.png">
   
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=3">
   
   <script src="https://cdn.jsdelivr.net/npm/lucide/dist/umd/lucide.min.js"></script>
   <script>
@@ -35,6 +35,7 @@
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 
 <body>
@@ -939,9 +940,23 @@
               <div class="card-header">
                 <div class="card-logo">
                   <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-card)" />
-                    <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-card)" />
-                    <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-card)" />
+                    <defs>
+                      <linearGradient id="logo-grad-primary-card-back" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="var(--user-card-theme, var(--accent-primary))" stop-opacity="1" />
+                        <stop offset="100%" stop-color="var(--user-card-theme, var(--accent-primary))" stop-opacity="0.25" />
+                      </linearGradient>
+                      <linearGradient id="logo-grad-dark-card-back" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="rgba(0, 0, 0, 0.5)" />
+                        <stop offset="100%" stop-color="rgba(0, 0, 0, 0.15)" />
+                      </linearGradient>
+                      <linearGradient id="logo-grad-light-card-back" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="rgba(255, 255, 255, 0.2)" />
+                        <stop offset="100%" stop-color="rgba(255, 255, 255, 0.05)" />
+                      </linearGradient>
+                    </defs>
+                    <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-card-back)" />
+                    <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-card-back)" />
+                    <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-card-back)" />
                     <path d="M12 12V22" stroke="var(--user-card-theme, var(--accent-primary))" stroke-width="1.5" stroke-linecap="round" />
                     <path d="M12 12L2 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
                     <path d="M12 12L22 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
@@ -1112,9 +1127,26 @@
         <div class="viewer-logo">
           <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
             style="width: 2.2rem; height: 2.2rem; filter: drop-shadow(0 2px 8px rgba(6, 182, 212, 0.45));">
-            <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-card)" />
-            <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-card)" />
-            <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-card)" />
+            <defs>
+              <linearGradient id="logo-grad-primary-viewer" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="1" />
+                <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.25" />
+              </linearGradient>
+              <linearGradient id="logo-grad-dark-viewer" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="rgba(0, 0, 0, 0.5)" />
+                <stop offset="100%" stop-color="rgba(0, 0, 0, 0.15)" />
+              </linearGradient>
+              <linearGradient id="logo-grad-light-viewer" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="rgba(255, 255, 255, 0.2)" />
+                <stop offset="100%" stop-color="rgba(255, 255, 255, 0.05)" />
+              </linearGradient>
+            </defs>
+            <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-viewer)" />
+            <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-viewer)" />
+            <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-viewer)" />
+            <path d="M12 12V22" stroke="var(--accent-primary)" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M12 12L2 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
+            <path d="M12 12L22 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
           </svg>
           <h2>AETHER LMS PORTAL</h2>
         </div>
@@ -1241,7 +1273,7 @@
   </div>
 
   <div class="toast-notification" id="success-toast">
-    <i data-lucide="check-circle"></i>
+    <div class="toast-icon-wrapper"><i data-lucide="check-circle"></i></div>
     <div class="toast-content">
       <span class="toast-title">Member Successfully Saved</span>
       <span class="toast-desc" id="toast-message">The new credentials have been locked to LMS database.</span>
@@ -1475,7 +1507,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="env.js"></script>
-  <script src="script.js"></script>
+  <script src="script.js?v=4"></script>
 </body>
 
 </html>
