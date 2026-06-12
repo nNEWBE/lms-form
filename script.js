@@ -969,6 +969,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const shareLinkUrl = document.getElementById('share-link-url');
   const btnCopyShareLink = document.getElementById('btn-copy-share-link');
   const shareCaption = document.getElementById('share-caption');
+  const shareCaptionCounter = document.getElementById('share-caption-counter');
 
   const shareFb = document.getElementById('share-fb');
   const shareTw = document.getElementById('share-tw');
@@ -976,6 +977,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const shareWa = document.getElementById('share-wa');
   const shareMsg = document.getElementById('share-msg');
   const shareDiscord = document.getElementById('share-discord');
+
+  // Character Limit Counter Helper
+  function updateCharCounter() {
+    if (shareCaption && shareCaptionCounter) {
+      const len = shareCaption.value.length;
+      shareCaptionCounter.textContent = `${len} / 280`;
+      if (len >= 280) {
+        shareCaptionCounter.classList.add('limit-reached');
+      } else {
+        shareCaptionCounter.classList.remove('limit-reached');
+      }
+    }
+  }
 
   // Fix OG image meta tags to use absolute URL at runtime (needed for GitHub Pages)
   (function fixOgImageUrls() {
@@ -1043,6 +1057,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // Build initial social URLs
       updateSocialShareUrls(finalShareUrl, defaultCaption);
 
+      // Update character counter
+      updateCharCounter();
+
       // Open Modal
       shareModal.classList.add('open');
     });
@@ -1054,6 +1071,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const currentLink = shareLinkUrl.value;
       const currentCaption = shareCaption.value;
       updateSocialShareUrls(currentLink, currentCaption);
+      updateCharCounter();
     });
   }
 
