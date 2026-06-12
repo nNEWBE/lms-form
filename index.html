@@ -377,35 +377,12 @@
                   </div>
                 </div>
 
-                <!-- Batch select -->
+                <!-- Batch input -->
                 <div class="student-select-col">
-                  <label for="custom-select-trigger-batch">
+                  <label for="batch">
                     <i data-lucide="users"></i> Batch *
                   </label>
-                  <div class="custom-select-wrapper" id="custom-select-batch">
-                    <div class="custom-select-trigger" id="custom-select-trigger-batch">
-                      <span id="custom-select-value-batch">Batch 60</span>
-                      <i data-lucide="chevron-down" class="select-arrow-icon"></i>
-                    </div>
-                    <div class="custom-select-options" id="custom-select-options-batch">
-                      <div class="custom-option" data-value="Batch 58">Batch 58</div>
-                      <div class="custom-option" data-value="Batch 59">Batch 59</div>
-                      <div class="custom-option selected" data-value="Batch 60">Batch 60</div>
-                      <div class="custom-option" data-value="Batch 61">Batch 61</div>
-                      <div class="custom-option" data-value="Batch 62">Batch 62</div>
-                      <div class="custom-option" data-value="Batch 63">Batch 63</div>
-                      <div class="custom-option" data-value="Batch 64">Batch 64</div>
-                    </div>
-                    <select id="batch" name="batch" style="display: none;" required>
-                      <option value="Batch 58">Batch 58</option>
-                      <option value="Batch 59">Batch 59</option>
-                      <option value="Batch 60" selected>Batch 60</option>
-                      <option value="Batch 61">Batch 61</option>
-                      <option value="Batch 62">Batch 62</option>
-                      <option value="Batch 63">Batch 63</option>
-                      <option value="Batch 64">Batch 64</option>
-                    </select>
-                  </div>
+                  <input type="text" id="batch" name="batch" class="input-control" placeholder="E.g. Batch 60" value="Batch 60" required>
                 </div>
 
                 <!-- Semester select -->

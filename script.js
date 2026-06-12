@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const inputBorrowLimit = document.getElementById('borrow_limit');
   const labelLimitValue = document.getElementById('borrow-limit-val');
   const ticksElements = document.querySelectorAll('.slider-scale-ticks .tick');
-  const selectBranch = document.getElementById('branch');
+  const inputBatch = document.getElementById('batch');
   const inputSearch = document.getElementById('search_interests');
   const genreCheckboxes = document.querySelectorAll('#genre-checkbox-container input[type="checkbox"]');
   const inputAddress = document.getElementById('address');
@@ -580,8 +580,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Reset custom selects
       if (deptSelect) deptSelect.reset();
-      if (batchSelect) batchSelect.reset();
       if (semesterSelect) semesterSelect.reset();
+      
+      // Reset batch input
+      if (inputBatch) {
+        inputBatch.value = 'Batch 60';
+      }
+      const previewBatchEl = document.getElementById('preview-batch');
+      if (previewBatchEl) previewBatchEl.textContent = 'BATCH 60';
       
       // Reset tier badge
       previewTier.className = 'card-type tier-standard';
@@ -689,19 +695,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  const batchSelect = setupCustomSelect({
-    wrapperId: 'custom-select-batch',
-    triggerId: 'custom-select-trigger-batch',
-    valueId: 'custom-select-value-batch',
-    optionsContainerId: 'custom-select-options-batch',
-    hiddenSelectId: 'batch',
-    defaultValue: 'Batch 60',
-    onChange: (val) => {
-      const el = document.getElementById('preview-batch');
-      if (el) el.textContent = val.toUpperCase();
-    }
-  });
-
   const semesterSelect = setupCustomSelect({
     wrapperId: 'custom-select-semester',
     triggerId: 'custom-select-trigger-semester',
@@ -714,6 +707,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (el) el.textContent = val.toUpperCase();
     }
   });
+
+  // Sync Batch normal text input
+  if (inputBatch) {
+    inputBatch.addEventListener('input', (e) => {
+      const el = document.getElementById('preview-batch');
+      if (el) el.textContent = e.target.value.trim().toUpperCase() || 'BATCH 60';
+    });
+  }
 
   // ---- Initialize Custom Date Pickers ----
   const dobPicker = setupDatePicker({
@@ -761,6 +762,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Global click to close custom dropdowns on click outside
   document.addEventListener('click', (e) => {
     document.querySelectorAll('.custom-select-wrapper.open, .custom-datepicker-wrapper.open').forEach(wrapper => {
+      // Prevent immediate closure when clicking associated labels
+      const label = wrapper.parentElement ? wrapper.parentElement.querySelector('label') : null;
+      if (label && label.contains(e.target)) {
+        return;
+      }
       if (!wrapper.contains(e.target)) {
         wrapper.classList.remove('open');
       }
