@@ -710,20 +710,18 @@ document.addEventListener('DOMContentLoaded', () => {
     return result.secure_url;
   }
 
-  // Extract path of a Cloudinary secure URL and prefix with 'c:' marker for reliable detection
   function getCloudinaryPath(url) {
     if (!url) return '';
     const match = url.match(/\/image\/upload\/(.+)$/);
     return match ? 'c:' + match[1] : 'c:' + url;
   }
 
-  // Custom Toast helper
   function showToast(titleText, descText, isError = false) {
     if (successToast && toastMessage) {
       const titleEl = successToast.querySelector('.toast-title');
       if (titleEl) titleEl.textContent = titleText;
       toastMessage.textContent = descText;
-      
+
       const iconEl = successToast.querySelector('i');
       if (iconEl) {
         if (isError) {
@@ -737,7 +735,7 @@ document.addEventListener('DOMContentLoaded', () => {
           lucide.createIcons();
         }
       }
-      
+
       successToast.classList.add('show');
       setTimeout(() => {
         successToast.classList.remove('show');
@@ -745,7 +743,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Helper to compress avatar image (with square crop and optimal sizing)
   let compressedAvatarBase64 = '';
   let cloudinaryAvatarUrl = '';
 
@@ -754,7 +751,7 @@ document.addEventListener('DOMContentLoaded', () => {
     img.onload = () => {
       const canvas = document.createElement('canvas');
       const maxDim = 100; // Optimal 1:1 dimension for preview avatar
-      
+
       // Center crop to 1:1 aspect ratio
       const size = Math.min(img.width, img.height);
       const sourceX = (img.width - size) / 2;
@@ -806,10 +803,10 @@ document.addEventListener('DOMContentLoaded', () => {
           try {
             const hostedUrl = await uploadToCloudinary(base64);
             cloudinaryAvatarUrl = hostedUrl;
-            
+
             // Render the hosted version directly on the card to ensure CORS/rendering is verified
             previewAvatar.src = hostedUrl;
-            
+
             labelFile.textContent = file.name;
             showToast('Avatar Hosted', 'Image successfully uploaded to Cloudinary.');
           } catch (error) {
@@ -1852,13 +1849,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Unified Minimal Database Helper (LocalStorage with Cloud Firebase REST API fallback)
+  // Initialize Firebase and Cloud Firestore compatibility SDK
+  let firestoreDb = null;
+  if (window.ENV && window.ENV.FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(window.ENV.FIREBASE_CONFIG);
+      }
+      firestoreDb = firebase.firestore();
+      console.log("Firebase & Firestore initialized successfully.");
+    } catch (e) {
+      console.error("Firebase/Firestore initialization failed:", e);
+    }
+  }
+
+  // Unified Minimal Database Helper (Firestore SDK with fallback to LocalStorage / Realtime DB REST API)
   const DB = {
     getFirebaseUrl() {
       return (window.ENV && window.ENV.FIREBASE_URL) ? window.ENV.FIREBASE_URL.replace(/\/$/, '') : null;
     },
 
     async saveMember(member) {
+      // 1. Try Cloud Firestore SDK
+      if (firestoreDb) {
+        try {
+          await firestoreDb.collection('members').doc(member.k).set(member);
+          console.log("Member saved to Firestore:", member.k);
+          return member;
+        } catch (err) {
+          console.warn('Firestore set failed, attempting fallback:', err);
+        }
+      }
+
+      // 2. Try Realtime Database REST API
       const firebaseUrl = this.getFirebaseUrl();
       if (firebaseUrl) {
         try {
@@ -1867,49 +1890,79 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(member)
           });
-          if (!response.ok) throw new Error('Firebase save failed');
+          if (!response.ok) throw new Error('Firebase REST save failed');
           return await response.json();
         } catch (err) {
-          console.warn('Firebase save failed, falling back to local storage:', err);
+          console.warn('Firebase REST save failed, falling back to LocalStorage:', err);
         }
       }
-      
-      // LocalStorage fallback
+
+      // 3. Fallback to LocalStorage
       const members = this.getLocalMembers();
       members[member.k] = member;
       localStorage.setItem('aether_lms_members', JSON.stringify(members));
+      return member;
     },
 
     async deleteMember(key) {
+      // 1. Try Cloud Firestore SDK
+      if (firestoreDb) {
+        try {
+          await firestoreDb.collection('members').doc(key).delete();
+          console.log("Member deleted from Firestore:", key);
+        } catch (err) {
+          console.warn('Firestore delete failed, attempting fallback:', err);
+        }
+      }
+
+      // 2. Try Realtime Database REST API
       const firebaseUrl = this.getFirebaseUrl();
       if (firebaseUrl) {
         try {
           const response = await fetch(`${firebaseUrl}/members/${key}.json`, {
             method: 'DELETE'
           });
-          if (!response.ok) throw new Error('Firebase delete failed');
+          if (!response.ok) throw new Error('Firebase REST delete failed');
         } catch (err) {
-          console.warn('Firebase delete failed, removing locally:', err);
+          console.warn('Firebase REST delete failed, removing locally:', err);
         }
       }
-      
+
+      // 3. Fallback to LocalStorage
       const members = this.getLocalMembers();
       delete members[key];
       localStorage.setItem('aether_lms_members', JSON.stringify(members));
     },
 
     async getAllMembers() {
+      // 1. Try Cloud Firestore SDK
+      if (firestoreDb) {
+        try {
+          const snapshot = await firestoreDb.collection('members').get();
+          const members = {};
+          snapshot.forEach(doc => {
+            members[doc.id] = doc.data();
+          });
+          return members;
+        } catch (err) {
+          console.warn('Firestore fetch failed, attempting fallback:', err);
+        }
+      }
+
+      // 2. Try Realtime Database REST API
       const firebaseUrl = this.getFirebaseUrl();
       if (firebaseUrl) {
         try {
           const response = await fetch(`${firebaseUrl}/members.json`);
-          if (!response.ok) throw new Error('Firebase fetch failed');
+          if (!response.ok) throw new Error('Firebase REST fetch failed');
           const data = await response.json();
           return data || {};
         } catch (err) {
-          console.warn('Firebase fetch failed, reading local storage:', err);
+          console.warn('Firebase REST fetch failed, reading from LocalStorage:', err);
         }
       }
+
+      // 3. Fallback to LocalStorage
       return this.getLocalMembers();
     },
 
@@ -1936,7 +1989,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const semVal = (!m.s || m.s === 'SEMESTER' || m.s === 'Select Semester') ? "" : (semMap[m.s] || m.s);
     const emailVal = m.e === DEFAULTS.email ? "" : m.e;
     const phoneVal = m.p === DEFAULTS.phone ? "" : m.p;
-    
+
     const limitDigits = m.l.match(/\d+/);
     const limitVal = (limitDigits && limitDigits[0] === String(DEFAULTS.limit)) ? "" : (limitDigits ? limitDigits[0] : "");
     const termVal = m.t === DEFAULTS.term ? "" : m.t;
@@ -1972,17 +2025,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!grid) return;
 
     grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 3rem 1rem;"><div style="display:inline-block; width:1.5rem; height:1.5rem; border:2px solid currentColor; border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:0.5rem;"></div><p style="margin:0; font-size:0.85rem;">Loading directory...</p></div>';
-    
+
     try {
       const members = await DB.getAllMembers();
       grid.innerHTML = '';
-      
+
       const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
       const filtered = Object.values(members).filter(m => {
-        return m.n.toLowerCase().includes(query) || 
-               m.k.toLowerCase().includes(query) || 
-               (m.e && m.e.toLowerCase().includes(query)) ||
-               (m.d && m.d.toLowerCase().includes(query));
+        return m.n.toLowerCase().includes(query) ||
+          m.k.toLowerCase().includes(query) ||
+          (m.e && m.e.toLowerCase().includes(query)) ||
+          (m.d && m.d.toLowerCase().includes(query));
       });
 
       if (filtered.length === 0) {
