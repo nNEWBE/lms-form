@@ -1055,26 +1055,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnShare && shareModal) {
     btnShare.addEventListener('click', () => {
-      const deptVal = document.getElementById('custom-select-value-dept') ? document.getElementById('custom-select-value-dept').textContent : 'CSE';
-      const semVal = document.getElementById('custom-select-value-semester') ? document.getElementById('custom-select-value-semester').textContent : '8th Sem';
+      const deptValText = document.getElementById('custom-select-value-dept') ? document.getElementById('custom-select-value-dept').textContent : 'DEPT';
+      const semValText = document.getElementById('custom-select-value-semester') ? document.getElementById('custom-select-value-semester').textContent : 'SEMESTER';
       
-      // Pack payload metadata (excluding huge local avatar binary to fit standard URL limits)
-      const cardData = {
-        n: previewName.textContent,
-        d: deptVal,
-        b: inputBatch ? inputBatch.value : 'Batch 60',
-        s: semVal,
-        e: previewEmail.textContent,
-        p: previewPhone.textContent,
-        l: previewLimit.textContent,
-        t: previewTerm.textContent,
-        k: previewCardKey.textContent,
-        th: libraryCard.style.getPropertyValue('--user-card-theme') || DEFAULTS.theme,
-        a: document.getElementById('preview-address') ? document.getElementById('preview-address').textContent : '',
-        tr: previewTier.querySelector('span') ? previewTier.querySelector('span').textContent : 'Standard'
+      const semMap = {
+        '1st Sem': '1', '2nd Sem': '2', '3rd Sem': '3', '4th Sem': '4', '5th Sem': '5',
+        '6th Sem': '6', '7th Sem': '7', '8th Sem': '8', '9th Sem': '9', '10th Sem': '10'
       };
+      const tierMap = { 'Standard': 'S', 'Premium': 'P', 'VIP': 'V' };
 
-      const payload = btoa(unescape(encodeURIComponent(JSON.stringify(cardData))));
+      // Compress URL payload by omitting defaults/placeholders and using a joined control-character separator
+      const nameVal = previewName.textContent === DEFAULTS.name ? "" : previewName.textContent;
+      const deptVal = (deptValText === 'DEPT' || deptValText === 'Select Department') ? "" : deptValText;
+      const batchValText = inputBatch ? inputBatch.value : 'Batch 60';
+      const batchVal = batchValText === 'Batch 60' ? "" : batchValText.replace(/Batch\s+/i, '');
+      const semVal = (semValText === 'SEMESTER' || semValText === 'Select Semester') ? "" : (semMap[semValText] || semValText);
+      const emailVal = previewEmail.textContent === DEFAULTS.email ? "" : previewEmail.textContent;
+      const phoneVal = previewPhone.textContent === DEFAULTS.phone ? "" : previewPhone.textContent;
+      const limitValText = previewLimit.textContent;
+      const limitDigits = limitValText.match(/\d+/);
+      const limitVal = (limitDigits && limitDigits[0] === String(DEFAULTS.limit)) ? "" : (limitDigits ? limitDigits[0] : "");
+      const termVal = previewTerm.textContent === DEFAULTS.term ? "" : previewTerm.textContent;
+      const keyValText = previewCardKey.textContent;
+      const keyVal = keyValText.startsWith('LMS-') ? keyValText.replace('LMS-', '') : keyValText;
+      const themeValText = libraryCard.style.getPropertyValue('--user-card-theme') || DEFAULTS.theme;
+      const themeVal = themeValText === DEFAULTS.theme ? "" : themeValText.replace('#', '');
+      const addrText = document.getElementById('preview-address') ? document.getElementById('preview-address').textContent : '';
+      const addrVal = (addrText === '' || addrText === 'No specific special clearances or address declared.') ? "" : addrText;
+      const tierText = previewTier.querySelector('span') ? previewTier.querySelector('span').textContent : 'Standard';
+      const tierVal = tierText === DEFAULTS.tier ? "" : (tierMap[tierText] || tierText);
+
+      const cardDataArray = [
+        nameVal,
+        deptVal,
+        batchVal,
+        semVal,
+        emailVal,
+        phoneVal,
+        limitVal,
+        termVal,
+        keyVal,
+        themeVal,
+        addrVal,
+        tierVal
+      ];
+
+      // Join with ASCII Unit Separator control character (impossible to be input by users)
+      const rawString = cardDataArray.join('\u001f');
+      const payload = btoa(unescape(encodeURIComponent(rawString))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
       const currentUrl = window.location.href.split('#')[0];
       const finalShareUrl = `${currentUrl}#share=${payload}`;
 
@@ -1082,8 +1110,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Auto-populate caption with member details
       const memberName = previewName.textContent || 'Member';
-      const tierVal = previewTier.querySelector('span') ? previewTier.querySelector('span').textContent : 'Standard';
-      const defaultCaption = `🎓 Check out my AETHER LMS Digital Library Card!\n\n👤 ${memberName} | ${deptVal} | ${tierVal} Member\n📚 Borrow Limit: ${previewLimit.textContent} | Valid: ${previewTerm.textContent}\n🔑 Card Key: ${previewCardKey.textContent}`;
+      const tierValText = previewTier.querySelector('span') ? previewTier.querySelector('span').textContent : 'Standard';
+      const defaultCaption = `🎓 Check out my AETHER LMS Digital Library Card!\n\n👤 ${memberName} | ${deptValText} | ${tierValText} Member\n📚 Borrow Limit: ${previewLimit.textContent} | Valid: ${previewTerm.textContent}\n🔑 Card Key: ${previewCardKey.textContent}`;
       
       currentShareCaption = defaultCaption;
 
@@ -1171,7 +1199,75 @@ document.addEventListener('DOMContentLoaded', () => {
     if (hash && hash.startsWith('#share=')) {
       const sharePayload = hash.replace('#share=', '');
       try {
-        const decodedData = JSON.parse(decodeURIComponent(escape(atob(sharePayload))));
+        let decodedData = {};
+        // Support URL-safe base64 decoding safely by restoring characters and padding
+        let normalizedPayload = sharePayload.replace(/-/g, '+').replace(/_/g, '/');
+        while (normalizedPayload.length % 4) {
+          normalizedPayload += '=';
+        }
+        const decodedString = decodeURIComponent(escape(atob(normalizedPayload)));
+        
+        if (decodedString.includes('\u001f')) {
+          const parsed = decodedString.split('\u001f');
+          // Map compressed array format to object format with default fallbacks
+          const tierMap = { 'S': 'Standard', 'P': 'Premium', 'V': 'VIP' };
+          const semRevMap = {
+            '1': '1st Sem', '2': '2nd Sem', '3': '3rd Sem', '4': '4th Sem', '5': '5th Sem',
+            '6': '6th Sem', '7': '7th Sem', '8': '8th Sem', '9': '9th Sem', '10': '10th Sem'
+          };
+          
+          const rawLimit = parsed[6];
+          const limitText = rawLimit ? `${rawLimit} BOOK${rawLimit > 1 ? 'S' : ''}` : `${DEFAULTS.limit} BOOKS`;
+          
+          decodedData = {
+            n: parsed[0] || DEFAULTS.name,
+            d: parsed[1] || 'DEPT',
+            b: parsed[2] ? `Batch ${parsed[2]}` : 'Batch 60',
+            s: parsed[3] ? (semRevMap[parsed[3]] || parsed[3]) : 'SEMESTER',
+            e: parsed[4] || DEFAULTS.email,
+            p: parsed[5] || DEFAULTS.phone,
+            l: limitText,
+            t: parsed[7] || DEFAULTS.term,
+            k: parsed[8] ? (parsed[8].startsWith('LMS-') ? parsed[8] : `LMS-${parsed[8]}`) : '',
+            th: parsed[9] ? (parsed[9].startsWith('#') ? parsed[9] : `#${parsed[9]}`) : DEFAULTS.theme,
+            a: parsed[10] || 'No specific special clearances or address declared.',
+            tr: tierMap[parsed[11]] || parsed[11] || DEFAULTS.tier
+          };
+        } else {
+          // Old JSON format (array or object)
+          const parsed = JSON.parse(decodedString);
+          if (Array.isArray(parsed)) {
+            decodedData = {
+              n: parsed[0] || DEFAULTS.name,
+              d: parsed[1] || 'DEPT',
+              b: parsed[2] || 'Batch 60',
+              s: parsed[3] || 'SEMESTER',
+              e: parsed[4] || DEFAULTS.email,
+              p: parsed[5] || DEFAULTS.phone,
+              l: parsed[6] || `${DEFAULTS.limit} BOOKS`,
+              t: parsed[7] || DEFAULTS.term,
+              k: parsed[8],
+              th: parsed[9] || DEFAULTS.theme,
+              a: parsed[10] || 'No specific special clearances or address declared.',
+              tr: parsed[11] || DEFAULTS.tier
+            };
+          } else {
+            decodedData = {
+              n: parsed.n || DEFAULTS.name,
+              d: parsed.d || 'DEPT',
+              b: parsed.b || 'Batch 60',
+              s: parsed.s || 'SEMESTER',
+              e: parsed.e || DEFAULTS.email,
+              p: parsed.p || DEFAULTS.phone,
+              l: parsed.l || `${DEFAULTS.limit} BOOKS`,
+              t: parsed.t || DEFAULTS.term,
+              k: parsed.k,
+              th: parsed.th || DEFAULTS.theme,
+              a: parsed.a || 'No specific special clearances or address declared.',
+              tr: parsed.tr || DEFAULTS.tier
+            };
+          }
+        }
         
         // Populate front card values
         if (previewName) previewName.textContent = decodedData.n;
