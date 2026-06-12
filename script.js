@@ -510,6 +510,37 @@ document.addEventListener('DOMContentLoaded', () => {
     previewTerm.textContent = `${monthStr} ${year}`;
   });
 
+  // Helper to compress avatar image
+  let compressedAvatarBase64 = '';
+  function compressAvatar(dataUrl, callback) {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxDim = 80;
+      let w = img.width;
+      let h = img.height;
+      if (w > h) {
+        if (w > maxDim) {
+          h = Math.round((h * maxDim) / w);
+          w = maxDim;
+        }
+      } else {
+        if (h > maxDim) {
+          w = Math.round((w * maxDim) / h);
+          h = maxDim;
+        }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const compressedUrl = canvas.toDataURL('image/jpeg', 0.4);
+      const base64Data = compressedUrl.split(',')[1];
+      callback(base64Data);
+    };
+    img.src = dataUrl;
+  }
+
   // Avatar Upload Handler
   inputAvatar.addEventListener('change', (e) => {
     if (isViewingShared()) return;
@@ -523,6 +554,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         dropzoneAvatar.classList.add('has-file');
         labelFile.textContent = file.name;
+
+        compressAvatar(event.target.result, (base64) => {
+          compressedAvatarBase64 = base64;
+        });
       };
       reader.readAsDataURL(file);
     } else {
@@ -536,6 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
     previewAvatarIcon.style.display = 'block';
     dropzoneAvatar.classList.remove('has-file');
     labelFile.textContent = 'Choose image or drag here';
+    compressedAvatarBase64 = '';
   }
 
 
@@ -1113,7 +1149,8 @@ document.addEventListener('DOMContentLoaded', () => {
         keyVal,
         themeVal,
         addrVal,
-        tierVal
+        tierVal,
+        compressedAvatarBase64
       ];
 
       // Join with ASCII Unit Separator control character (impossible to be input by users)
@@ -1237,7 +1274,8 @@ document.addEventListener('DOMContentLoaded', () => {
             k: parsed[8] ? (parsed[8].startsWith('LMS-') ? parsed[8] : `LMS-${parsed[8]}`) : '',
             th: parsed[9] ? (parsed[9].startsWith('#') ? parsed[9] : `#${parsed[9]}`) : DEFAULTS.theme,
             a: parsed[10] || 'No specific special clearances or address declared.',
-            tr: tierMap[parsed[11]] || parsed[11] || DEFAULTS.tier
+            tr: tierMap[parsed[11]] || parsed[11] || DEFAULTS.tier,
+            av: parsed[12] || ''
           };
         } else {
           // Old JSON format (array or object)
@@ -1285,6 +1323,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (previewLimit) previewLimit.textContent = decodedData.l;
         if (previewTerm) previewTerm.textContent = decodedData.t;
         if (previewCardKey) previewCardKey.textContent = decodedData.k;
+
+        // Populate avatar
+        if (decodedData.av) {
+          if (previewAvatar) {
+            previewAvatar.src = 'data:image/jpeg;base64,' + decodedData.av;
+            previewAvatar.style.display = 'block';
+          }
+          if (previewAvatarIcon) {
+            previewAvatarIcon.style.display = 'none';
+          }
+        } else {
+          if (previewAvatar) {
+            previewAvatar.src = '';
+            previewAvatar.style.display = 'none';
+          }
+          if (previewAvatarIcon) {
+            previewAvatarIcon.style.display = 'block';
+          }
+        }
         
         // Populate address on back
         const previewAddr = document.getElementById('preview-address');
@@ -1382,6 +1439,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const activeRadio = document.querySelector('input[name="tier"]:checked');
       if (activeRadio) {
         activeRadio.dispatchEvent(new Event('change'));
+      }
+
+      // Sync avatar preview
+      if (compressedAvatarBase64) {
+        if (previewAvatar) {
+          previewAvatar.src = 'data:image/jpeg;base64,' + compressedAvatarBase64;
+          previewAvatar.style.display = 'block';
+        }
+        if (previewAvatarIcon) {
+          previewAvatarIcon.style.display = 'none';
+        }
+      } else {
+        if (previewAvatar) {
+          previewAvatar.src = '';
+          previewAvatar.style.display = 'none';
+        }
+        if (previewAvatarIcon) {
+          previewAvatarIcon.style.display = 'block';
+        }
       }
 
       // Reinitialize icons
