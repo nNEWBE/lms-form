@@ -905,7 +905,11 @@
                     const previewAvatar = document.getElementById('preview-avatar');
                     const previewAvatarContainer = document.getElementById('preview-avatar-container');
                     if (previewAvatar && previewAvatarContainer) {
-                      previewAvatar.src = draft['cloudinaryAvatarUrl'];
+                      let url = draft['cloudinaryAvatarUrl'];
+                      if (url && url.includes('cloudinary.com')) {
+                        url = url.replace('/image/upload/', '/image/upload/f_auto,q_auto,w_150,h_150,c_fill/');
+                      }
+                      previewAvatar.src = url;
                       previewAvatarContainer.classList.add('has-image');
                     }
                   }
