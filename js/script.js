@@ -22,6 +22,143 @@ document.addEventListener('DOMContentLoaded', () => {
     console.warn('Lucide CDN is offline; icons will not render.');
   }
 
+  // Passcode visibility toggle (Registration Page)
+  const togglePassBtn = document.getElementById('toggle-password-visibility');
+  const passwordInput = document.getElementById('password');
+
+  if (togglePassBtn && passwordInput) {
+    togglePassBtn.addEventListener('click', () => {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      
+      const newIcon = type === 'password' ? 'eye' : 'eye-off';
+      togglePassBtn.innerHTML = `<i data-lucide="${newIcon}" id="toggle-password-icon" style="width: 1.1rem; height: 1.1rem;"></i>`;
+      
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons({
+          node: togglePassBtn
+        });
+      }
+    });
+  }
+
+  // Dedicated function to sync all inputs & selects to print-only-layout
+  function syncPrintLayoutValues() {
+    const getVal = (id) => {
+      const el = document.getElementById(id);
+      return el ? el.value || '' : '';
+    };
+    const getSelectText = (valueSpanId) => {
+      const el = document.getElementById(valueSpanId);
+      return el ? el.textContent.trim() : '';
+    };
+
+    // Main student fields
+    const firstName = getVal('first_name');
+    const lastName = getVal('last_name');
+    const fullName = (firstName + ' ' + lastName).trim();
+
+    document.getElementById('print-val-first-name').textContent = firstName;
+    document.getElementById('print-val-last-name').textContent = lastName;
+    document.getElementById('print-val-student-id').textContent = getVal('student_id');
+    document.getElementById('print-val-dept').textContent = getSelectText('custom-select-value-dept');
+    document.getElementById('print-val-semester').textContent = getSelectText('custom-select-value-semester');
+    document.getElementById('print-val-degree-level').textContent = getSelectText('custom-select-value-degree-level');
+    document.getElementById('print-val-campus').textContent = getSelectText('custom-select-value-campus');
+
+    // Personal info
+    document.getElementById('print-val-dob').textContent = getVal('dob-display') || getVal('dob');
+    document.getElementById('print-val-gender').textContent = getSelectText('custom-select-value-gender');
+    document.getElementById('print-val-blood-group').textContent = getSelectText('custom-select-value-blood-group');
+    document.getElementById('print-val-phone').textContent = getVal('phone');
+    document.getElementById('print-val-email').textContent = getVal('email');
+    document.getElementById('print-val-address').textContent = getVal('address');
+
+    // Emergency Contact
+    document.getElementById('print-val-emergency-name').textContent = getVal('emergency_name');
+    document.getElementById('print-val-emergency-relation').textContent = getVal('emergency_relationship');
+    document.getElementById('print-val-emergency-phone').textContent = getVal('emergency_phone');
+    document.getElementById('print-val-emergency-address').textContent = getVal('emergency_address');
+
+    // Membership details
+    document.getElementById('print-val-member-type').textContent = getSelectText('custom-select-value-membership-type');
+    document.getElementById('print-val-preferred-branch').textContent = getSelectText('custom-select-value-preferred-branch');
+    document.getElementById('print-val-borrow-category').textContent = getSelectText('custom-select-value-borrowing-category');
+    document.getElementById('print-val-borrow-limit').textContent = document.getElementById('borrow-limit-val')?.textContent || '1';
+    document.getElementById('print-val-preferred-contact').textContent = getSelectText('custom-select-value-preferred-contact');
+    
+    // Checkbox state for documents
+    const docDropzone = document.getElementById('enrollment-dropzone');
+    const docAttached = docDropzone && docDropzone.classList.contains('has-file') ? 'Yes (Digitally Verified)' : 'No';
+    document.getElementById('print-val-doc-attached').textContent = docAttached;
+
+    document.getElementById('print-val-start-date').textContent = getVal('start-date-display') || getVal('membership_start');
+    document.getElementById('print-val-expiry-date').textContent = getVal('expiry-date-display') || getVal('membership_expiry');
+
+    // Sync avatar photo to print box
+    const previewAvatarImg = document.getElementById('preview-avatar');
+    const printAvatarPreviewBox = document.getElementById('print-avatar-preview-box');
+    const printAvatarTextBox = document.getElementById('print-avatar-text-box');
+    if (previewAvatarImg && printAvatarPreviewBox) {
+      const src = previewAvatarImg.src;
+      if (src && !src.endsWith('/') && !src.includes('placeholder') && !src.includes('avatar-placeholder') && !src.includes('data:image/svg+xml')) {
+        printAvatarPreviewBox.src = src;
+        printAvatarPreviewBox.style.display = 'block';
+        if (printAvatarTextBox) printAvatarTextBox.style.display = 'none';
+      } else {
+        printAvatarPreviewBox.src = '';
+        printAvatarPreviewBox.style.display = 'none';
+        if (printAvatarTextBox) printAvatarTextBox.style.display = 'block';
+      }
+    }
+
+    // Office Use copy
+    document.getElementById('print-office-name').textContent = fullName;
+    document.getElementById('print-office-id').textContent = getVal('student_id');
+    document.getElementById('print-office-dept').textContent = getSelectText('custom-select-value-dept');
+    document.getElementById('print-office-campus').textContent = getSelectText('custom-select-value-campus');
+    document.getElementById('print-office-phone').textContent = getVal('phone');
+    document.getElementById('print-office-email').textContent = getVal('email');
+    
+    // Copy card key / registration number if editing
+    const urlParams = new URLSearchParams(window.location.search);
+    const editKey = urlParams.get('edit') || '';
+    document.getElementById('print-office-reg-no').textContent = editKey || '___________________';
+    document.getElementById('print-office-join-date').textContent = getVal('start-date-display') || getVal('membership_start') || new Date().toLocaleDateString();
+  }
+
+  // Print registration form
+  const printFormBtn = document.getElementById('print-form-btn');
+  if (printFormBtn) {
+    printFormBtn.addEventListener('click', () => {
+      syncPrintLayoutValues();
+      window.print();
+    });
+  }
+
+  // Bind print event listener
+  window.addEventListener('beforeprint', syncPrintLayoutValues);
+
+  // Password visibility toggle (Admin Login Page)
+  const toggleAdminPassBtn = document.getElementById('toggle-admin-password-visibility');
+  const adminPasswordInput = document.getElementById('admin-password');
+
+  if (toggleAdminPassBtn && adminPasswordInput) {
+    toggleAdminPassBtn.addEventListener('click', () => {
+      const type = adminPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      adminPasswordInput.setAttribute('type', type);
+      
+      const newIcon = type === 'password' ? 'eye' : 'eye-off';
+      toggleAdminPassBtn.innerHTML = `<i data-lucide="${newIcon}" id="toggle-admin-password-icon" style="width: 0.85rem; height: 0.85rem;"></i>`;
+      
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons({
+          node: toggleAdminPassBtn
+        });
+      }
+    });
+  }
+
   const themeToggle = document.getElementById('theme-toggle');
   const savedTheme = localStorage.getItem('lms-theme');
   if (savedTheme === 'light') {
@@ -287,7 +424,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       searchInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase().trim();
-        options.forEach(option => {
+        const currentOptions = optionsContainer.querySelectorAll('.custom-option');
+        currentOptions.forEach(option => {
           const text = option.textContent.toLowerCase();
           if (text.includes(query)) {
             option.style.display = '';
@@ -314,7 +452,8 @@ document.addEventListener('DOMContentLoaded', () => {
         wrapper.classList.add('open');
         if (searchInput) {
           searchInput.value = '';
-          options.forEach(o => o.style.display = '');
+          const currentOptions = optionsContainer.querySelectorAll('.custom-option');
+          currentOptions.forEach(o => o.style.display = '');
           setTimeout(() => searchInput.focus(), 50);
         }
       }
@@ -326,17 +465,16 @@ document.addEventListener('DOMContentLoaded', () => {
       updateStyle();
 
       let text = placeholderText || 'Select';
-      if (val === '') {
+      const currentOptions = optionsContainer.querySelectorAll('.custom-option');
+      currentOptions.forEach(o => o.classList.remove('selected'));
+
+      const option = Array.from(currentOptions).find(o => o.getAttribute('data-value') === (val || ''));
+      if (option) {
+        text = option.textContent;
         displayValue.textContent = text;
-        options.forEach(o => o.classList.remove('selected'));
+        option.classList.add('selected');
       } else {
-        const option = Array.from(options).find(o => o.getAttribute('data-value') === val);
-        if (option) {
-          text = option.textContent;
-          displayValue.textContent = text;
-          options.forEach(o => o.classList.remove('selected'));
-          option.classList.add('selected');
-        }
+        displayValue.textContent = text;
       }
       if (onChange) onChange(val, text);
     });
@@ -547,15 +685,96 @@ document.addEventListener('DOMContentLoaded', () => {
   const cardActionsWrapper = document.querySelector('.card-actions-wrapper');
 
   let isCardCreated = false;
+  let originalStatus = null;
 
   function updateSubmitButtonText() {
     if (!btnSubmit) return;
     const span = btnSubmit.querySelector('span');
     if (span) {
-      if (isCardCreated) {
-        span.innerHTML = 'Update<span class="btn-text-full"> Member</span>';
+      const isAdmin = sessionStorage.getItem('isAdminAuthenticated') === 'true';
+      if (isAdmin) {
+        if (isCardCreated) {
+          span.innerHTML = 'Update<span class="btn-text-full"> Member</span>';
+        } else {
+          span.innerHTML = 'Create<span class="btn-text-full"> Member</span>';
+        }
       } else {
-        span.innerHTML = 'Create<span class="btn-text-full"> Member</span>';
+        if (isCardCreated) {
+          span.innerHTML = 'Update<span class="btn-text-full"> Request</span>';
+        } else {
+          span.innerHTML = 'Request<span class="btn-text-full"> Card</span>';
+        }
+      }
+    }
+  }
+
+  function updateStatusUI() {
+    const badge = document.getElementById('preview-card-status');
+    const notification = document.getElementById('preview-status-notification');
+    if (!notification) return;
+
+    const notificationText = notification.querySelector('.notification-text');
+    const notificationIcon = notification.querySelector('.notification-icon');
+
+    const isAdmin = sessionStorage.getItem('isAdminAuthenticated') === 'true';
+    
+    // Determine the status we should render
+    let currentStatus = 'Pending';
+    if (isCardCreated) {
+      currentStatus = originalStatus || 'Pending';
+    } else {
+      currentStatus = isAdmin ? 'Active' : 'Pending';
+    }
+
+    // Update status badge on card
+    if (badge) {
+      if (currentStatus === 'Pending') {
+        badge.style.display = 'inline-flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // Update notification banner
+    notification.className = 'status-notification-banner';
+    notification.style.display = 'flex';
+
+    if (currentStatus === 'Pending') {
+      notification.classList.add('notify-pending');
+      if (notificationIcon) {
+        notificationIcon.setAttribute('data-lucide', 'clock');
+      }
+      if (isCardCreated) {
+        notificationText.innerHTML = `Your card request is <strong>Pending Approval</strong>. You can share your card using the action buttons below.`;
+      } else {
+        notificationText.innerHTML = `Your card request will be submitted as <strong>Pending Approval</strong> for admin verification.`;
+      }
+    } else if (currentStatus === 'Active' || currentStatus === 'New Card') {
+      notification.classList.add('notify-active');
+      if (notificationIcon) {
+        notificationIcon.setAttribute('data-lucide', 'check-circle-2');
+      }
+      if (isCardCreated) {
+        notificationText.innerHTML = `Your library card is <strong>Active and Published</strong>! It is fully verified.`;
+      } else {
+        notificationText.innerHTML = `Admin Mode: This card will be immediately <strong>Published and Active</strong>.`;
+      }
+    } else {
+      notification.classList.add('notify-inactive');
+      if (notificationIcon) {
+        notificationIcon.setAttribute('data-lucide', 'alert-triangle');
+      }
+      notificationText.innerHTML = `This library card is currently <strong>${currentStatus}</strong>. Access is restricted.`;
+    }
+
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons({
+        node: notification
+      });
+      if (badge) {
+        lucide.createIcons({
+          node: badge
+        });
       }
     }
   }
@@ -563,6 +782,43 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateCardActionsVisibility() {
     if (!cardActionsWrapper) return;
     cardActionsWrapper.style.display = isCardCreated ? 'grid' : 'none';
+  }
+
+  let cardStatusListener = null;
+
+  function subscribeToCardStatus(key) {
+    if (cardStatusListener) {
+      cardStatusListener(); // Unsubscribe
+      cardStatusListener = null;
+    }
+
+    if (firestoreDb && key) {
+      console.log("Subscribing to real-time status updates for key:", key);
+      try {
+        cardStatusListener = firestoreDb.collection('members').doc(key).onSnapshot((docSnapshot) => {
+          if (docSnapshot.exists) {
+            const memberData = docSnapshot.data();
+            if (memberData && memberData.membership_details) {
+              const newStatus = memberData.membership_details.status || null;
+              if (newStatus !== originalStatus) {
+                console.log("Real-time status update received:", newStatus);
+                originalStatus = newStatus;
+                // Update local storage
+                const localMembers = DB.getLocalMembers();
+                localMembers[key] = memberData;
+                localStorage.setItem('aether_lms_members', JSON.stringify(localMembers));
+                
+                updateStatusUI();
+              }
+            }
+          }
+        }, (err) => {
+          console.warn("Real-time snapshot listener error:", err);
+        });
+      } catch (e) {
+        console.warn("Could not attach Firestore real-time listener:", e);
+      }
+    }
   }
 
   const DEFAULTS = {
@@ -664,9 +920,12 @@ document.addEventListener('DOMContentLoaded', () => {
         previewCardKey.textContent = matched.k;
         updateQrCodeElement(matched.k);
       }
+      originalStatus = matched.membership_details?.status || null;
       isCardCreated = true;
       updateSubmitButtonText();
       updateCardActionsVisibility();
+      updateStatusUI();
+      subscribeToCardStatus(matched.k);
     }
   }
 
@@ -1756,6 +2015,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dobPicker) dobPicker.reset();
         if (startDatePicker) startDatePicker.reset();
         if (expiryDatePicker) expiryDatePicker.reset();
+        updateStatusUI();
       }, 50);
     });
   }
@@ -1925,7 +2185,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const preferredBranch = document.getElementById('preferred_branch') ? document.getElementById('preferred_branch').value : '';
       const borrowingCategory = document.getElementById('borrowing_category') ? document.getElementById('borrowing_category').value : '';
       const preferredContact = document.getElementById('preferred_contact') ? document.getElementById('preferred_contact').value : '';
-      const cardStatus = document.querySelector('input[name="card_status"]:checked')?.value || 'New Card';
+      const isAdmin = sessionStorage.getItem('isAdminAuthenticated') === 'true';
+      const cardStatus = isAdmin
+        ? (originalStatus || document.querySelector('input[name="card_status"]:checked')?.value || 'New Card')
+        : 'Pending';
 
       const researchInterestsArray = [];
       document.querySelectorAll('input[name="interest"]:checked').forEach(cb => {
@@ -1939,6 +2202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         s: (semValText === 'SEMESTER' || semValText === 'Select Semester') ? '' : semValText,
         e: inputEmail.value.trim() || DEFAULTS.email,
         p: inputPhone.value.trim() || DEFAULTS.phone,
+        pw: inputPassword ? inputPassword.value : '',
         l: limitValText,
         t: previewTerm.textContent,
         k: keyVal,
@@ -1997,11 +2261,24 @@ document.addEventListener('DOMContentLoaded', () => {
         isCardCreated = true;
         updateSubmitButtonText();
         updateCardActionsVisibility();
+        updateStatusUI();
+        subscribeToCardStatus(keyVal);
+
+        const titleEl = document.querySelector('.success-modal-title');
+        const descEl = document.querySelector('.success-modal-desc');
+        if (titleEl) {
+          titleEl.textContent = isAdmin ? 'Registration Complete!' : 'Request Submitted!';
+        }
+        if (descEl) {
+          descEl.textContent = isAdmin 
+            ? 'The library membership card has been successfully generated and compiled into the central directory.' 
+            : 'Your library card request has been successfully submitted to the admin directory and is pending verification. You can view the pending card and share the link below.';
+        }
 
         if (isUpdating) {
-          showToast('Member Updated', 'Member record updated successfully.', 'success');
+          showToast(isAdmin ? 'Member Updated' : 'Request Updated', isAdmin ? 'Member record updated successfully.' : 'Your card request was updated successfully.', 'success');
         } else {
-          showToast('Member Created', 'Member record registered successfully.', 'success');
+          showToast(isAdmin ? 'Member Created' : 'Request Submitted', isAdmin ? 'Member record registered successfully.' : 'Your card request was submitted successfully.', 'success');
         }
 
         if (successModal) {
@@ -2263,6 +2540,11 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log("saveFormDraft: autosave is currently blocked. Skipping save.");
       return;
     }
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('edit')) {
+      console.log("saveFormDraft: Edit mode active. Skipping draft persistence to localStorage.");
+      return;
+    }
     
 
     const draft = {};
@@ -2309,8 +2591,218 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  async function checkForEditMember() {
+    if (!form) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const editKey = urlParams.get('edit');
+    if (!editKey) return;
+
+    console.log("checkForEditMember: Fetching member details for key:", editKey);
+    showToast("Loading Member", "Retrieving member record from database...", "loading");
+
+    try {
+      const members = await DB.getAllMembers();
+      const member = Object.values(members).find(m => m && m.k === editKey);
+      if (!member) {
+        showToast("Error", "Member record not found.", "error");
+        return;
+      }
+
+      console.log("checkForEditMember: Member found, populating form:", member);
+      
+      blockAutosave = true;
+
+      // Populate text inputs
+      if (inputFirstName && member.student_info) inputFirstName.value = member.student_info.first_name || '';
+      if (inputLastName && member.student_info) inputLastName.value = member.student_info.last_name || '';
+      if (inputEmail) inputEmail.value = member.e || '';
+      if (inputPhone) inputPhone.value = member.p || member.ph || '';
+      if (inputPassword) inputPassword.value = member.pw || '';
+      
+      const studentIdInput = document.getElementById('student_id');
+      if (studentIdInput && member.student_info) studentIdInput.value = member.student_info.student_id || '';
+      
+      const facultyInput = document.getElementById('faculty');
+      if (facultyInput && member.student_info) facultyInput.value = member.student_info.faculty || '';
+      
+      const programInput = document.getElementById('program');
+      if (programInput && member.student_info) programInput.value = member.student_info.program || '';
+      
+      const advisorInput = document.getElementById('academic_advisor');
+      if (advisorInput && member.student_info) advisorInput.value = member.student_info.advisor || '';
+      
+      if (inputBatch) inputBatch.value = member.b || (member.student_info && member.student_info.session) || '';
+      if (inputAddress && member.personal_info) inputAddress.value = member.personal_info.present_address || '';
+      
+      const permanentAddrInput = document.getElementById('permanent_address');
+      if (permanentAddrInput && member.personal_info) permanentAddrInput.value = member.personal_info.permanent_address || '';
+      
+      const cityInput = document.getElementById('city');
+      if (cityInput && member.personal_info) cityInput.value = member.personal_info.city || '';
+      
+      const postcodeInput = document.getElementById('postcode');
+      if (postcodeInput && member.personal_info) postcodeInput.value = member.personal_info.postcode || '';
+      
+      const countryInput = document.getElementById('country');
+      if (countryInput && member.personal_info) countryInput.value = member.personal_info.country || '';
+      
+      const nationalityInput = document.getElementById('nationality');
+      if (nationalityInput && member.personal_info) nationalityInput.value = member.personal_info.nationality || '';
+      
+      const nidPassportInput = document.getElementById('nid_passport');
+      if (nidPassportInput && member.personal_info) nidPassportInput.value = member.personal_info.nid_passport || '';
+      
+      const altPhoneInput = document.getElementById('alt_phone');
+      if (altPhoneInput && member.personal_info) altPhoneInput.value = member.personal_info.alt_phone || '';
+
+      // Emergency contact info
+      const emNameInput = document.getElementById('emergency_name');
+      if (emNameInput && member.emergency_contact) emNameInput.value = member.emergency_contact.name || '';
+      
+      const emRelationInput = document.getElementById('emergency_relationship');
+      if (emRelationInput && member.emergency_contact) emRelationInput.value = member.emergency_contact.relationship || '';
+      
+      const emPhoneInput = document.getElementById('emergency_phone');
+      if (emPhoneInput && member.emergency_contact) emPhoneInput.value = member.emergency_contact.phone || '';
+      
+      const emAddrInput = document.getElementById('emergency_address');
+      if (emAddrInput && member.emergency_contact) emAddrInput.value = member.emergency_contact.address || '';
+
+      // Card Theme
+      if (inputCardTheme) {
+        inputCardTheme.value = member.th || '#06b6d4';
+        if (labelColorHex) labelColorHex.textContent = member.th || '#06b6d4';
+        if (libraryCard) libraryCard.style.setProperty('--user-card-theme', member.th || '#06b6d4');
+      }
+
+      // Borrow Limit
+      if (inputBorrowLimit) {
+        inputBorrowLimit.value = member.lm || 1;
+        if (labelLimitValue) labelLimitValue.textContent = member.lm || 1;
+      }
+
+      // Checkbox agree terms
+      if (inputAgree) inputAgree.checked = true;
+
+      // Select Tier (radio buttons)
+      const tierVal = member.tr || 'Standard';
+      const tierRadio = document.querySelector(`input[name="tier"][value="${tierVal}"]`);
+      if (tierRadio) tierRadio.checked = true;
+
+      // Select research interests (checkboxes)
+      const interests = member.membership_details?.interests || [];
+      const interestCheckboxes = document.querySelectorAll('input[name="interest"]');
+      interestCheckboxes.forEach(cb => {
+        cb.checked = interests.includes(cb.value);
+      });
+
+      // Populate custom select triggers/hidden selects using setValue()
+      if (deptSelect && member.student_info) deptSelect.setValue(member.d || member.student_info.department || '');
+      if (campusSelect && member.student_info) campusSelect.setValue(member.student_info.campus || '');
+      if (genderSelect && member.personal_info) genderSelect.setValue(member.personal_info.gender || '');
+      if (bloodGroupSelect && member.personal_info) bloodGroupSelect.setValue(member.personal_info.blood_group || '');
+      
+      if (membershipTypeSelect && member.membership_details) membershipTypeSelect.setValue(member.membership_details.type || '');
+      if (preferredBranchSelect && member.membership_details) preferredBranchSelect.setValue(member.membership_details.branch || '');
+      if (borrowingCategorySelect && member.membership_details) borrowingCategorySelect.setValue(member.membership_details.category || '');
+      if (preferredContactSelect && member.membership_details) preferredContactSelect.setValue(member.membership_details.contact_method || '');
+      
+      // Semester select (if exists on page)
+      const semVal = member.student_info?.semester || (member.student_info && member.student_info.semester) || '';
+      if (semesterSelect && semVal) semesterSelect.setValue(semVal);
+      
+      // Degree Level select
+      const degreeVal = member.student_info?.degree_level || '';
+      if (degreeLevelSelect && degreeVal) degreeLevelSelect.setValue(degreeVal);
+
+      // Date Pickers
+      if (member.personal_info && member.personal_info.dob && dobPicker) {
+        const parts = member.personal_info.dob.split('-');
+        if (parts.length === 3) {
+          dobPicker.selectDate(new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])));
+        }
+      }
+      if (member.membership_details && member.membership_details.start_date && startDatePicker) {
+        const parts = member.membership_details.start_date.split('-');
+        if (parts.length === 3) {
+          startDatePicker.selectDate(new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])));
+        }
+      }
+      if (member.membership_details && member.membership_details.expiry_date && expiryDatePicker) {
+        const parts = member.membership_details.expiry_date.split('-');
+        if (parts.length === 3) {
+          expiryDatePicker.selectDate(new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])));
+        }
+      }
+
+      // Card Key and QR code
+      if (previewCardKey) {
+        previewCardKey.textContent = editKey;
+        updateQrCodeElement(editKey);
+      }
+
+      // Avatar/Photo
+      if (member.av) {
+        cloudinaryAvatarUrl = member.av;
+        if (previewAvatar) {
+          previewAvatar.src = buildAvatarSrc(member.av);
+        }
+        if (previewAvatarContainer) {
+          previewAvatarContainer.classList.add('has-image');
+        }
+        if (labelFile) {
+          labelFile.textContent = 'avatar.jpg';
+        }
+      }
+
+      // Enrollment Proof
+      if (member.ep) {
+        cloudinaryEnrollmentUrl = member.ep;
+        if (dropzoneEnrollment) {
+          dropzoneEnrollment.classList.add('has-file');
+        }
+        if (labelEnrollmentFile) {
+          const match = member.ep.match(/\/([^\/]+)$/);
+          labelEnrollmentFile.textContent = match ? match[1] : 'Document Attached';
+        }
+      }
+
+      // Preserve status in originalStatus global variable
+      originalStatus = member.membership_details?.status || 'New Card';
+
+      // Mark card as created/updating
+      isCardCreated = true;
+      updateSubmitButtonText();
+      updateCardActionsVisibility();
+      updateStatusUI();
+      subscribeToCardStatus(editKey);
+
+      // Trigger input/change on form fields to update card previews
+      const formInputs = form.querySelectorAll('input, textarea, select');
+      formInputs.forEach(input => {
+        if (input.id === 'dob' || input.id === 'membership_start' || input.id === 'membership_expiry') return;
+        if (input.type === 'file') return;
+        input.dispatchEvent(new Event('input'));
+        input.dispatchEvent(new Event('change'));
+      });
+
+      blockAutosave = false;
+      
+      showToast("Member Loaded", "Populated member record details for editing.", "success");
+    } catch (err) {
+      console.error("checkForEditMember failed:", err);
+      showToast("Error", "Failed to retrieve member details: " + err.message, "error");
+      blockAutosave = false;
+    }
+  }
+
   function restoreFormDraft() {
     if (!form) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('edit')) {
+      console.log("restoreFormDraft: Edit mode detected. Skipping localStorage draft restoration.");
+      return;
+    }
     let rawDraft = null;
     try {
       rawDraft = localStorage.getItem('aether_lms_form_draft');
@@ -2375,11 +2867,15 @@ document.addEventListener('DOMContentLoaded', () => {
         updateQrCodeElement(draft['card_key']);
       }
       const localMembers = DB.getLocalMembers();
-      if (localMembers[draft['card_key']]) {
+      const cached = localMembers[draft['card_key']];
+      if (cached) {
+        originalStatus = cached.membership_details?.status || null;
         isCardCreated = true;
         updateSubmitButtonText();
         updateCardActionsVisibility();
+        updateStatusUI();
       }
+      subscribeToCardStatus(draft['card_key']);
     }
 
     if (draft['dob'] && dobPicker) {
@@ -3579,6 +4075,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let isAdminAuthenticated = sessionStorage.getItem('isAdminAuthenticated') === 'true';
   let currentFilteredMembers = [];
+  let lastFetchedMembers = null;
   const adminLoginForm = document.getElementById('admin-login-form');
   const adminLoginError = document.getElementById('admin-login-error');
   const btnLoginCancel = document.getElementById('btn-login-cancel');
@@ -3659,11 +4156,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnLoginCancel) {
     btnLoginCancel.addEventListener('click', (e) => {
       e.preventDefault();
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        window.location.href = '../index.html';
-      }
+      window.location.href = '../index.html';
     });
   }
 
@@ -3817,16 +4310,161 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+  function getNestedValue(obj, path) {
+    return path.split('.').reduce((o, i) => (o ? o[i] : undefined), obj);
+  }
 
-  async function renderAdminDirectory() {
+  function setNestedValue(obj, path, value) {
+    const parts = path.split('.');
+    const last = parts.pop();
+    const parent = parts.reduce((o, i) => {
+      if (!o[i]) o[i] = {};
+      return o[i];
+    }, obj);
+    parent[last] = value;
+  }
+
+  function getCampusTheme(val) {
+    return val === 'Main Campus' ? 'cyan' : (val === 'Permanent Campus' ? 'purple' : 'blue');
+  }
+
+  function getGenderTheme(val) {
+    return val === 'Male' ? 'blue' : (val === 'Female' ? 'pink' : 'gray');
+  }
+
+  function getDegreeTheme(val) {
+    return val === 'Bachelor' ? 'blue' : (val === 'Master' ? 'purple' : (val === 'PhD' ? 'cyan' : 'gray'));
+  }
+
+  function getBranchTheme(val) {
+    return val === 'Main Branch' ? 'cyan' : (val === 'City Branch' ? 'green' : 'blue');
+  }
+
+  function getCategoryTheme(val) {
+    return val === 'Student' ? 'yellow' : (val === 'Faculty' ? 'purple' : (val === 'Research Scholar' ? 'pink' : 'gray'));
+  }
+
+  function getContactTheme(val) {
+    return val === 'Email' ? 'blue' : (val === 'SMS' ? 'green' : (val === 'Phone Call' ? 'cyan' : 'gray'));
+  }
+
+  function getStatusTheme(val) {
+    const statusVal = val || 'Active';
+    return statusVal === 'Active' ? 'green' : (statusVal === 'Blocked' ? 'red' : (statusVal === 'Suspended' ? 'orange' : (statusVal === 'Expired' ? 'gray' : (statusVal === 'Pending' ? 'orange' : 'blue'))));
+  }
+
+  function setupBadgeDropdown(row, m, selector, fieldPath, options, themeResolver) {
+    const trigger = row.querySelector(selector);
+    const wrapper = trigger ? trigger.closest('.table-badge-select-wrapper') : null;
+    if (!trigger || !wrapper) return;
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const dropdown = document.getElementById('table-generic-dropdown');
+      if (!dropdown) return;
+
+      const isOpen = dropdown.style.display === 'block' && dropdown.activeTrigger === trigger;
+
+      // Close all dropdowns
+      const actionsDropdown = document.getElementById('table-actions-dropdown');
+      if (actionsDropdown) actionsDropdown.style.display = 'none';
+      const tierDropdown = document.getElementById('table-tier-dropdown');
+      if (tierDropdown) tierDropdown.style.display = 'none';
+      document.querySelectorAll('.table-tier-select-wrapper').forEach(w => w.classList.remove('open'));
+      document.querySelectorAll('.table-badge-select-wrapper').forEach(w => w.classList.remove('open'));
+
+      if (isOpen) {
+        dropdown.style.display = 'none';
+      } else {
+        dropdown.activeMember = m;
+        dropdown.activeWrapper = wrapper;
+        dropdown.activeTrigger = trigger;
+        dropdown.style.display = 'block';
+        wrapper.classList.add('open');
+
+        const currentValue = getNestedValue(m, fieldPath) || 'N/A';
+        
+        // Populate options in generic dropdown
+        dropdown.innerHTML = options.map(opt => {
+          const isSel = opt === currentValue ? 'selected' : '';
+          return `<div class="custom-option ${isSel}" data-value="${opt}" style="padding: 0.45rem 0.75rem; font-size: 0.78rem; cursor: pointer;">${opt}</div>`;
+        }).join('');
+
+        // Bind click event on each option
+        dropdown.querySelectorAll('.custom-option').forEach(optEl => {
+          optEl.addEventListener('click', async (optEvent) => {
+            optEvent.stopPropagation();
+            dropdown.style.display = 'none';
+            wrapper.classList.remove('open');
+
+            const newVal = optEl.getAttribute('data-value');
+            const oldVal = getNestedValue(m, fieldPath);
+            if (newVal === oldVal) return;
+
+            // Optimistic update
+            setNestedValue(m, fieldPath, newVal);
+            if (lastFetchedMembers) {
+              lastFetchedMembers[m.k] = m;
+            }
+
+            trigger.querySelector('span').textContent = newVal;
+            // Update color theme class
+            const oldColorTheme = themeResolver(oldVal);
+            const newColorTheme = themeResolver(newVal);
+            trigger.classList.remove(`badge-theme-${oldColorTheme}`);
+            trigger.classList.add(`badge-theme-${newColorTheme}`);
+
+            try {
+              await DB.saveMember(m);
+              showToast('Field Updated', `Successfully updated ${m.n}'s record.`);
+              renderAdminDirectory(true); // silent re-render to update KPIs
+            } catch (err) {
+              // Rollback
+              setNestedValue(m, fieldPath, oldVal);
+              if (lastFetchedMembers) {
+                lastFetchedMembers[m.k] = m;
+              }
+              trigger.querySelector('span').textContent = oldVal || 'N/A';
+              trigger.classList.remove(`badge-theme-${newColorTheme}`);
+              trigger.classList.add(`badge-theme-${oldColorTheme}`);
+              showToast('Update Failed', `Failed to update field: ${err.message || err}`, true);
+            }
+          });
+        });
+
+        // Position the dropdown
+        const rect = trigger.getBoundingClientRect();
+        const dropdownWidth = 145;
+        const dropdownHeight = options.length * 28 + 10;
+
+        let left = rect.right - dropdownWidth;
+        if (left < 10) left = 10;
+        dropdown.style.left = left + 'px';
+
+        const spaceBelow = window.innerHeight - rect.bottom;
+        let top = rect.bottom + 4;
+        if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
+          top = rect.top - dropdownHeight - 4;
+        }
+        dropdown.style.top = top + 'px';
+      }
+    });
+  }
+  async function renderAdminDirectory(useCache = false) {
     const tableBody = document.getElementById('admin-table-body');
     const searchInput = document.getElementById('admin-search-input');
     if (!tableBody) return;
 
-    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;"><div style="display:inline-block; width:1.5rem; height:1.5rem; border:2px solid currentColor; border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:0.5rem; vertical-align:middle;"></div><p style="margin:0; font-size:0.85rem; display:inline-block; margin-left:0.5rem;">Loading directory...</p></td></tr>';
+    const table = tableBody.closest('table');
+
+    if (!useCache || !lastFetchedMembers) {
+      if (table) table.classList.add('is-empty');
+      tableBody.innerHTML = '<tr><td colspan="40" style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;"><div style="display:inline-block; width:1rem; height:1rem; border:1.5px solid currentColor; border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; vertical-align:middle;"></div><p style="margin:0; font-size:0.85rem; display:inline-block; margin-left:0.5rem; vertical-align:middle;">Loading directory...</p></td></tr>';
+    }
 
     try {
-      const members = await DB.getAllMembers();
+      const members = (useCache && lastFetchedMembers) ? lastFetchedMembers : await DB.getAllMembers();
+      lastFetchedMembers = members;
       tableBody.innerHTML = '';
 
       const allMembers = Object.values(members).filter(Boolean);
@@ -3915,9 +4553,10 @@ document.addEventListener('DOMContentLoaded', () => {
       currentFilteredMembers = filtered;
 
       if (filtered.length === 0) {
+        if (table) table.classList.add('is-empty');
         tableBody.innerHTML = `
           <tr>
-            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">
+            <td colspan="40" style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">
               <i data-lucide="info" style="width: 2rem; height: 2rem; margin-bottom: 0.5rem; color: var(--accent-secondary); display: inline-block;"></i>
               <p style="margin: 0; font-size: 0.85rem;">No members match the current filters.</p>
             </td>
@@ -3926,6 +4565,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof lucide !== 'undefined') lucide.createIcons();
         return;
       }
+
+      if (table) table.classList.remove('is-empty');
+      tableBody.innerHTML = '';
 
       filtered.forEach(m => {
         const row = document.createElement('tr');
@@ -3958,8 +4600,29 @@ document.addEventListener('DOMContentLoaded', () => {
           tierClass = 'tier-vip';
         }
 
+        // Formatting for research interests
+        const interestsVal = (m.membership_details?.interests || []).join(', ') || 'None';
+        
+        // Formatting for enrollment proof link
+        let proofHtml = 'N/A';
+        if (m.ep) {
+          let epSrc = m.ep;
+          if (epSrc.startsWith('c:')) {
+            const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
+            epSrc = `https://res.cloudinary.com/${cloudName}/image/upload/${epSrc.substring(2)}`;
+          } else if (!epSrc.startsWith('http://') && !epSrc.startsWith('https://') && !epSrc.startsWith('data:')) {
+            if (epSrc.includes('lms_documents/') || epSrc.includes('lms-documents/')) {
+              const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
+              epSrc = `https://res.cloudinary.com/${cloudName}/image/upload/${epSrc}`;
+            } else {
+              epSrc = 'data:application/pdf;base64,' + epSrc;
+            }
+          }
+          proofHtml = `<a href="${epSrc}" target="_blank" style="color: var(--accent-primary); text-decoration: none; font-weight: 500; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.25rem;"><i data-lucide="external-link" style="width: 0.85rem; height: 0.85rem;"></i> View Proof</a>`;
+        }
+
         row.innerHTML = `
-          <td style="padding: 0.85rem 1rem;">
+          <td style="padding: 0.85rem 1rem; white-space: nowrap;">
             <div class="table-member-info">
               <div class="table-avatar-container">
                 ${avatarHtml}
@@ -3969,46 +4632,257 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             </div>
           </td>
-          <td style="padding: 0.85rem 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--member-theme); font-weight: 600;">
+          <td style="padding: 0.85rem 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--member-theme); font-weight: 600; white-space: nowrap;">
             LMS-${(m.k || '').replace('LMS-', '')}
           </td>
-          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem;">
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
             ${m.e || 'N/A'}
           </td>
-          <td style="padding: 0.85rem 1rem; color: var(--text-muted); font-size: 0.78rem;">
-            <div style="color: var(--text-main); font-weight: 500;">${m.d || (m.student_info && m.student_info.department) || 'N/A'}</div>
-            <div style="font-size: 0.7rem;">${m.b || (m.student_info && m.student_info.session) || 'N/A'}</div>
-          </td>
-          <td style="padding: 0.85rem 1rem;">
-            <span class="table-tier-badge ${tierClass}">
-              <i data-lucide="${tierIcon}"></i>
-              <span>${m.tr || 'Standard'}</span>
-            </span>
-          </td>
-          <td style="padding: 0.85rem 1rem;">
-            <div class="table-actions">
-              <button class="table-action-btn view-btn">
-                <i data-lucide="eye" style="width: 0.8rem; height: 0.8rem; margin-right: 0.25rem;"></i> View
-              </button>
-              <button class="table-action-btn delete-btn">
-                <i data-lucide="trash-2" style="width: 0.8rem; height: 0.8rem;"></i>
+          <td style="padding: 0.85rem 1rem; white-space: nowrap;">
+            <div class="table-badge-select-wrapper">
+              <button class="table-badge-trigger badge-status badge-theme-${getStatusTheme(m.membership_details?.status)}" type="button">
+                <span>${m.membership_details?.status || 'Active'}</span>
               </button>
             </div>
           </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.p || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.d || (m.student_info && m.student_info.department) || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.b || (m.student_info && m.student_info.session) || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.s || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.student_info?.student_id || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; white-space: nowrap;">
+            <div class="table-badge-select-wrapper">
+              <button class="table-badge-trigger badge-degree badge-theme-${getDegreeTheme(m.student_info?.degree_level)}" type="button">
+                <span>${m.student_info?.degree_level || 'N/A'}</span>
+              </button>
+            </div>
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.student_info?.faculty || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.student_info?.program || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; white-space: nowrap;">
+            <div class="table-badge-select-wrapper">
+              <button class="table-badge-trigger badge-campus badge-theme-${getCampusTheme(m.student_info?.campus)}" type="button">
+                <span>${m.student_info?.campus || 'N/A'}</span>
+              </button>
+            </div>
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.student_info?.advisor || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.personal_info?.dob || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; white-space: nowrap;">
+            <div class="table-badge-select-wrapper">
+              <button class="table-badge-trigger badge-gender badge-theme-${getGenderTheme(m.personal_info?.gender)}" type="button">
+                <span>${m.personal_info?.gender || 'N/A'}</span>
+              </button>
+            </div>
+          </td>
+          <td style="padding: 0.85rem 1rem; white-space: nowrap;">
+            <div class="table-badge-select-wrapper">
+              <button class="table-badge-trigger badge-blood badge-theme-red" type="button">
+                <span>${m.personal_info?.blood_group || 'N/A'}</span>
+              </button>
+            </div>
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.personal_info?.nationality || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.personal_info?.nid_passport || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.personal_info?.alt_phone || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis;" title="${m.personal_info?.present_address || m.a || 'N/A'}">
+            ${m.personal_info?.present_address || m.a || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis;" title="${m.personal_info?.permanent_address || 'N/A'}">
+            ${m.personal_info?.permanent_address || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.personal_info?.city || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.personal_info?.postcode || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.personal_info?.country || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.emergency_contact?.name || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.emergency_contact?.relationship || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.emergency_contact?.phone || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis;" title="${m.emergency_contact?.address || 'N/A'}">
+            ${m.emergency_contact?.address || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; white-space: nowrap;">
+            <div class="table-badge-select-wrapper">
+              <button class="table-badge-trigger badge-branch badge-theme-${getBranchTheme(m.membership_details?.branch)}" type="button">
+                <span>${m.membership_details?.branch || 'N/A'}</span>
+              </button>
+            </div>
+          </td>
+          <td style="padding: 0.85rem 1rem; white-space: nowrap;">
+            <div class="table-badge-select-wrapper">
+              <button class="table-badge-trigger badge-category badge-theme-${getCategoryTheme(m.membership_details?.category)}" type="button">
+                <span>${m.membership_details?.category || 'N/A'}</span>
+              </button>
+            </div>
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.l || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis;" title="${interestsVal}">
+            ${interestsVal}
+          </td>
+          <td style="padding: 0.85rem 1rem; white-space: nowrap;">
+            <div class="table-badge-select-wrapper">
+              <button class="table-badge-trigger badge-contact badge-theme-${getContactTheme(m.membership_details?.contact_method)}" type="button">
+                <span>${m.membership_details?.contact_method || 'N/A'}</span>
+              </button>
+            </div>
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.membership_details?.start_date || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${m.t || m.membership_details?.expiry_date || 'N/A'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap; text-transform: capitalize;">
+            ${m.th || 'Cyan'}
+          </td>
+          <td style="padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.78rem; white-space: nowrap;">
+            ${proofHtml}
+          </td>
+          <td style="padding: 0.85rem 1rem; white-space: nowrap;">
+            <div class="table-tier-select-wrapper">
+              <button class="table-tier-trigger ${tierClass}" type="button">
+                <span>${m.tr || 'Standard'}</span>
+              </button>
+            </div>
+          </td>
+          <td class="sticky-actions-col" style="padding: 0.85rem 1rem; text-align: center; white-space: nowrap;">
+            <button class="table-action-dots-btn" type="button" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 0.35rem 0.5rem; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s;">
+              <i data-lucide="more-vertical" style="width: 1.1rem; height: 1.1rem;"></i>
+            </button>
+          </td>
         `;
 
-        row.querySelector('.view-btn').addEventListener('click', () => {
-          showMemberDetailsModal(m);
-        });
+        const tierWrapper = row.querySelector('.table-tier-select-wrapper');
+        const tierTrigger = row.querySelector('.table-tier-trigger');
+        if (tierTrigger && tierWrapper) {
+          tierTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const dropdown = document.getElementById('table-tier-dropdown');
+            if (!dropdown) return;
 
-        row.querySelector('.delete-btn').addEventListener('click', async (e) => {
-          e.stopPropagation();
-          if (confirm(`Are you sure you want to delete ${m.n}'s record?`)) {
-            await DB.deleteMember(m.k);
-            renderAdminDirectory();
-            showToast('Record Deleted', `${m.n} has been deleted from database.`);
-          }
-        });
+            const isOpen = dropdown.style.display === 'block' && dropdown.activeMember === m;
+
+            // Close all dropdowns
+            const actionsDropdown = document.getElementById('table-actions-dropdown');
+            if (actionsDropdown) actionsDropdown.style.display = 'none';
+            document.querySelectorAll('.table-tier-select-wrapper').forEach(w => w.classList.remove('open'));
+
+            if (isOpen) {
+              dropdown.style.display = 'none';
+            } else {
+              dropdown.activeMember = m;
+              dropdown.activeWrapper = tierWrapper;
+              dropdown.activeTrigger = tierTrigger;
+              dropdown.style.display = 'block';
+              tierWrapper.classList.add('open');
+
+              // Highlight currently selected option
+              const currentTier = m.tr || 'Standard';
+              dropdown.querySelectorAll('.custom-option').forEach(opt => {
+                if (opt.getAttribute('data-value') === currentTier) {
+                  opt.classList.add('selected');
+                } else {
+                  opt.classList.remove('selected');
+                }
+              });
+
+              const rect = tierTrigger.getBoundingClientRect();
+              const dropdownWidth = 100;
+              const dropdownHeight = 105;
+
+              let left = rect.right - dropdownWidth;
+              if (left < 10) left = 10;
+              dropdown.style.left = left + 'px';
+
+              const spaceBelow = window.innerHeight - rect.bottom;
+              let top = rect.bottom + 4;
+              if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
+                top = rect.top - dropdownHeight - 4;
+              }
+              dropdown.style.top = top + 'px';
+            }
+          });
+        }
+
+        const dotsBtn = row.querySelector('.table-action-dots-btn');
+        if (dotsBtn) {
+          dotsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const dropdown = document.getElementById('table-actions-dropdown');
+            if (!dropdown) return;
+
+            const isOpen = dropdown.style.display === 'block' && dropdown.activeMember === m;
+
+            if (isOpen) {
+              dropdown.style.display = 'none';
+            } else {
+              dropdown.activeMember = m;
+              dropdown.style.display = 'block';
+
+              const rect = dotsBtn.getBoundingClientRect();
+              const dropdownWidth = 110;
+              const dropdownHeight = 110;
+
+              let left = rect.right - dropdownWidth;
+              if (left < 10) left = 10;
+              dropdown.style.left = left + 'px';
+
+              const spaceBelow = window.innerHeight - rect.bottom;
+              let top = rect.bottom + 4;
+              if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
+                top = rect.top - dropdownHeight - 4;
+              }
+              dropdown.style.top = top + 'px';
+            }
+          });
+        }
+
+        // Setup click events for the new custom badge selects
+        setupBadgeDropdown(row, m, '.badge-campus', 'student_info.campus', ['Main Campus', 'Permanent Campus'], getCampusTheme);
+        setupBadgeDropdown(row, m, '.badge-gender', 'personal_info.gender', ['Male', 'Female', 'Other'], getGenderTheme);
+        setupBadgeDropdown(row, m, '.badge-blood', 'personal_info.blood_group', ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'], () => 'red');
+        setupBadgeDropdown(row, m, '.badge-degree', 'student_info.degree_level', ['Bachelor', 'Master', 'PhD', 'Associate', 'Diploma'], getDegreeTheme);
+        setupBadgeDropdown(row, m, '.badge-branch', 'membership_details.branch', ['Main Branch', 'City Branch'], getBranchTheme);
+        setupBadgeDropdown(row, m, '.badge-category', 'membership_details.category', ['Student', 'Faculty', 'Research Scholar'], getCategoryTheme);
+        setupBadgeDropdown(row, m, '.badge-contact', 'membership_details.contact_method', ['Email', 'SMS', 'Phone Call'], getContactTheme);
+        setupBadgeDropdown(row, m, '.badge-status', 'membership_details.status', ['Active', 'Blocked', 'Expired', 'Suspended', 'New Card', 'Pending'], getStatusTheme);
 
         tableBody.appendChild(row);
       });
@@ -4016,7 +4890,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof lucide !== 'undefined') lucide.createIcons();
     } catch (err) {
       console.error("renderAdminDirectory failed:", err);
-      tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--accent-error); padding: 2rem 1rem;"><i data-lucide="alert-circle" style="width: 2rem; height: 2rem; margin-bottom: 0.5rem; display: inline-block;"></i><p style="margin: 0; font-size: 0.85rem;">Failed to load directory: ${err.message || err}</p></td></tr>`;
+      if (table) table.classList.add('is-empty');
+      tableBody.innerHTML = `<tr><td colspan="40" style="text-align: center; color: var(--accent-error); padding: 2rem 1rem;"><i data-lucide="alert-circle" style="width: 2rem; height: 2rem; margin-bottom: 0.5rem; display: inline-block;"></i><p style="margin: 0; font-size: 0.85rem;">Failed to load directory: ${err.message || err}</p></td></tr>`;
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
   }
@@ -4025,7 +4900,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const optionsContainer = document.getElementById('custom-select-options-filter-dept');
     if (!optionsContainer) return;
 
+    // Preserve the search container if it exists
+    const searchContainer = optionsContainer.querySelector('.select-search-container');
+
     optionsContainer.innerHTML = '';
+
+    if (searchContainer) {
+      optionsContainer.appendChild(searchContainer);
+    }
 
     const allOpt = document.createElement('div');
     allOpt.className = 'custom-option';
@@ -4061,6 +4943,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeVal = hiddenSelect ? hiddenSelect.value : '';
     const activeText = activeVal || 'All Departments';
     if (displayValue) displayValue.textContent = activeText;
+
+    options.forEach(o => {
+      if (o.getAttribute('data-value') === (activeVal || '')) {
+        o.classList.add('selected');
+      } else {
+        o.classList.remove('selected');
+      }
+    });
   }
 
   function exportToCSV(members) {
@@ -4221,6 +5111,24 @@ document.addEventListener('DOMContentLoaded', () => {
           exportChevron.style.transform = 'rotate(0deg)';
         }
       }
+      const tableDropdown = document.getElementById('table-actions-dropdown');
+      if (tableDropdown && !tableDropdown.contains(e.target)) {
+        tableDropdown.style.display = 'none';
+      }
+      const tierDropdown = document.getElementById('table-tier-dropdown');
+      if (tierDropdown && !tierDropdown.contains(e.target)) {
+        tierDropdown.style.display = 'none';
+        if (tierDropdown.activeWrapper) {
+          tierDropdown.activeWrapper.classList.remove('open');
+        }
+      }
+      const genericDropdown = document.getElementById('table-generic-dropdown');
+      if (genericDropdown && !genericDropdown.contains(e.target)) {
+        genericDropdown.style.display = 'none';
+        if (genericDropdown.activeWrapper) {
+          genericDropdown.activeWrapper.classList.remove('open');
+        }
+      }
     });
   }
 
@@ -4244,6 +5152,114 @@ document.addEventListener('DOMContentLoaded', () => {
         if (exportChevron) exportChevron.style.transform = 'rotate(0deg)';
       }
     });
+  }
+
+  // Initialize table floating actions dropdown
+  const tableDropdown = document.getElementById('table-actions-dropdown');
+  if (tableDropdown) {
+    tableDropdown.querySelector('.view-option').addEventListener('click', (e) => {
+      e.stopPropagation();
+      tableDropdown.style.display = 'none';
+      const m = tableDropdown.activeMember;
+      if (m && m.k) {
+        window.location.href = `share.html?id=${encodeURIComponent(m.k)}`;
+      }
+    });
+
+    tableDropdown.querySelector('.edit-option').addEventListener('click', (e) => {
+      e.stopPropagation();
+      tableDropdown.style.display = 'none';
+      const m = tableDropdown.activeMember;
+      if (m && m.k) {
+        window.location.href = `../index.html?edit=${encodeURIComponent(m.k)}`;
+      }
+    });
+
+    tableDropdown.querySelector('.delete-option').addEventListener('click', async (e) => {
+      e.stopPropagation();
+      tableDropdown.style.display = 'none';
+      const m = tableDropdown.activeMember;
+      if (m && m.k) {
+        if (confirm(`Are you sure you want to delete ${m.n}'s record?`)) {
+          await DB.deleteMember(m.k);
+          renderAdminDirectory();
+          showToast('Record Deleted', `${m.n} has been deleted from database.`);
+        }
+      }
+    });
+
+    // Close on any scroll inside window/containers (capturing scroll listener)
+    window.addEventListener('scroll', () => {
+      tableDropdown.style.display = 'none';
+      const genericDropdown = document.getElementById('table-generic-dropdown');
+      if (genericDropdown) {
+        genericDropdown.style.display = 'none';
+        if (genericDropdown.activeWrapper) {
+          genericDropdown.activeWrapper.classList.remove('open');
+        }
+      }
+    }, true);
+  }
+
+  // Initialize table floating tier dropdown
+  const tierDropdown = document.getElementById('table-tier-dropdown');
+  if (tierDropdown) {
+    tierDropdown.querySelectorAll('.custom-option').forEach(opt => {
+      opt.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        tierDropdown.style.display = 'none';
+
+        const m = tierDropdown.activeMember;
+        const wrapper = tierDropdown.activeWrapper;
+        const trigger = tierDropdown.activeTrigger;
+
+        if (wrapper) wrapper.classList.remove('open');
+        if (!m || !trigger) return;
+
+        const newTier = opt.getAttribute('data-value');
+        const oldTier = m.tr || 'Standard';
+        if (newTier === oldTier) return;
+
+        // Optimistic UI updates
+        m.tr = newTier;
+        if (lastFetchedMembers) {
+          lastFetchedMembers[m.k] = m;
+        }
+
+        trigger.className = `table-tier-trigger tier-${newTier.toLowerCase()}`;
+        trigger.querySelector('span').textContent = newTier;
+
+        try {
+          await DB.saveMember(m);
+          showToast('Tier Updated', `Successfully updated ${m.n}'s tier to ${newTier}.`);
+          renderAdminDirectory(true); // silent re-render to update KPIs
+        } catch (err) {
+          // Rollback
+          m.tr = oldTier;
+          if (lastFetchedMembers) {
+            lastFetchedMembers[m.k] = m;
+          }
+          trigger.className = `table-tier-trigger tier-${oldTier.toLowerCase()}`;
+          trigger.querySelector('span').textContent = oldTier;
+          showToast('Update Failed', `Failed to update tier: ${err.message || err}`, true);
+        }
+      });
+    });
+
+    // Close on scroll
+    window.addEventListener('scroll', () => {
+      tierDropdown.style.display = 'none';
+      if (tierDropdown.activeWrapper) {
+        tierDropdown.activeWrapper.classList.remove('open');
+      }
+      const genericDropdown = document.getElementById('table-generic-dropdown');
+      if (genericDropdown) {
+        genericDropdown.style.display = 'none';
+        if (genericDropdown.activeWrapper) {
+          genericDropdown.activeWrapper.classList.remove('open');
+        }
+      }
+    }, true);
   }
 
   // Initialize admin custom select filters
@@ -4292,7 +5308,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   checkSharedLink();
-  blockAutosave = false;
+  if (typeof updateStatusUI === 'function') {
+    updateStatusUI();
+  }
+  if (typeof updateSubmitButtonText === 'function') {
+    updateSubmitButtonText();
+  }
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('edit') && typeof checkForEditMember === 'function') {
+    checkForEditMember().then(() => {
+      blockAutosave = false;
+    });
+  } else {
+    blockAutosave = false;
+  }
 });
 
 const styleSheet = document.createElement("style");

@@ -323,6 +323,14 @@
         <p class="share-tagline">Secure Digital Library Credentials Verification</p>
       </div>
 
+      <!-- Card Status Notification Banner -->
+      <div id="preview-status-notification" class="status-notification-banner" style="display: none;">
+        <div class="notification-content">
+          <i class="notification-icon" data-lucide="info"></i>
+          <span class="notification-text"></span>
+        </div>
+      </div>
+
       <!-- Card container — same structure as home page -->
       <div class="share-card-wrap">
         <div class="card-perspective" id="card-perspective">
@@ -360,9 +368,15 @@
                   </svg>
                   <span class="card-logo-text">AETHER LMS</span>
                 </div>
-                <div class="card-type tier-standard" id="preview-tier">
-                  <i data-lucide="shield"></i>
-                  <span>Standard</span>
+                <div class="card-header-badges" style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
+                  <div class="card-type tier-standard" id="preview-tier">
+                    <i data-lucide="shield"></i>
+                    <span>Standard</span>
+                  </div>
+                  <div class="card-status-badge" id="preview-card-status" style="display: none;">
+                    <i data-lucide="clock"></i>
+                    <span>Pending</span>
+                  </div>
                 </div>
               </div>
 
@@ -639,6 +653,25 @@
           return;
         }
         renderCard(member);
+
+        // ── 7.5. Attach real-time snapshot listener ──
+        if (firestoreDb && cardKey) {
+          try {
+            firestoreDb.collection('members').doc(cardKey).onSnapshot((docSnapshot) => {
+              if (docSnapshot.exists) {
+                const latestMember = docSnapshot.data();
+                if (latestMember) {
+                  console.log("Real-time update received for card:", latestMember.k);
+                  renderCard(latestMember);
+                }
+              }
+            }, (err) => {
+              console.warn("Real-time observer warning:", err);
+            });
+          } catch (e) {
+            console.warn("Failed to attach real-time observer:", e);
+          }
+        }
       } catch (err) {
         console.error('Fetch failed:', err);
         showError('Network error connecting to database. Please refresh.');
@@ -739,6 +772,45 @@
           else if (tier === 'VIP') { iconName = 'crown'; tierClass = 'tier-vip'; }
           previewTierEl.classList.add(tierClass);
           previewTierEl.innerHTML = `<i data-lucide="${iconName}"></i><span>${tier}</span>`;
+        }
+
+        // Status Badge & Notification Banner
+        const status = m.membership_details?.status || 'Pending';
+        const badgeEl = document.getElementById('preview-card-status');
+        const notifyEl = document.getElementById('preview-status-notification');
+        
+        if (badgeEl) {
+          if (status === 'Pending') {
+            badgeEl.style.display = 'inline-flex';
+          } else {
+            badgeEl.style.display = 'none';
+          }
+        }
+        
+        if (notifyEl) {
+          notifyEl.style.display = 'flex';
+          const notifyText = notifyEl.querySelector('.notification-text');
+          const notifyIcon = notifyEl.querySelector('.notification-icon');
+          notifyEl.className = 'status-notification-banner';
+          
+          if (status === 'Pending') {
+            notifyEl.classList.add('notify-pending');
+            if (notifyIcon) notifyIcon.setAttribute('data-lucide', 'clock');
+            if (notifyText) notifyText.innerHTML = `This library membership card is <strong>Pending Approval</strong>. It must be verified by an admin.`;
+          } else if (status === 'Active' || status === 'New Card') {
+            notifyEl.classList.add('notify-active');
+            if (notifyIcon) notifyIcon.setAttribute('data-lucide', 'check-circle-2');
+            if (notifyText) notifyText.innerHTML = `Verified: This library membership card is <strong>Active and Verified</strong>.`;
+          } else {
+            notifyEl.classList.add('notify-inactive');
+            if (notifyIcon) notifyIcon.setAttribute('data-lucide', 'alert-triangle');
+            if (notifyText) notifyText.innerHTML = `This library membership card is currently <strong>${status}</strong>. Access is restricted.`;
+          }
+          
+          if (typeof lucide !== 'undefined') {
+            lucide.createIcons({ node: notifyEl });
+            if (badgeEl) lucide.createIcons({ node: badgeEl });
+          }
         }
 
         // QR

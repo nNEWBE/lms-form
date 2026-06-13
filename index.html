@@ -126,15 +126,36 @@
     <main class="main-layout">
 
       <section class="glass-panel form-container" id="registration-form-panel">
-        <h2 style="display: flex; align-items: center; width: 100%;">
-          <i data-lucide="user-plus"></i>
-          <span>Add New Library Member</span>
+        <h2 style="display: flex; align-items: center; width: 100%; gap: 0.5rem;">
+          <div class="form-header-title-wrapper" style="display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="user-plus"></i>
+            <span>Add New Library Member</span>
+          </div>
           <button type="button" class="btn btn-secondary" id="demo-autofill-btn"
             style="margin-left: auto; padding: 0.35rem 0.7rem; font-size: 0.75rem; background: color-mix(in srgb, var(--accent-primary) 15%, transparent); border-color: color-mix(in srgb, var(--accent-primary) 30%, transparent); color: var(--accent-primary); height: 28px; display: inline-flex; align-items: center; gap: 0.3rem;">
             <i data-lucide="zap" style="width: 12px; height: 12px; color: var(--accent-primary);"></i>
             <span>Fill Demo</span>
           </button>
+          <button type="button" class="btn btn-secondary" id="print-form-btn"
+            style="padding: 0.35rem 0.7rem; font-size: 0.75rem; background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: var(--text-main); height: 28px; display: inline-flex; align-items: center; gap: 0.3rem;">
+            <i data-lucide="printer" style="width: 12px; height: 12px;"></i>
+            <span>Print Form</span>
+          </button>
         </h2>
+
+        <!-- Print Header Block (Visible only during print) -->
+        <div class="print-header-container" style="display: none; margin-bottom: 2rem;">
+          <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+            <div style="font-size: 8pt; text-transform: uppercase; letter-spacing: 0.1em; color: #06b6d4; font-weight: bold; margin-bottom: 0.25rem;">Aether Library Management System</div>
+            <h1 style="font-size: 20pt; font-weight: 800; color: #002b5c; margin: 0; text-transform: uppercase; border: none; padding: 0; line-height: 1.1;">Registration Form</h1>
+            <div style="width: 80px; height: 3px; background: #002b5c; margin-top: 0.5rem; margin-bottom: 0.5rem;"></div>
+            <p style="font-size: 8.5pt; color: #4b5563; margin: 0; font-style: italic;">Fill out all the fields below to register a library card account.</p>
+          </div>
+          <div style="width: 100px; height: 120px; border: 1.5px dashed #002b5c; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 7.5pt; color: #4b5563; font-weight: 500; text-transform: uppercase; border-radius: 4px; padding: 4px; box-sizing: border-box; background: #ffffff;">
+            <img id="print-avatar-preview" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 2px;">
+            <span id="print-avatar-text" style="line-height: 1.3;">Affix Photo Here</span>
+          </div>
+        </div>
 
         <form id="library-member-form" novalidate>
           <div class="form-grid">
@@ -675,8 +696,13 @@
                   <label for="password">
                     <i data-lucide="lock"></i> Access Security PIN *
                   </label>
-                  <input type="password" id="password" name="password" class="input-control"
-                    placeholder="4-8 digit passcode" required minlength="4">
+                  <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                    <input type="password" id="password" name="password" class="input-control"
+                      placeholder="4-8 digit passcode" required minlength="4" style="padding-right: 2.5rem; width: 100%;">
+                    <button type="button" id="toggle-password-visibility" style="position: absolute; right: 0.75rem; background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0.25rem; transition: color 0.2s; z-index: 10;" onmouseover="this.style.color='var(--text-main)'" onmouseout="this.style.color='var(--text-muted)'">
+                      <i data-lucide="eye" style="width: 1.1rem; height: 1.1rem;" id="toggle-password-icon"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -823,6 +849,17 @@
               </div>
             </div>
 
+            <!-- Print-Only Attachment Check -->
+            <div class="field-group print-only" style="display: none;">
+              <label>Enrollment Document Proof Attachment</label>
+              <div class="preview-address-card">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <input type="checkbox" id="print-proof-attached-yes" style="width: 12pt; height: 12pt; accent-color: #000000;" checked disabled>
+                  <span style="font-size: 10pt; color: #000000;">Document proof has been attached (verified digitally)</span>
+                </div>
+              </div>
+            </div>
+
             <div class="field-group full-width">
               <label class="custom-checkbox" style="align-items: flex-start; padding: 0.75rem 1rem;">
                 <input type="checkbox" id="agree_terms" name="agree_terms" required>
@@ -845,6 +882,16 @@
                 <div class="btn-spinner"></div>
                 <span>Create<span class="btn-text-full"> Member</span></span>
               </button>
+            </div>
+
+            <!-- Print-Only Signature Row -->
+            <div class="print-only signature-row" style="display: none; margin-top: 4rem;">
+              <div style="width: 40%; text-align: center; border-top: 1px solid #000000; padding-top: 0.5rem;">
+                <span style="font-size: 9.5pt; font-weight: 600; color: #000000;">Applicant Signature</span>
+              </div>
+              <div style="width: 40%; text-align: center; border-top: 1px solid #000000; padding-top: 0.5rem;">
+                <span style="font-size: 9.5pt; font-weight: 600; color: #000000;">Authorized Librarian Signature</span>
+              </div>
             </div>
 
           </div>
@@ -945,6 +992,14 @@
           <span>Live Digital ID Card</span>
         </div>
 
+        <!-- Card Status Notification Banner -->
+        <div id="preview-status-notification" class="status-notification-banner" style="display: none;">
+          <div class="notification-content">
+            <i class="notification-icon" data-lucide="info"></i>
+            <span class="notification-text"></span>
+          </div>
+        </div>
+
         <div class="card-perspective" id="card-perspective">
           <div class="library-card" id="library-id-card">
 
@@ -980,9 +1035,15 @@
                   </svg>
                   <span class="card-logo-text">AETHER LMS</span>
                 </div>
-                <div class="card-type tier-standard" id="preview-tier">
-                  <i data-lucide="shield"></i>
-                  <span>Standard</span>
+                <div class="card-header-badges" style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
+                  <div class="card-type tier-standard" id="preview-tier">
+                    <i data-lucide="shield"></i>
+                    <span>Standard</span>
+                  </div>
+                  <div class="card-status-badge" id="preview-card-status" style="display: none;">
+                    <i data-lucide="clock"></i>
+                    <span>Pending</span>
+                  </div>
                 </div>
               </div>
 
@@ -1383,6 +1444,254 @@
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- Dedicated Print-Only Layout -->
+  <div class="print-only-layout">
+    <!-- Top Branding Wavy Banner -->
+    <div class="print-header-banner">
+      <div class="print-brand-container">
+        <!-- Site Logo SVG -->
+        <svg class="print-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="print-logo-grad-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#002b5c" />
+              <stop offset="100%" stop-color="#001a38" />
+            </linearGradient>
+            <linearGradient id="print-logo-grad-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="rgba(0, 0, 0, 0.45)" />
+              <stop offset="100%" stop-color="rgba(0, 0, 0, 0.2)" />
+            </linearGradient>
+            <linearGradient id="print-logo-grad-light" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="rgba(255, 255, 255, 0.2)" />
+              <stop offset="100%" stop-color="rgba(255, 255, 255, 0.05)" />
+            </linearGradient>
+          </defs>
+          <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#print-logo-grad-primary)" />
+          <path d="M2 7L12 12V22L2 17V7Z" fill="url(#print-logo-grad-dark)" />
+          <path d="M22 7L12 12V22L22 17V7Z" fill="url(#print-logo-grad-light)" />
+          <path d="M12 12V22" stroke="#002b5c" stroke-width="1.5" stroke-linecap="round" />
+          <path d="M12 12L2 7" stroke="rgba(0, 0, 0, 0.15)" stroke-width="1" />
+          <path d="M12 12L22 7" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1" />
+        </svg>
+        <div class="print-brand-info">
+          <h2 class="print-brand-title">AETHER LMS</h2>
+          <p class="print-brand-subtitle">Digital Library Card Portal</p>
+        </div>
+      </div>
+      <div class="print-photo-box">
+        <img id="print-avatar-preview-box" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+        <span id="print-avatar-text-box">Affix Photo Here</span>
+      </div>
+    </div>
+
+    <!-- Centered Form Title -->
+    <h1 class="print-form-main-title">REGISTRATION FORM</h1>
+
+    <!-- SECTION 1: STUDENT & PERSONAL INFORMATION -->
+    <div class="print-section-header">A. Student & Personal Information</div>
+    <div class="print-form-row">
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">First Name:</span>
+        <span class="print-underline" id="print-val-first-name"></span>
+      </div>
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">Last Name:</span>
+        <span class="print-underline" id="print-val-last-name"></span>
+      </div>
+    </div>
+    <div class="print-form-row">
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">Student ID / Roll:</span>
+        <span class="print-underline" id="print-val-student-id"></span>
+      </div>
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">Department:</span>
+        <span class="print-underline" id="print-val-dept"></span>
+      </div>
+    </div>
+    <div class="print-form-row">
+      <div class="print-form-field" style="width: 33%;">
+        <span class="print-label">Semester:</span>
+        <span class="print-underline" id="print-val-semester"></span>
+      </div>
+      <div class="print-form-field" style="width: 33%;">
+        <span class="print-label">Degree Level:</span>
+        <span class="print-underline" id="print-val-degree-level"></span>
+      </div>
+      <div class="print-form-field" style="width: 34%;">
+        <span class="print-label">Campus Branch:</span>
+        <span class="print-underline" id="print-val-campus"></span>
+      </div>
+    </div>
+    <div class="print-form-row">
+      <div class="print-form-field" style="width: 33%;">
+        <span class="print-label">Date of Birth:</span>
+        <span class="print-underline" id="print-val-dob"></span>
+      </div>
+      <div class="print-form-field" style="width: 33%;">
+        <span class="print-label">Gender:</span>
+        <span class="print-underline" id="print-val-gender"></span>
+      </div>
+      <div class="print-form-field" style="width: 34%;">
+        <span class="print-label">Blood Group:</span>
+        <span class="print-underline" id="print-val-blood-group"></span>
+      </div>
+    </div>
+    <div class="print-form-row">
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">Mobile Number:</span>
+        <span class="print-underline" id="print-val-phone"></span>
+      </div>
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">Email Address:</span>
+        <span class="print-underline" id="print-val-email"></span>
+      </div>
+    </div>
+    <div class="print-form-row">
+      <div class="print-form-field" style="width: 100%;">
+        <span class="print-label">Present Address:</span>
+        <span class="print-underline" id="print-val-address"></span>
+      </div>
+    </div>
+
+    <!-- SECTION 2: EMERGENCY CONTACT -->
+    <div class="print-section-header">B. Emergency Contact</div>
+    <div class="print-form-row">
+      <div class="print-form-field" style="width: 40%;">
+        <span class="print-label">Contact Person Name:</span>
+        <span class="print-underline" id="print-val-emergency-name"></span>
+      </div>
+      <div class="print-form-field" style="width: 20%;">
+        <span class="print-label">Relationship:</span>
+        <span class="print-underline" id="print-val-emergency-relation"></span>
+      </div>
+      <div class="print-form-field" style="width: 40%;">
+        <span class="print-label">Contact Number:</span>
+        <span class="print-underline" id="print-val-emergency-phone"></span>
+      </div>
+    </div>
+    <div class="print-form-row">
+      <div class="print-form-field" style="width: 100%;">
+        <span class="print-label">Contact Address:</span>
+        <span class="print-underline" id="print-val-emergency-address"></span>
+      </div>
+    </div>
+
+    <!-- SECTION 3: MEMBERSHIP DETAILS -->
+    <div class="print-section-header">C. Membership Details</div>
+    <div class="print-form-row">
+      <div class="print-form-field" style="width: 33%;">
+        <span class="print-label">Membership Type:</span>
+        <span class="print-underline" id="print-val-member-type"></span>
+      </div>
+      <div class="print-form-field" style="width: 33%;">
+        <span class="print-label">Preferred Branch:</span>
+        <span class="print-underline" id="print-val-preferred-branch"></span>
+      </div>
+      <div class="print-form-field" style="width: 34%;">
+        <span class="print-label">Borrow Category:</span>
+        <span class="print-underline" id="print-val-borrow-category"></span>
+      </div>
+    </div>
+    <div class="print-form-row">
+      <div class="print-form-field" style="width: 33%;">
+        <span class="print-label">Max Borrow Limit:</span>
+        <span class="print-underline" id="print-val-borrow-limit"></span>
+      </div>
+      <div class="print-form-field" style="width: 33%;">
+        <span class="print-label">Preferred Contact:</span>
+        <span class="print-underline" id="print-val-preferred-contact"></span>
+      </div>
+      <div class="print-form-field" style="width: 34%;">
+        <span class="print-label">Document Attached?</span>
+        <span class="print-underline" id="print-val-doc-attached"></span>
+      </div>
+    </div>
+    <div class="print-form-row">
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">Membership Start:</span>
+        <span class="print-underline" id="print-val-start-date"></span>
+      </div>
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">Membership Expiry:</span>
+        <span class="print-underline" id="print-val-expiry-date"></span>
+      </div>
+    </div>
+
+    <!-- DECLARATION & SIGNATURES -->
+    <div class="print-declaration-text">
+      I confirm that the details provided are accurate and agree to follow the Gono Bishwabidyalay library borrowing and conduct rules.
+    </div>
+
+    <div class="print-sig-row">
+      <div class="print-sig-col">
+        <div class="print-sig-line"></div>
+        <div class="print-sig-title">Applicant Signature</div>
+      </div>
+      <div class="print-sig-col">
+        <div class="print-sig-line"></div>
+        <div class="print-sig-title">Authorized Librarian Signature</div>
+      </div>
+    </div>
+
+    <!-- TEAR-OFF LINE -->
+    <div class="print-tear-off">
+      <span>✂ Tear here for office copy</span>
+    </div>
+
+    <!-- SECTION 4: FOR OFFICE USE ONLY -->
+    <div class="print-office-use-title">FOR OFFICE USE ONLY</div>
+    <div class="print-form-row">
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">Member Name:</span>
+        <span class="print-underline" id="print-office-name"></span>
+      </div>
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">Student ID / Roll:</span>
+        <span class="print-underline" id="print-office-id"></span>
+      </div>
+    </div>
+    <div class="print-form-row">
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">Department:</span>
+        <span class="print-underline" id="print-office-dept"></span>
+      </div>
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">Campus Branch:</span>
+        <span class="print-underline" id="print-office-campus"></span>
+      </div>
+    </div>
+    <div class="print-form-row">
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">Mobile Number:</span>
+        <span class="print-underline" id="print-office-phone"></span>
+      </div>
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">Email Address:</span>
+        <span class="print-underline" id="print-office-email"></span>
+      </div>
+    </div>
+    <div class="print-form-row">
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">Registration No:</span>
+        <span class="print-underline" id="print-office-reg-no"></span>
+      </div>
+      <div class="print-form-field" style="width: 50%;">
+        <span class="print-label">Date of Joining:</span>
+        <span class="print-underline" id="print-office-join-date"></span>
+      </div>
+    </div>
+
+    <div class="print-sig-row" style="margin-top: 2rem;">
+      <div class="print-sig-col" style="margin-left: auto; width: 45%;">
+        <div class="print-sig-line"></div>
+        <div class="print-sig-title">Signature of Approving Officer</div>
+      </div>
+    </div>
+
+    <!-- Bottom Banner -->
+    <div class="print-footer-banner"></div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>

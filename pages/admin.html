@@ -25,7 +25,7 @@
 
     .stat-card:hover {
       transform: translateY(-2px);
-      border-color: color-mix(in srgb, var(--accent-primary) 35%, rgba(255, 255, 255, 0.08)) !important;
+      border-color: color-mix(in srgb, var(--card-hover-color, var(--accent-primary)) 35%, rgba(255, 255, 255, 0.08)) !important;
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
     }
 
@@ -36,7 +36,7 @@
 
     body.light-mode .stat-card:hover {
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
-      border-color: var(--accent-primary) !important;
+      border-color: var(--card-hover-color, var(--accent-primary)) !important;
     }
 
     body.light-mode .filters-group select {
@@ -45,21 +45,64 @@
       color: #05060b !important;
     }
 
-    body.light-mode #export-dropdown-menu {
-      background: #ffffff !important;
-      border-color: rgba(0, 0, 0, 0.08) !important;
+    .search-input-wrapper {
+      background: rgba(5, 6, 11, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s ease;
     }
 
-    body.light-mode #export-dropdown-menu button {
-      color: #05060b !important;
-    }
-
-    body.light-mode #export-dropdown-menu button:hover {
+    body.light-mode .search-input-wrapper {
       background: rgba(0, 0, 0, 0.03) !important;
+      border-color: rgba(0, 0, 0, 0.08) !important;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06) !important;
     }
 
-    #export-dropdown-menu button:hover {
-      background: rgba(255, 255, 255, 0.05);
+    .filters-group .custom-select-trigger {
+      background: rgba(5, 6, 11, 0.7) !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .filters-group .custom-select-trigger:hover {
+      background: rgba(5, 6, 11, 0.8) !important;
+      border-color: rgba(255, 255, 255, 0.15) !important;
+    }
+
+    .filters-group .custom-select-wrapper.open .custom-select-trigger {
+      border-color: var(--accent-primary) !important;
+      background: rgba(5, 6, 11, 0.85) !important;
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 20%, transparent), inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    body.light-mode .filters-group .custom-select-trigger {
+      background: rgba(0, 0, 0, 0.03) !important;
+      border-color: rgba(0, 0, 0, 0.08) !important;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+      color: #1a1a2e !important;
+    }
+
+    body.light-mode .filters-group .custom-select-trigger:hover {
+      background: rgba(0, 0, 0, 0.05) !important;
+      border-color: rgba(0, 0, 0, 0.12) !important;
+    }
+
+    body.light-mode .filters-group .custom-select-wrapper.open .custom-select-trigger {
+      border-color: var(--accent-primary) !important;
+      background: #ffffff !important;
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 20%, transparent), inset 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+    }
+
+
+
+    .table-action-dots-btn:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: var(--text-main) !important;
+    }
+
+    body.light-mode .table-action-dots-btn:hover {
+      background: rgba(0, 0, 0, 0.05) !important;
+      color: #1a1a2e !important;
     }
 
     @keyframes slideDown {
@@ -72,6 +115,31 @@
         opacity: 1;
         transform: translateY(0);
       }
+    }
+
+    #table-actions-dropdown,
+    #table-tier-dropdown {
+      background: #0b0c13;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    body.light-mode #table-actions-dropdown,
+    body.light-mode #table-tier-dropdown {
+      background: #ffffff !important;
+      border-color: rgba(0, 0, 0, 0.1) !important;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      margin: 4px 0;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    body.light-mode .dropdown-divider {
+      background: rgba(0, 0, 0, 0.08) !important;
     }
   </style>
 </head>
@@ -174,9 +242,9 @@
         style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; width: 100%; margin-bottom: 0.5rem;">
 
         <div class="stat-card glass-panel"
-          style="padding: 1rem; display: flex; align-items: center; gap: 1rem; border-radius: 10px; background: rgba(5, 6, 11, 0.45); border: 1px solid rgba(255, 255, 255, 0.05);">
+          style="padding: 1rem; display: flex; align-items: center; gap: 1rem; border-radius: 10px; background: rgba(5, 6, 11, 0.45); border: 1px solid rgba(255, 255, 255, 0.05); --card-hover-color: #06b6d4;">
           <div class="stat-icon"
-            style="background: rgba(6, 182, 212, 0.12); color: var(--accent-primary); width: 2.75rem; height: 2.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            style="background: rgba(6, 182, 212, 0.12); color: #06b6d4; width: 2.75rem; height: 2.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
             <i data-lucide="users" style="width: 1.35rem; height: 1.35rem;"></i>
           </div>
           <div>
@@ -190,7 +258,7 @@
         </div>
 
         <div class="stat-card glass-panel"
-          style="padding: 1rem; display: flex; align-items: center; gap: 1rem; border-radius: 10px; background: rgba(5, 6, 11, 0.45); border: 1px solid rgba(255, 255, 255, 0.05);">
+          style="padding: 1rem; display: flex; align-items: center; gap: 1rem; border-radius: 10px; background: rgba(5, 6, 11, 0.45); border: 1px solid rgba(255, 255, 255, 0.05); --card-hover-color: #eab308;">
           <div class="stat-icon"
             style="background: rgba(234, 179, 8, 0.12); color: #eab308; width: 2.75rem; height: 2.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
             <i data-lucide="crown" style="width: 1.35rem; height: 1.35rem;"></i>
@@ -206,7 +274,7 @@
         </div>
 
         <div class="stat-card glass-panel"
-          style="padding: 1rem; display: flex; align-items: center; gap: 1rem; border-radius: 10px; background: rgba(5, 6, 11, 0.45); border: 1px solid rgba(255, 255, 255, 0.05);">
+          style="padding: 1rem; display: flex; align-items: center; gap: 1rem; border-radius: 10px; background: rgba(5, 6, 11, 0.45); border: 1px solid rgba(255, 255, 255, 0.05); --card-hover-color: #8b5cf6;">
           <div class="stat-icon"
             style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6; width: 2.75rem; height: 2.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
             <i data-lucide="zap" style="width: 1.35rem; height: 1.35rem;"></i>
@@ -222,7 +290,7 @@
         </div>
 
         <div class="stat-card glass-panel"
-          style="padding: 1rem; display: flex; align-items: center; gap: 1rem; border-radius: 10px; background: rgba(5, 6, 11, 0.45); border: 1px solid rgba(255, 255, 255, 0.05);">
+          style="padding: 1rem; display: flex; align-items: center; gap: 1rem; border-radius: 10px; background: rgba(5, 6, 11, 0.45); border: 1px solid rgba(255, 255, 255, 0.05); --card-hover-color: #22c55e;">
           <div class="stat-icon"
             style="background: rgba(34, 197, 94, 0.12); color: #22c55e; width: 2.75rem; height: 2.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
             <i data-lucide="check-circle" style="width: 1.35rem; height: 1.35rem;"></i>
@@ -243,7 +311,7 @@
       <div class="admin-controls-row"
         style="width: 100%; display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.25rem; align-items: center;">
         <div class="search-input-wrapper"
-          style="flex: 1; min-width: 280px; display: flex; align-items: center; gap: 0.65rem; background: rgba(5, 6, 11, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 0.6rem 1rem; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);">
+          style="flex: 1; min-width: 280px; display: flex; align-items: center; gap: 0.65rem; border-radius: 10px; padding: 0.6rem 1rem;">
           <i data-lucide="search" style="color: var(--text-muted); width: 1.1rem; height: 1.1rem; flex-shrink: 0;"></i>
           <input type="text" id="admin-search-input"
             placeholder="Search members by name, access key, email, or department..."
@@ -293,6 +361,7 @@
             </div>
             <div class="custom-select-options" id="custom-select-options-filter-status" style="background: #0b0c13; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
               <div class="custom-option" data-value="">All Statuses</div>
+              <div class="custom-option" data-value="Pending">Pending</div>
               <div class="custom-option" data-value="Active">Active</div>
               <div class="custom-option" data-value="Blocked">Blocked</div>
               <div class="custom-option" data-value="Expired">Expired</div>
@@ -301,6 +370,7 @@
             </div>
             <select id="filter-status" style="display: none;">
               <option value="">All Statuses</option>
+              <option value="Pending">Pending</option>
               <option value="Active">Active</option>
               <option value="Blocked">Blocked</option>
               <option value="Expired">Expired</option>
@@ -312,20 +382,22 @@
           <!-- Export Actions Dropdown -->
           <div class="export-dropdown-wrapper" style="position: relative; display: inline-block;">
             <button type="button" class="btn btn-primary" id="btn-export-dropdown-toggle"
-              style="padding: 0.6rem 1rem; font-size: 0.82rem; height: 38px; display: inline-flex; align-items: center; gap: 0.5rem; background: var(--accent-primary); border: none; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s; color: #05060b;">
-              <i data-lucide="download" style="width: 1rem; height: 1rem; stroke-width: 2.5px;"></i>
+              style="padding: 0.55rem 0.8rem; font-size: 0.82rem; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 0.5rem; background: var(--accent-primary); border: none; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s; color: #05060b;">
+              <i data-lucide="download" style="width: 0.85rem; height: 0.85rem; stroke-width: 2.5px;"></i>
               <span>Export</span>
               <i data-lucide="chevron-down" id="export-chevron"
-                style="width: 0.8rem; height: 0.8rem; stroke-width: 2.5px;"></i>
+                style="width: 0.85rem; height: 0.85rem; stroke-width: 2.5px;"></i>
             </button>
-            <div id="export-dropdown-menu"
-              style="display: none; position: absolute; right: 0; top: 110%; background: #0b0c13; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; width: 140px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); z-index: 100; overflow: hidden; animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
-              <button type="button" id="btn-export-csv"
-                style="width: 100%; padding: 0.65rem 1rem; background: transparent; border: none; text-align: left; color: var(--text-main); font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s; font-family: 'Inter', sans-serif;"><i
-                  data-lucide="file-text" style="width: 0.9rem; height: 0.9rem;"></i> Export CSV</button>
-              <button type="button" id="btn-export-json"
-                style="width: 100%; padding: 0.65rem 1rem; background: transparent; border: none; text-align: left; color: var(--text-main); font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s; font-family: 'Inter', sans-serif;"><i
-                  data-lucide="braces" style="width: 0.9rem; height: 0.9rem;"></i> Export JSON</button>
+            <div id="export-dropdown-menu" class="custom-select-options"
+              style="display: none; position: absolute; right: 0; left: auto; top: calc(100% + 5px); width: 140px; z-index: 100; animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+              <div class="custom-option" id="btn-export-csv" style="font-family: 'Inter', sans-serif;">
+                <i data-lucide="file-text" style="width: 0.9rem; height: 0.9rem;"></i>
+                <span>Export CSV</span>
+              </div>
+              <div class="custom-option" id="btn-export-json" style="font-family: 'Inter', sans-serif;">
+                <i data-lucide="braces" style="width: 0.9rem; height: 0.9rem;"></i>
+                <span>Export JSON</span>
+              </div>
             </div>
           </div>
 
@@ -335,28 +407,50 @@
       <div class="admin-table-wrapper"
         style="width: 100%; overflow-x: auto; max-height: 480px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; background: rgba(5, 6, 11, 0.65); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); -webkit-overflow-scrolling: touch;">
         <table class="admin-members-table"
-          style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.8rem; font-family: 'Inter', sans-serif; min-width: 750px;">
+          style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.8rem; font-family: 'Inter', sans-serif;">
           <thead
             style="background: rgba(10, 11, 18, 0.9); border-bottom: 1px solid rgba(255, 255, 255, 0.08); position: sticky; top: 0; z-index: 1;">
             <tr>
-              <th
-                style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                Member</th>
-              <th
-                style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                Access Key</th>
-              <th
-                style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                Email</th>
-              <th
-                style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                Dept / Batch</th>
-              <th
-                style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                Tier</th>
-              <th
-                style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; text-align: center;">
-                Actions</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Member</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Access Key</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Email</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Status</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Phone</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Department</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Session / Batch</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Semester</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Student ID</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Degree Level</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Faculty</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Program</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Campus</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Advisor</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Date of Birth</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Gender</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Blood Group</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Nationality</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">NID / Passport</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Alt Phone</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Present Address</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Permanent Address</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">City</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Postcode</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Country</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Emergency Name</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Emergency Relation</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Emergency Phone</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Emergency Address</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Pref Branch</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Borrow Category</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Borrow Limit</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Research Interests</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Pref Contact</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Start Date</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Expiry Date</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Card Theme</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Proof</th>
+              <th style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Tier</th>
+              <th class="sticky-actions-col" style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; text-align: center; white-space: nowrap;">Actions</th>
             </tr>
           </thead>
           <tbody id="admin-table-body">
@@ -579,6 +673,33 @@
       <span class="toast-desc" id="toast-message">Operation successful.</span>
     </div>
   </div>
+
+  <!-- Floating Actions Dropdown -->
+  <div id="table-actions-dropdown" class="custom-select-options" style="display: none; position: fixed; width: 110px; z-index: 99999; padding: 4px 0; animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+    <div class="custom-option view-option" style="padding: 0.45rem 0.75rem; font-size: 0.78rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+      <i data-lucide="eye" style="width: 0.85rem; height: 0.85rem; flex-shrink: 0;"></i>
+      <span>View</span>
+    </div>
+    <div class="custom-option edit-option" style="padding: 0.45rem 0.75rem; font-size: 0.78rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+      <i data-lucide="edit-3" style="width: 0.85rem; height: 0.85rem; flex-shrink: 0;"></i>
+      <span>Edit</span>
+    </div>
+    <div class="dropdown-divider"></div>
+    <div class="custom-option delete-option" style="padding: 0.45rem 0.75rem; font-size: 0.78rem; color: #ef4444; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+      <i data-lucide="trash-2" style="width: 0.85rem; height: 0.85rem; flex-shrink: 0; stroke: #ef4444;"></i>
+      <span>Delete</span>
+    </div>
+  </div>
+
+  <!-- Floating Tier Dropdown -->
+  <div id="table-tier-dropdown" class="custom-select-options" style="display: none; position: fixed; width: 100px; z-index: 99999; padding: 4px 0; animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+    <div class="custom-option" data-value="Standard" style="padding: 0.45rem 0.75rem; font-size: 0.78rem; cursor: pointer;">Standard</div>
+    <div class="custom-option" data-value="Premium" style="padding: 0.45rem 0.75rem; font-size: 0.78rem; cursor: pointer;">Premium</div>
+    <div class="custom-option" data-value="VIP" style="padding: 0.45rem 0.75rem; font-size: 0.78rem; cursor: pointer;">VIP</div>
+  </div>
+
+  <!-- Floating Generic Dropdown for Table Inline Updates -->
+  <div id="table-generic-dropdown" class="custom-select-options" style="display: none; position: fixed; width: 150px; z-index: 99999; padding: 4px 0; animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);"></div>
 
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>

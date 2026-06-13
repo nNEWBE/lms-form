@@ -515,9 +515,12 @@
 
         <div class="login-input-group">
           <label for="admin-password">Password / PIN</label>
-          <div class="login-input-wrapper">
+          <div class="login-input-wrapper" style="position: relative;">
             <i data-lucide="key-round"></i>
-            <input type="password" id="admin-password" placeholder="Password" required autocomplete="current-password">
+            <input type="password" id="admin-password" placeholder="Password" required autocomplete="current-password" style="padding-right: 2rem;">
+            <button type="button" id="toggle-admin-password-visibility" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0.25rem; transition: color 0.2s;" onmouseover="this.style.color='var(--text-main)'" onmouseout="this.style.color='var(--text-muted)'">
+              <i data-lucide="eye" style="width: 0.85rem; height: 0.85rem;" id="toggle-admin-password-icon"></i>
+            </button>
           </div>
         </div>
 
