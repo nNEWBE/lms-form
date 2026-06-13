@@ -4624,3 +4624,222 @@ body.light-mode #btn-apply-crop {
 body.light-mode #btn-apply-crop:hover {
   background: var(--accent-secondary);
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOBILE PERFORMANCE OPTIMIZATIONS
+   Target: ≤768px (phones). Zero design changes — only rendering fixes.
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+
+  /* ── 1. Promote the main scrolling body to its own compositor layer ── */
+  body {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: scroll;
+    /* Prevent paint during scroll by isolating this stacking context */
+    isolation: isolate;
+  }
+
+  /* ── 2. Kill backdrop-filter on ALL elements — most expensive mobile op ── */
+  .fixed-navbar,
+  .toast-notification,
+  .share-modal-overlay,
+  .success-modal-overlay,
+  .processing-overlay,
+  .custom-select-options,
+  .datepicker-calendar,
+  .share-page-wrapper {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* ── 3. Replace blurred backgrounds with solid equivalents ── */
+  .fixed-navbar {
+    background: rgba(5, 6, 11, 0.99) !important;
+  }
+
+  body.light-mode .fixed-navbar {
+    background: rgba(240, 241, 245, 0.99) !important;
+  }
+
+  .toast-notification {
+    background: #0d0e18 !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  body.light-mode .toast-notification {
+    background: #ffffff !important;
+  }
+
+  /* ── 4. Stop animating multi-layer backgrounds (stars drift) ── */
+  .viewer-stars-container,
+  .share-stars {
+    animation: none !important;
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0 !important;
+  }
+
+  /* ── 5. Kill expensive SVG drop-shadow filters on beam paths ── */
+  .beam-path,
+  #beam-path-top,
+  #beam-path-center,
+  #beam-path-bottom,
+  #beam-path-left,
+  #beam-path-right {
+    filter: none !important;
+  }
+
+  /* ── 6. Kill the radial-gradient blur glow behind the card ── */
+  .viewer-card-placement::before,
+  .share-card-wrap::before,
+  #theme-ripple-overlay {
+    filter: none !important;
+    opacity: 0.4;
+  }
+
+  /* ── 7. Drop-shadow on logo and icons — replaced with cheaper box-shadow ── */
+  .card-logo i,
+  .card-logo .custom-logo-svg {
+    filter: none !important;
+  }
+
+  /* ── 8. Disable hover transitions on scroll — touch devices fire these on tap,
+          not scroll, so they're harmless to disable for perf ── */
+  .glass-panel {
+    transition: none !important;
+  }
+
+  .btn {
+    transition: background 0.15s ease !important;
+  }
+
+  .action-btn,
+  .social-btn,
+  .btn-copy-link,
+  .table-action-btn,
+  .admin-panel-btn,
+  .nav-icon-btn,
+  .custom-checkbox,
+  .custom-radio,
+  .custom-checkbox-card,
+  .custom-radio-card,
+  .custom-select-trigger,
+  .file-dropzone,
+  .calendar-day-cell,
+  .calendar-month-cell,
+  .calendar-footer-btn,
+  .time-item {
+    transition: none !important;
+  }
+
+  /* ── 9. Remove will-change from elements not actively animating ──
+          will-change keeps GPU textures in VRAM — bad when not animating */
+  .beam-container,
+  .beam-path,
+  .toast-notification,
+  .share-modal-overlay,
+  .success-modal-overlay,
+  .processing-overlay,
+  .badge-dot,
+  .processing-step-item {
+    will-change: auto !important;
+  }
+
+  /* ── 10. Keep will-change only on the card (actively animated via JS) ── */
+  .library-card {
+    will-change: transform;
+  }
+
+  /* ── 11. Contain layout paint for heavy panels (prevents full-page repaints) ── */
+  .glass-panel {
+    contain: layout style;
+  }
+
+  .share-modal-content,
+  .success-modal-content,
+  .processing-panel {
+    contain: layout style paint;
+  }
+
+  /* ── 12. Enable momentum scroll on all scrollable containers ── */
+  .custom-select-options,
+  .datepicker-calendar,
+  .admin-table-wrapper,
+  .share-modal-body,
+  .time-column {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── 13. Thin scrollbars — reduce paint area ── */
+  ::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+
+  /* ── 14. card-perspective — disable 3D perspective on mobile
+           (tilt is driven by mousemove which doesn't fire on mobile anyway,
+            so this frees the GPU from maintaining a 3D context) ── */
+  .card-perspective {
+    perspective: none;
+  }
+
+  /* ── 15. Reduce box-shadow complexity on cards ── */
+  .library-card-side {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+  }
+
+  /* ── 16. Disable the holographic shimmer overlay on mobile ── */
+  .library-card-side::after {
+    display: none !important;
+  }
+
+  /* ── 17. Share-page wrapper — make it GPU-composited for smooth overflow scroll ── */
+  .share-page-wrapper {
+    transform: translateZ(0);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── 18. Reduce animation complexity on processing step items ── */
+  .processing-step-item {
+    filter: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    animation: none !important;
+  }
+
+  .processing-overlay.active .processing-step-item {
+    animation: none !important;
+  }
+
+  /* ── 19. Fixed elements — use transform for positioning to keep on compositor ── */
+  .skel-rail {
+    display: none !important;
+  }
+}
+
+/* ── Touch device: disable hover entirely (prevents sticky hover state after tap) ── */
+@media (hover: none) and (pointer: coarse) {
+  .glass-panel:hover,
+  .action-btn:hover,
+  .btn-primary:hover,
+  .btn-secondary:hover,
+  .admin-panel-btn:hover,
+  .nav-icon-btn:hover,
+  .social-btn:hover,
+  .file-dropzone:hover,
+  .custom-select-trigger:hover,
+  .calendar-day-cell:hover,
+  .table-action-btn:hover {
+    transform: none !important;
+    filter: none !important;
+  }
+
+  /* Keep tap visual feedback with active states instead */
+  .btn:active {
+    opacity: 0.85;
+  }
+
+  .action-btn:active,
+  .social-btn:active {
+    opacity: 0.75;
+  }
+}
