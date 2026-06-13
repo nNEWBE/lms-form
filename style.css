@@ -3036,14 +3036,17 @@ textarea.input-control {
   .share-modal-content {
     padding: 1.15rem 1rem;
   }
+
   .social-share-buttons {
     gap: 0.3rem;
   }
+
   .social-btn {
     padding: 0.5rem 0.15rem;
     gap: 0.3rem;
     border-radius: 8px;
   }
+
   .social-btn span {
     display: none;
   }
@@ -3537,20 +3540,16 @@ textarea.input-control {
 
 .success-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(8, 9, 15, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  inset: 0;
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: rgba(5, 6, 11, 0.88);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.35s ease;
+  will-change: opacity;
 }
 
 .success-modal-overlay.open {
@@ -3559,20 +3558,16 @@ textarea.input-control {
 }
 
 .success-modal-content {
-  background: rgba(13, 14, 21, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(10, 11, 19, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top: 3px solid var(--accent-success, #10b981);
-  border-radius: 16px;
+  border-radius: 20px;
   width: 90%;
   max-width: 420px;
-  padding: 2.25rem 1.75rem;
-  box-shadow:
-    0 24px 80px rgba(0, 0, 0, 0.8),
-    0 0 40px rgba(16, 185, 129, 0.12);
-  transform: translateY(20px) scale(0.95);
-  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  transform: translate3d(0, 20px, 0);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -3580,7 +3575,7 @@ textarea.input-control {
 }
 
 .success-modal-overlay.open .success-modal-content {
-  transform: translateY(0) scale(1);
+  transform: translate3d(0, 0, 0);
 }
 
 .success-modal-icon-wrapper {
@@ -3588,19 +3583,19 @@ textarea.input-control {
   width: 68px;
   height: 68px;
   border-radius: 50%;
-  background: rgba(16, 185, 129, 0.12);
+  background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.25rem;
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 25%, transparent);
 }
 
 .success-modal-icon {
   width: 32px;
   height: 32px;
-  color: var(--accent-success, #10b981);
-  filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.40));
+  color: var(--accent-primary);
+  filter: drop-shadow(0 2px 8px color-mix(in srgb, var(--accent-primary) 40%, transparent));
 }
 
 .success-modal-pulse-ring {
@@ -3610,7 +3605,7 @@ textarea.input-control {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 2px solid var(--accent-success, #10b981);
+  border: 2px solid var(--accent-primary);
   animation: modalPulse 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
   opacity: 0;
   pointer-events: none;
@@ -3674,7 +3669,7 @@ textarea.input-control {
 
 #success-summary-key {
   font-family: 'JetBrains Mono', monospace;
-  color: var(--accent-secondary, #8b5cf6);
+  color: var(--accent-primary);
 }
 
 .success-modal-actions {
@@ -4483,4 +4478,149 @@ body.light-mode .processing-step-item.current .step-label {
 .processing-step-item.done .step-label {
   color: var(--accent-primary);
   text-decoration: none;
+}
+
+/* Photo Crop Modal Styles */
+.crop-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: #05060b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: move;
+  margin-top: 0.5rem;
+}
+
+body.light-mode .crop-container {
+  background: #f0f1f5;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.crop-image {
+  position: absolute;
+  transform-origin: center center;
+  max-width: none;
+  user-select: none;
+  pointer-events: none;
+  will-change: left, top, width, height;
+}
+
+.crop-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: radial-gradient(circle 90px at center, transparent 99%, rgba(5, 6, 11, 0.8) 100%);
+  z-index: 2;
+}
+
+body.light-mode .crop-mask {
+  background: radial-gradient(circle 90px at center, transparent 99%, rgba(240, 241, 245, 0.8) 100%);
+}
+
+.crop-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 180px;
+  height: 180px;
+  transform: translate(-50%, -50%);
+  border: 2px dashed var(--accent-primary);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 3;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+/* Card Avatar display rules using has-image class */
+.card-avatar-container.has-image .card-avatar-placeholder {
+  display: none !important;
+}
+
+.card-avatar-container.has-image .card-avatar {
+  display: block !important;
+}
+
+.card-avatar-container:not(.has-image) .card-avatar-placeholder {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-avatar-container:not(.has-image) .card-avatar {
+  display: none !important;
+}
+
+/* Crop Modal Actions styling */
+#btn-cancel-crop {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-normal);
+  padding: 0.65rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+#btn-cancel-crop:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+body.light-mode #btn-cancel-crop {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #05060b;
+}
+
+body.light-mode #btn-cancel-crop:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+#btn-apply-crop {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  color: #05060b;
+  border: none;
+  font-weight: 600;
+  padding: 0.65rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+#btn-apply-crop:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
+}
+
+#btn-apply-crop i,
+#btn-apply-crop svg {
+  width: 1rem;
+  height: 1rem;
+  stroke-width: 2.5px;
+}
+
+body.light-mode #btn-apply-crop {
+  background: var(--accent-primary);
+  color: #ffffff;
+}
+
+body.light-mode #btn-apply-crop:hover {
+  background: var(--accent-secondary);
 }

@@ -1,5 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+  // Override Event constructor to ensure programmatically dispatched events bubble by default
+  const OriginalEvent = window.Event;
+  window.Event = function(type, options) {
+    if (type === 'input' || type === 'change') {
+      options = Object.assign({ bubbles: true }, options);
+    }
+    return new OriginalEvent(type, options);
+  };
+  window.Event.prototype = OriginalEvent.prototype;
+
   document.querySelectorAll('label').forEach(label => {
     if (label.innerHTML.includes('*')) {
       label.innerHTML = label.innerHTML.replace(/\*/g, '<span class="required-asterisk">*</span>');
@@ -258,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const previewCardKey = document.getElementById('preview-card-key');
   const previewAvatar = document.getElementById('preview-avatar');
   const previewAvatarIcon = document.getElementById('preview-avatar-icon');
+  const previewAvatarContainer = document.getElementById('preview-avatar-container');
 
   if (previewAvatar) {
     previewAvatar.addEventListener('error', () => {
@@ -1021,6 +1032,289 @@ document.addEventListener('DOMContentLoaded', () => {
     img.src = dataUrl;
   }
 
+  let isUploadingAvatar = false;
+  let selectedFileForCrop = null;
+
+  const cropModal = document.getElementById('crop-modal');
+  const cropSourceImage = document.getElementById('crop-source-image');
+  const cropZoomSlider = document.getElementById('crop-zoom-slider');
+  const cropZoomLabel = document.getElementById('crop-zoom-label');
+  const btnApplyCrop = document.getElementById('btn-apply-crop');
+  const btnCancelCrop = document.getElementById('btn-cancel-crop');
+  const btnCloseCropModal = document.getElementById('btn-close-crop-modal');
+  const cropContainer = document.querySelector('.crop-container');
+
+  let cropState = {
+    zoom: 1,
+    baseScale: 1,
+    posX: 0,
+    posY: 0,
+    isDragging: false,
+    startX: 0,
+    startY: 0
+  };
+
+  function openCropModal(imageSrc) {
+    if (!cropModal || !cropSourceImage) return;
+    cropSourceImage.src = imageSrc;
+    cropSourceImage.onload = () => {
+      const imgW = cropSourceImage.naturalWidth;
+      const imgH = cropSourceImage.naturalHeight;
+      const minScale = 180 / Math.min(imgW, imgH);
+
+      cropState.baseScale = minScale;
+      cropState.zoom = 1;
+      cropState.posX = 0;
+      cropState.posY = 0;
+
+      if (cropZoomSlider) {
+        cropZoomSlider.value = 1;
+      }
+      if (cropZoomLabel) {
+        cropZoomLabel.textContent = '1.0x';
+      }
+
+      cropSourceImage.style.display = 'block';
+      cropModal.style.display = 'flex';
+
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+
+      setTimeout(() => {
+        updateCropImageTransform();
+        cropModal.classList.add('open');
+      }, 50);
+    };
+  }
+
+  function closeCropModal() {
+    if (!cropModal) return;
+    cropModal.classList.remove('open');
+    setTimeout(() => {
+      cropModal.style.display = 'none';
+      if (cropSourceImage) {
+        cropSourceImage.src = '';
+        cropSourceImage.style.display = 'none';
+      }
+    }, 350);
+  }
+
+  function updateCropImageTransform() {
+    if (!cropSourceImage || !cropContainer) return;
+    const scale = cropState.baseScale * cropState.zoom;
+    const containerW = cropContainer.clientWidth || 390;
+    const containerH = cropContainer.clientHeight || 300;
+
+    const w = cropSourceImage.naturalWidth * scale;
+    const h = cropSourceImage.naturalHeight * scale;
+
+    cropSourceImage.style.width = `${w}px`;
+    cropSourceImage.style.height = `${h}px`;
+
+    const left = (containerW - w) / 2 + cropState.posX;
+    const top = (containerH - h) / 2 + cropState.posY;
+
+    cropSourceImage.style.left = `${left}px`;
+    cropSourceImage.style.top = `${top}px`;
+  }
+
+  if (cropContainer) {
+    cropContainer.addEventListener('mousedown', (e) => {
+      cropState.isDragging = true;
+      cropState.startX = e.clientX - cropState.posX;
+      cropState.startY = e.clientY - cropState.posY;
+      cropContainer.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!cropState.isDragging) return;
+      cropState.posX = e.clientX - cropState.startX;
+      cropState.posY = e.clientY - cropState.startY;
+
+      const scale = cropState.baseScale * cropState.zoom;
+      const w = cropSourceImage.naturalWidth * scale;
+      const h = cropSourceImage.naturalHeight * scale;
+
+      const limitX = Math.max(0, (w - 180) / 2);
+      const limitY = Math.max(0, (h - 180) / 2);
+
+      cropState.posX = Math.max(-limitX, Math.min(limitX, cropState.posX));
+      cropState.posY = Math.max(-limitY, Math.min(limitY, cropState.posY));
+
+      updateCropImageTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (cropState.isDragging) {
+        cropState.isDragging = false;
+        cropContainer.style.cursor = 'move';
+      }
+    });
+
+    // Touch support for mobile devices
+    cropContainer.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        cropState.isDragging = true;
+        cropState.startX = e.touches[0].clientX - cropState.posX;
+        cropState.startY = e.touches[0].clientY - cropState.posY;
+      }
+    });
+
+    cropContainer.addEventListener('touchmove', (e) => {
+      if (!cropState.isDragging || e.touches.length !== 1) return;
+      e.preventDefault();
+      cropState.posX = e.touches[0].clientX - cropState.startX;
+      cropState.posY = e.touches[0].clientY - cropState.startY;
+
+      const scale = cropState.baseScale * cropState.zoom;
+      const w = cropSourceImage.naturalWidth * scale;
+      const h = cropSourceImage.naturalHeight * scale;
+
+      const limitX = Math.max(0, (w - 180) / 2);
+      const limitY = Math.max(0, (h - 180) / 2);
+
+      cropState.posX = Math.max(-limitX, Math.min(limitX, cropState.posX));
+      cropState.posY = Math.max(-limitY, Math.min(limitY, cropState.posY));
+
+      updateCropImageTransform();
+    }, { passive: false });
+
+    cropContainer.addEventListener('touchend', () => {
+      cropState.isDragging = false;
+    });
+
+    // Scroll wheel zoom support
+    cropContainer.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomStep = 0.05;
+      let newZoom = cropState.zoom + (e.deltaY < 0 ? zoomStep : -zoomStep);
+      newZoom = Math.max(1, Math.min(3, newZoom));
+
+      cropState.zoom = newZoom;
+      if (cropZoomSlider) {
+        cropZoomSlider.value = newZoom;
+      }
+      if (cropZoomLabel) {
+        cropZoomLabel.textContent = `${newZoom.toFixed(1)}x`;
+      }
+
+      const scale = cropState.baseScale * cropState.zoom;
+      const w = cropSourceImage.naturalWidth * scale;
+      const h = cropSourceImage.naturalHeight * scale;
+
+      const limitX = Math.max(0, (w - 180) / 2);
+      const limitY = Math.max(0, (h - 180) / 2);
+
+      cropState.posX = Math.max(-limitX, Math.min(limitX, cropState.posX));
+      cropState.posY = Math.max(-limitY, Math.min(limitY, cropState.posY));
+
+      updateCropImageTransform();
+    }, { passive: false });
+  }
+
+  if (cropZoomSlider) {
+    cropZoomSlider.addEventListener('input', (e) => {
+      cropState.zoom = parseFloat(e.target.value);
+      if (cropZoomLabel) {
+        cropZoomLabel.textContent = `${cropState.zoom.toFixed(1)}x`;
+      }
+
+      const scale = cropState.baseScale * cropState.zoom;
+      const w = cropSourceImage.naturalWidth * scale;
+      const h = cropSourceImage.naturalHeight * scale;
+
+      const limitX = Math.max(0, (w - 180) / 2);
+      const limitY = Math.max(0, (h - 180) / 2);
+
+      cropState.posX = Math.max(-limitX, Math.min(limitX, cropState.posX));
+      cropState.posY = Math.max(-limitY, Math.min(limitY, cropState.posY));
+
+      updateCropImageTransform();
+    });
+  }
+
+  if (btnApplyCrop) {
+    btnApplyCrop.addEventListener('click', () => {
+      const scale = cropState.baseScale * cropState.zoom;
+      const containerW = cropContainer.clientWidth || 390;
+      const containerH = cropContainer.clientHeight || 300;
+
+      const imgW = cropSourceImage.naturalWidth * scale;
+      const imgH = cropSourceImage.naturalHeight * scale;
+
+      const offsetX = (imgW - 180) / 2 - cropState.posX;
+      const offsetY = (imgH - 180) / 2 - cropState.posY;
+
+      const sourceX = offsetX / scale;
+      const sourceY = offsetY / scale;
+      const sourceW = 180 / scale;
+      const sourceH = 180 / scale;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 150;
+      canvas.height = 150;
+      const ctx = canvas.getContext('2d');
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      ctx.drawImage(
+        cropSourceImage,
+        sourceX, sourceY, sourceW, sourceH,
+        0, 0, 150, 150
+      );
+
+      const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+      const base64Data = croppedDataUrl.split(',')[1];
+
+      compressedAvatarBase64 = base64Data;
+
+      if (previewAvatar) {
+        previewAvatar.src = croppedDataUrl;
+      }
+      if (previewAvatarContainer) {
+        previewAvatarContainer.classList.add('has-image');
+      }
+
+      saveFormDraft();
+
+      closeCropModal();
+
+      labelFile.textContent = 'Uploading...';
+      isUploadingAvatar = true;
+
+      uploadToCloudinary(base64Data)
+        .then(url => {
+          cloudinaryAvatarUrl = url;
+          labelFile.textContent = selectedFileForCrop ? selectedFileForCrop.name : 'avatar.jpg';
+          isUploadingAvatar = false;
+          showToast('Photo Uploaded', 'Student photo uploaded to Cloudinary.', 'success');
+          saveFormDraft();
+        })
+        .catch(err => {
+          console.error('Cloudinary background upload failed:', err);
+          labelFile.textContent = 'Upload failed';
+          isUploadingAvatar = false;
+          showToast('Upload Failed', 'Could not upload student photo.', 'error');
+        });
+    });
+  }
+
+  if (btnCancelCrop) {
+    btnCancelCrop.addEventListener('click', () => {
+      closeCropModal();
+      inputAvatar.value = '';
+    });
+  }
+
+  if (btnCloseCropModal) {
+    btnCloseCropModal.addEventListener('click', () => {
+      closeCropModal();
+      inputAvatar.value = '';
+    });
+  }
+
   inputAvatar.addEventListener('change', (e) => {
     if (isViewingShared()) return;
     const file = e.target.files[0];
@@ -1032,17 +1326,10 @@ document.addEventListener('DOMContentLoaded', () => {
         resetAvatarPreview();
         return;
       }
+      selectedFileForCrop = file;
       const reader = new FileReader();
       reader.onload = (event) => {
-        previewAvatar.src = event.target.result;
-        previewAvatar.style.display = 'block';
-        previewAvatarIcon.style.display = 'none';
-        dropzoneAvatar.classList.add('has-file');
-        labelFile.textContent = 'Compressing...';
-        compressAvatar(event.target.result, (base64) => {
-          compressedAvatarBase64 = base64;
-          labelFile.textContent = file.name;
-        });
+        openCropModal(event.target.result);
       };
       reader.readAsDataURL(file);
     } else {
@@ -1051,13 +1338,19 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function resetAvatarPreview() {
-    previewAvatar.src = '';
-    previewAvatar.style.display = 'none';
-    previewAvatarIcon.style.display = 'block';
+    if (previewAvatar) {
+      previewAvatar.src = '';
+    }
+    if (previewAvatarContainer) {
+      previewAvatarContainer.classList.remove('has-image');
+    }
     dropzoneAvatar.classList.remove('has-file');
     labelFile.textContent = 'Choose image or drag here';
     compressedAvatarBase64 = '';
     cloudinaryAvatarUrl = '';
+    isUploadingAvatar = false;
+    selectedFileForCrop = null;
+    saveFormDraft();
   }
 
   ['dragenter', 'dragover'].forEach(eventName => {
@@ -1112,6 +1405,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.onload = (event) => {
           tempEnrollmentBase64 = event.target.result;
           labelEnrollmentFile.textContent = file.name;
+          saveFormDraft();
         };
         reader.readAsDataURL(file);
       } else {
@@ -1119,6 +1413,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tempEnrollmentBase64 = '';
         dropzoneEnrollment.classList.remove('has-file');
         labelEnrollmentFile.textContent = 'Choose PDF or Image';
+        saveFormDraft();
       }
     });
 
@@ -1206,8 +1501,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   btnReset.addEventListener('click', () => {
+    localStorage.removeItem('aether_lms_form_draft');
 
     setTimeout(() => {
+      if (isViewingShared()) return;
 
       previewName.textContent = DEFAULTS.name;
       previewEmail.textContent = DEFAULTS.email;
@@ -1344,7 +1641,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnSubmit.classList.add('is-loading');
 
     setTimeout(async () => {
-      if (compressedAvatarBase64) {
+      if (compressedAvatarBase64 && !cloudinaryAvatarUrl) {
         try {
           cloudinaryAvatarUrl = await uploadToCloudinary(compressedAvatarBase64);
         } catch (err) {
@@ -1480,8 +1777,6 @@ document.addEventListener('DOMContentLoaded', () => {
           successModal.classList.remove('open');
 
           window.location.hash = `share=${payload}`;
-
-          btnReset.click();
         };
       }
 
@@ -1489,8 +1784,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnSuccessClose) {
         btnSuccessClose.onclick = () => {
           successModal.classList.remove('open');
-
-          btnReset.click();
         };
       }
     }, 1600);
@@ -1706,6 +1999,473 @@ document.addEventListener('DOMContentLoaded', () => {
     clearDateBtnId: 'expiry-calendar-clear-date',
     selectTodayBtnId: 'expiry-calendar-select-today'
   });
+
+  // --- Form Draft Persistence ---
+  let blockAutosave = true;
+
+  function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+      const context = this;
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+  }
+
+  function saveFormDraft() {
+    if (blockAutosave) {
+      console.log("saveFormDraft: autosave is currently blocked. Skipping save.");
+      return;
+    }
+    if (isViewingShared()) {
+      console.log("saveFormDraft: Shared card view is active. Skipping draft save.");
+      return;
+    }
+
+    const draft = {};
+    const inputs = form.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+      if (input.type === 'file') return;
+      const name = input.name || input.id;
+      if (!name) return;
+
+      if (input.type === 'checkbox') {
+        if (input.name === 'interest') {
+          if (!draft[name]) draft[name] = [];
+          if (input.checked) {
+            draft[name].push(input.value);
+          }
+        } else {
+          draft[name] = input.checked;
+        }
+      } else if (input.type === 'radio') {
+        if (input.checked) {
+          draft[name] = input.value;
+        }
+      } else {
+        draft[name] = input.value;
+      }
+    });
+
+    if (compressedAvatarBase64) {
+      draft['avatar_base64'] = compressedAvatarBase64;
+    }
+    if (tempEnrollmentBase64) {
+      draft['enrollment_base64'] = tempEnrollmentBase64;
+    }
+    if (cloudinaryAvatarUrl) {
+      draft['cloudinaryAvatarUrl'] = cloudinaryAvatarUrl;
+    }
+    if (cloudinaryEnrollmentUrl) {
+      draft['cloudinaryEnrollmentUrl'] = cloudinaryEnrollmentUrl;
+    }
+
+    console.log("saveFormDraft: saving draft to localStorage", draft);
+
+    try {
+      localStorage.setItem('aether_lms_form_draft', JSON.stringify(draft));
+    } catch (e) {
+      console.warn('Failed to save draft to localStorage:', e);
+    }
+  }
+
+  function restoreFormDraft() {
+    let rawDraft = null;
+    try {
+      rawDraft = localStorage.getItem('aether_lms_form_draft');
+    } catch (e) {
+      console.warn('Failed to read draft from localStorage:', e);
+    }
+    console.log("restoreFormDraft: rawDraft read =", rawDraft);
+    if (!rawDraft) return;
+
+    let draft = null;
+    try {
+      draft = JSON.parse(rawDraft);
+    } catch (e) {
+      console.error('Failed to parse draft:', e);
+      return;
+    }
+    if (!draft) return;
+
+    console.log("restoreFormDraft: Restoring fields into DOM...");
+
+    const inputs = form.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+      if (input.type === 'file') return;
+      const name = input.name || input.id;
+      if (!name || !(name in draft)) return;
+
+      if (input.type === 'checkbox') {
+        if (input.name === 'interest') {
+          input.checked = Array.isArray(draft[name]) && draft[name].includes(input.value);
+        } else {
+          input.checked = !!draft[name];
+        }
+      } else if (input.type === 'radio') {
+        input.checked = (input.value === draft[name]);
+      } else {
+        input.value = draft[name];
+      }
+    });
+
+    if (draft['avatar_base64']) {
+      compressedAvatarBase64 = draft['avatar_base64'];
+      if (previewAvatar) {
+        previewAvatar.src = 'data:image/jpeg;base64,' + compressedAvatarBase64;
+      }
+      if (previewAvatarContainer) {
+        previewAvatarContainer.classList.add('has-image');
+      }
+    }
+    if (draft['enrollment_base64']) {
+      tempEnrollmentBase64 = draft['enrollment_base64'];
+      if (dropzoneEnrollment) {
+        dropzoneEnrollment.classList.add('has-file');
+      }
+      if (labelEnrollmentFile) {
+        labelEnrollmentFile.textContent = 'Temporary Attachment Loaded';
+      }
+    }
+    if (draft['cloudinaryAvatarUrl']) {
+      cloudinaryAvatarUrl = draft['cloudinaryAvatarUrl'];
+    }
+    if (draft['cloudinaryEnrollmentUrl']) {
+      cloudinaryEnrollmentUrl = draft['cloudinaryEnrollmentUrl'];
+    }
+
+    if (draft['dob'] && dobPicker) {
+      const parts = draft['dob'].split('-');
+      if (parts.length === 3) {
+        const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        dobPicker.selectDate(d);
+      }
+    }
+    if (draft['membership_start'] && startDatePicker) {
+      const parts = draft['membership_start'].split('-');
+      if (parts.length === 3) {
+        const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        startDatePicker.selectDate(d);
+      }
+    }
+    if (draft['membership_expiry'] && expiryDatePicker) {
+      const parts = draft['membership_expiry'].split('-');
+      if (parts.length === 3) {
+        const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        expiryDatePicker.selectDate(d);
+      }
+    }
+
+    inputs.forEach(input => {
+      if (input.id === 'dob' || input.id === 'membership_start' || input.id === 'membership_expiry') return;
+      if (input.type === 'file') return;
+      input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new Event('change'));
+    });
+
+    console.log("restoreFormDraft: restoration complete");
+  }
+
+  // Restore draft before adding auto-save event listeners
+  restoreFormDraft();
+
+  form.addEventListener('input', debounce(saveFormDraft, 500));
+  form.addEventListener('change', saveFormDraft);
+
+  const demoAutofillBtn = document.getElementById('demo-autofill-btn');
+  if (demoAutofillBtn) {
+    demoAutofillBtn.addEventListener('click', () => {
+      // 1. Names
+      const firstNames = ['Aria', 'Ethan', 'Liam', 'Olivia', 'Noah', 'Emma', 'Oliver', 'Ava', 'Lucas', 'Sophia', 'Mason', 'Isabella', 'Logan', 'Mia', 'Sajid', 'Anik', 'Nabil', 'Tasnim', 'Fariha', 'Zeeshan'];
+      const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Debnath', 'Hasan', 'Rahman', 'Islam', 'Ahmed', 'Chowdhury', 'Roy'];
+      const first = firstNames[Math.floor(Math.random() * firstNames.length)];
+      const last = lastNames[Math.floor(Math.random() * lastNames.length)];
+
+      if (inputFirstName) {
+        inputFirstName.value = first;
+        inputFirstName.dispatchEvent(new Event('input'));
+        highlightInputError(inputFirstName, false);
+      }
+      if (inputLastName) {
+        inputLastName.value = last;
+        inputLastName.dispatchEvent(new Event('input'));
+        highlightInputError(inputLastName, false);
+      }
+
+      // 2. Student ID
+      const studentIdInput = document.getElementById('student_id');
+      if (studentIdInput) {
+        const randId = `LIB-2026-${Math.floor(100 + Math.random() * 900)}`;
+        studentIdInput.value = randId;
+        studentIdInput.dispatchEvent(new Event('input'));
+        highlightInputError(studentIdInput, false);
+      }
+
+      // 3. Email & Phone
+      if (inputEmail) {
+        inputEmail.value = `${first.toLowerCase()}.${last.toLowerCase()}@university.edu`;
+        inputEmail.dispatchEvent(new Event('input'));
+        highlightInputError(inputEmail, false);
+      }
+      if (inputPhone) {
+        inputPhone.value = `+880 1${Math.floor(5 + Math.random() * 5)}${Math.floor(10000000 + Math.random() * 90000000)}`;
+        inputPhone.dispatchEvent(new Event('input'));
+        highlightInputError(inputPhone, false);
+      }
+
+      // 4. Custom Selects
+      if (degreeLevelSelect) {
+        const levels = ['BSc', 'MSc', 'PhD', 'Other'];
+        degreeLevelSelect.setValue(levels[Math.floor(Math.random() * levels.length)]);
+        const degTrigger = document.getElementById('custom-select-trigger-degree-level');
+        if (degTrigger) degTrigger.style.borderColor = '';
+      }
+
+      const facultyInput = document.getElementById('faculty');
+      const faculties = ['Faculty of Science & Information Technology', 'Faculty of Engineering', 'Faculty of Business Administration', 'Faculty of Arts & Social Sciences'];
+      const chosenFaculty = faculties[Math.floor(Math.random() * faculties.length)];
+      if (facultyInput) {
+        facultyInput.value = chosenFaculty;
+        facultyInput.dispatchEvent(new Event('input'));
+        highlightInputError(facultyInput, false);
+      }
+
+      if (deptSelect) {
+        const depts = ['Computer Science', 'Software Engineering', 'Electrical Engineering', 'Mechanical Engineering', 'Civil Engineering', 'Business Administration', 'English', 'Mathematics'];
+        deptSelect.setValue(depts[Math.floor(Math.random() * depts.length)]);
+        const deptTrigger = document.getElementById('custom-select-trigger-dept');
+        if (deptTrigger) deptTrigger.style.borderColor = '';
+      }
+
+      const programInput = document.getElementById('program');
+      if (programInput) {
+        const programs = ['BSc in CSE', 'BSc in SWE', 'BSc in EEE', 'BBA', 'BA in English', 'MSc in CS'];
+        programInput.value = programs[Math.floor(Math.random() * programs.length)];
+        programInput.dispatchEvent(new Event('input'));
+        highlightInputError(programInput, false);
+      }
+
+      if (inputSemester) {
+        const semesters = ['1st Sem', '2nd Sem', '3rd Sem', '4th Sem', '5th Sem', '6th Sem', '7th Sem', '8th Sem'];
+        inputSemester.value = semesters[Math.floor(Math.random() * semesters.length)];
+        inputSemester.dispatchEvent(new Event('input'));
+        highlightInputError(inputSemester, false);
+      }
+
+      if (inputBatch) {
+        inputBatch.value = `Batch ${Math.floor(50 + Math.random() * 15)}`;
+        inputBatch.dispatchEvent(new Event('input'));
+        highlightInputError(inputBatch, false);
+      }
+
+      if (campusSelect) {
+        const campuses = ['Main Campus', 'Permanent Campus', 'City Campus'];
+        campusSelect.setValue(campuses[Math.floor(Math.random() * campuses.length)]);
+      }
+
+      const advisorInput = document.getElementById('academic_advisor');
+      if (advisorInput) {
+        const advisors = ['Dr. Alan Turing', 'Dr. Grace Hopper', 'Dr. Ada Lovelace', 'Prof. Richard Feynman', 'Dr. Tim Berners-Lee'];
+        advisorInput.value = advisors[Math.floor(Math.random() * advisors.length)];
+        advisorInput.dispatchEvent(new Event('input'));
+        highlightInputError(advisorInput, false);
+      }
+
+      // 5. Personal Information
+      if (dobPicker) {
+        const currentYear = new Date().getFullYear();
+        const birthYear = currentYear - (18 + Math.floor(Math.random() * 8));
+        const birthMonth = Math.floor(Math.random() * 12);
+        const birthDay = Math.floor(1 + Math.random() * 28);
+        dobPicker.selectDate(new Date(birthYear, birthMonth, birthDay));
+      }
+
+      if (genderSelect) {
+        const genders = ['Male', 'Female', 'Other'];
+        genderSelect.setValue(genders[Math.floor(Math.random() * genders.length)]);
+      }
+
+      if (bloodGroupSelect) {
+        const bloods = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+        bloodGroupSelect.setValue(bloods[Math.floor(Math.random() * bloods.length)]);
+      }
+
+      const nationalityInput = document.getElementById('nationality');
+      if (nationalityInput) {
+        nationalityInput.value = 'Bangladeshi';
+        nationalityInput.dispatchEvent(new Event('input'));
+        highlightInputError(nationalityInput, false);
+      }
+
+      const nidInput = document.getElementById('nid_passport');
+      if (nidInput) {
+        nidInput.value = Math.floor(1000000000 + Math.random() * 9000000000).toString();
+        nidInput.dispatchEvent(new Event('input'));
+        highlightInputError(nidInput, false);
+      }
+
+      const altPhoneInput = document.getElementById('alt_phone');
+      if (altPhoneInput) {
+        altPhoneInput.value = `+880 1${Math.floor(5 + Math.random() * 5)}${Math.floor(10000000 + Math.random() * 90000000)}`;
+        altPhoneInput.dispatchEvent(new Event('input'));
+        highlightInputError(altPhoneInput, false);
+      }
+
+      if (inputAddress) {
+        const addresses = ['House 12, Road 5, Dhanmondi, Dhaka', 'Mirpur-10, Dhaka', 'Uttara Sector-4, Dhaka', 'Savar, Dhaka', 'Banani, Dhaka'];
+        inputAddress.value = addresses[Math.floor(Math.random() * addresses.length)];
+        inputAddress.dispatchEvent(new Event('input'));
+        highlightInputError(inputAddress, false);
+      }
+
+      const permAddressInput = document.getElementById('permanent_address');
+      if (permAddressInput) {
+        permAddressInput.value = 'Same as present address';
+        permAddressInput.dispatchEvent(new Event('input'));
+        highlightInputError(permAddressInput, false);
+      }
+
+      const cityInput = document.getElementById('city');
+      if (cityInput) {
+        cityInput.value = 'Dhaka';
+        cityInput.dispatchEvent(new Event('input'));
+        highlightInputError(cityInput, false);
+      }
+
+      const postcodeInput = document.getElementById('postcode');
+      if (postcodeInput) {
+        postcodeInput.value = Math.floor(1000 + Math.random() * 9000).toString();
+        postcodeInput.dispatchEvent(new Event('input'));
+        highlightInputError(postcodeInput, false);
+      }
+
+      const countryInput = document.getElementById('country');
+      if (countryInput) {
+        countryInput.value = 'Bangladesh';
+        countryInput.dispatchEvent(new Event('input'));
+        highlightInputError(countryInput, false);
+      }
+
+      // 6. Emergency Contact
+      const emNameInput = document.getElementById('emergency_name');
+      if (emNameInput) {
+        const names = ['Komal Debnath', 'Mizanur Rahman', 'Farida Yasmin', 'Zillur Rahman', 'Rowshan Ara'];
+        emNameInput.value = names[Math.floor(Math.random() * names.length)];
+        emNameInput.dispatchEvent(new Event('input'));
+        highlightInputError(emNameInput, false);
+      }
+
+      const emRelInput = document.getElementById('emergency_relationship');
+      if (emRelInput) {
+        const rels = ['Father', 'Mother', 'Spouse', 'Guardian', 'Brother'];
+        emRelInput.value = rels[Math.floor(Math.random() * rels.length)];
+        emRelInput.dispatchEvent(new Event('input'));
+        highlightInputError(emRelInput, false);
+      }
+
+      const emPhoneInput = document.getElementById('emergency_phone');
+      if (emPhoneInput) {
+        emPhoneInput.value = `+880 1${Math.floor(5 + Math.random() * 5)}${Math.floor(10000000 + Math.random() * 90000000)}`;
+        emPhoneInput.dispatchEvent(new Event('input'));
+        highlightInputError(emPhoneInput, false);
+      }
+
+      const emAddrInput = document.getElementById('emergency_address');
+      if (emAddrInput) {
+        emAddrInput.value = 'Same as student address';
+        emAddrInput.dispatchEvent(new Event('input'));
+        highlightInputError(emAddrInput, false);
+      }
+
+      // 7. Membership Details
+      if (membershipTypeSelect) {
+        const mTypes = ['Student', 'Faculty', 'Staff'];
+        membershipTypeSelect.setValue(mTypes[Math.floor(Math.random() * mTypes.length)]);
+        const mTrigger = document.getElementById('custom-select-trigger-membership-type');
+        if (mTrigger) mTrigger.style.borderColor = '';
+      }
+
+      if (preferredBranchSelect) {
+        const branches = ['Main Library', 'Science Branch', 'City Campus Library'];
+        preferredBranchSelect.setValue(branches[Math.floor(Math.random() * branches.length)]);
+        const branchTrigger = document.getElementById('custom-select-trigger-preferred-branch');
+        if (branchTrigger) branchTrigger.style.borderColor = '';
+      }
+
+      if (borrowingCategorySelect) {
+        const cats = ['General Collection', 'Reference Collection', 'Special Collection'];
+        borrowingCategorySelect.setValue(cats[Math.floor(Math.random() * cats.length)]);
+      }
+
+      // Checkboxes: Research Interests
+      document.querySelectorAll('input[name="interest"]').forEach(cb => {
+        cb.checked = Math.random() > 0.5;
+        cb.dispatchEvent(new Event('change'));
+      });
+
+      // Radio: Card Status
+      const radioStatus = document.querySelectorAll('input[name="card_status"]');
+      if (radioStatus.length > 0) {
+        const chosenRadio = radioStatus[Math.floor(Math.random() * radioStatus.length)];
+        chosenRadio.checked = true;
+        chosenRadio.dispatchEvent(new Event('change'));
+      }
+
+      if (preferredContactSelect) {
+        const methods = ['Email', 'Phone'];
+        preferredContactSelect.setValue(methods[Math.floor(Math.random() * methods.length)]);
+      }
+
+      if (inputPassword) {
+        inputPassword.value = Math.floor(1000 + Math.random() * 9000).toString();
+        inputPassword.dispatchEvent(new Event('input'));
+        highlightInputError(inputPassword, false);
+      }
+
+      // Color Theme
+      if (inputCardTheme) {
+        const colors = ['#06b6d4', '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+        const chosenColor = colors[Math.floor(Math.random() * colors.length)];
+        inputCardTheme.value = chosenColor;
+        inputCardTheme.dispatchEvent(new Event('input'));
+      }
+
+      // Borrow Limit
+      if (inputBorrowLimit) {
+        const limit = Math.floor(1 + Math.random() * 25);
+        inputBorrowLimit.value = limit;
+        inputBorrowLimit.dispatchEvent(new Event('input'));
+      }
+
+      // Dates: Start and Expiry
+      const today = new Date();
+      if (startDatePicker) {
+        startDatePicker.selectDate(today);
+      }
+      if (expiryDatePicker) {
+        const expiry = new Date();
+        expiry.setFullYear(today.getFullYear() + 1);
+        expiryDatePicker.selectDate(expiry);
+      }
+
+      // Radio: Card tier
+      const radioTiers = document.querySelectorAll('input[name="tier"]');
+      if (radioTiers.length > 0) {
+        const chosenTier = radioTiers[Math.floor(Math.random() * radioTiers.length)];
+        chosenTier.checked = true;
+        chosenTier.dispatchEvent(new Event('change'));
+      }
+
+      // Agree terms
+      if (inputAgree) {
+        inputAgree.checked = true;
+        inputAgree.dispatchEvent(new Event('change'));
+        highlightInputError(inputAgree, false);
+      }
+
+      showToast('Autofill Successful', 'Demo fields populated. Front and back live previews updated.', 'success');
+    });
+  }
 
   document.addEventListener('click', (e) => {
     document.querySelectorAll('.custom-select-wrapper.open, .custom-datepicker-wrapper.open').forEach(wrapper => {
@@ -2298,7 +3058,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (btnShare && shareModal) {
-    btnShare.addEventListener('click', () => {
+    btnShare.addEventListener('click', async () => {
+      // If photo upload is currently in progress, wait for it
+      if (isUploadingAvatar) {
+        showToast('Uploading Photo', 'Please wait while the student photo upload completes...', 'loading');
+        let checkCount = 0;
+        while (isUploadingAvatar && checkCount < 30) {
+          await new Promise(resolve => setTimeout(resolve, 300));
+          checkCount++;
+        }
+      }
+
+      // If there is an avatar selected, but it hasn't been uploaded to Cloudinary yet (or upload failed earlier):
+      if (compressedAvatarBase64 && !cloudinaryAvatarUrl) {
+        showToast('Uploading Photo', 'Please wait while the student photo is being uploaded...', 'loading');
+        try {
+          cloudinaryAvatarUrl = await uploadToCloudinary(compressedAvatarBase64);
+          showToast('Upload Complete', 'Student photo uploaded successfully.', 'success');
+        } catch (err) {
+          console.error('Cloudinary upload on share failed:', err);
+          showToast('Upload Failed', 'Could not upload student photo. Using fallback link.', 'error');
+        }
+      }
+
       const payload = getSharePayload();
       const currentUrl = window.location.href.split('#')[0];
       const finalShareUrl = `${currentUrl}#share=${payload}`;
@@ -2474,35 +3256,31 @@ document.addEventListener('DOMContentLoaded', () => {
           if (previewAvatar) {
             console.log("checkSharedLink: Raw avatar data from payload =", decodedData.av);
             let avatarSrc = decodedData.av;
-
             if (avatarSrc.startsWith('c:')) {
-
               const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
-              avatarSrc = `https://res.cloudinary.com/${cloudName}/image/upload/${avatarSrc.substring(2)}`;
+              avatarSrc = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_150,h_150,c_fill/${avatarSrc.substring(2)}`;
             } else if (avatarSrc.startsWith('http://') || avatarSrc.startsWith('https://')) {
-
+              if (avatarSrc.includes('cloudinary.com')) {
+                avatarSrc = avatarSrc.replace('/image/upload/', '/image/upload/f_auto,q_auto,w_150,h_150,c_fill/');
+              }
             } else if (avatarSrc.includes('lms_avatars/') || avatarSrc.includes('lms-avatars/')) {
-
               const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
-              avatarSrc = `https://res.cloudinary.com/${cloudName}/image/upload/${avatarSrc}`;
+              avatarSrc = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_150,h_150,c_fill/${avatarSrc}`;
             } else {
-
               avatarSrc = 'data:image/jpeg;base64,' + avatarSrc;
             }
             console.log("checkSharedLink: Final constructed avatar URL =", avatarSrc);
             previewAvatar.src = avatarSrc;
-            previewAvatar.style.display = 'block';
           }
-          if (previewAvatarIcon) {
-            previewAvatarIcon.style.display = 'none';
+          if (previewAvatarContainer) {
+            previewAvatarContainer.classList.add('has-image');
           }
         } else {
           if (previewAvatar) {
             previewAvatar.src = '';
-            previewAvatar.style.display = 'none';
           }
-          if (previewAvatarIcon) {
-            previewAvatarIcon.style.display = 'block';
+          if (previewAvatarContainer) {
+            previewAvatarContainer.classList.remove('has-image');
           }
         }
 
@@ -2612,18 +3390,27 @@ document.addEventListener('DOMContentLoaded', () => {
       if (compressedAvatarBase64) {
         if (previewAvatar) {
           previewAvatar.src = 'data:image/jpeg;base64,' + compressedAvatarBase64;
-          previewAvatar.style.display = 'block';
         }
-        if (previewAvatarIcon) {
-          previewAvatarIcon.style.display = 'none';
+        if (previewAvatarContainer) {
+          previewAvatarContainer.classList.add('has-image');
+        }
+      } else if (cloudinaryAvatarUrl) {
+        if (previewAvatar) {
+          let url = cloudinaryAvatarUrl;
+          if (url && url.includes('cloudinary.com')) {
+            url = url.replace('/image/upload/', '/image/upload/f_auto,q_auto,w_150,h_150,c_fill/');
+          }
+          previewAvatar.src = url;
+        }
+        if (previewAvatarContainer) {
+          previewAvatarContainer.classList.add('has-image');
         }
       } else {
         if (previewAvatar) {
           previewAvatar.src = '';
-          previewAvatar.style.display = 'none';
         }
-        if (previewAvatarIcon) {
-          previewAvatarIcon.style.display = 'block';
+        if (previewAvatarContainer) {
+          previewAvatarContainer.classList.remove('has-image');
         }
       }
 
@@ -3245,6 +4032,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('hashchange', checkSharedLink);
   checkSharedLink();
+  blockAutosave = false;
 });
 
 const styleSheet = document.createElement("style");
