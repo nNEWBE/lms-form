@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AETHER LMS — Verify Digital Library Card</title>
+  <meta name="description" content="Verify digital AETHER LMS library membership card with holographic 3D effects and QR codes.">
+  
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="style.css?v=24">
+  
+  <!-- CDNs for icons and QR generation -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide/dist/umd/lucide.min.js"></script>
+  <script>
+    if (typeof lucide === 'undefined') {
+      document.write('<script src="https://unpkg.com/lucide@latest"><\/script>');
+    }
+  </script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
+  <!-- Firebase Compact SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    /* Override body for share page - fullscreen viewer */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* Share page specific body background */
+    body {
+      background-color: #030407;
+    }
+    body.light-mode {
+      background-color: #f0f1f5;
+    }
+
+    /* Center the viewer content vertically and horizontally */
+    .share-page-wrapper {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-y: auto;
+      padding: 1.5rem;
+      background: radial-gradient(ellipse at 50% 30%, #12131f 0%, #08090f 60%, #040507 100%);
+    }
+
+    body.light-mode .share-page-wrapper {
+      background: radial-gradient(ellipse at 50% 30%, #e8eaf6 0%, #f0f1f5 60%, #f5f5fb 100%);
+    }
+
+    /* Stars animation */
+    .share-stars {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 40px 70px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 150px 120px, #ddd, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 200px 80px, #fff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 300px 150px, #eee, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 100px 200px, #fff, rgba(0,0,0,0));
+      background-size: 300px 300px;
+      opacity: 0.15;
+      pointer-events: none;
+      animation: starsDrift 60s linear infinite;
+      z-index: 0;
+    }
+
+    body.light-mode .share-stars {
+      opacity: 0.04;
+    }
+
+    @keyframes starsDrift {
+      0%   { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+      100% { background-position: 300px 300px, -300px 300px, 300px -300px, -300px -300px, 150px 300px, -150px -300px; }
+    }
+
+    /* Background glow overlay */
+    #theme-ripple-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent-primary, #06b6d4) 12%, transparent) 0%, transparent 60%);
+      z-index: 1;
+    }
+
+    /* Main viewer content */
+    .share-viewer-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      animation: viewerFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes viewerFadeIn {
+      from { opacity: 0; transform: translateY(24px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Header */
+    .share-header {
+      text-align: center;
+      width: 100%;
+    }
+
+    .share-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .share-logo h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: #ffffff;
+      margin: 0;
+    }
+
+    body.light-mode .share-logo h2 {
+      color: #1a1a2e;
+    }
+
+    .share-tagline {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 0;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    /* Card wrapper — uses IDENTICAL structure as home page preview */
+    .share-card-wrap {
+      width: 100%;
+      max-width: 460px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* Glow behind card - identical to .viewer-card-placement::before */
+    .share-card-wrap::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 80%;
+      height: 70%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(ellipse, color-mix(in srgb, var(--accent-primary, #06b6d4) 15%, transparent) 0%, transparent 70%);
+      filter: blur(40px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Action buttons */
+    .share-actions {
+      display: flex;
+      gap: 0.75rem;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    .share-actions .btn {
+      flex: 1;
+      justify-content: center;
+      padding: 0.65rem 1rem;
+      font-size: 0.82rem;
+    }
+
+    /* Error state */
+    #error-state {
+      z-index: 10;
+      display: none;
+      text-align: center;
+      padding: 3.5rem 1.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      max-width: 400px;
+      width: 90%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 250px;
+    }
+
+    /* Click hint label */
+    .share-flip-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      opacity: 0.7;
+    }
+
+    .share-flip-hint svg, .share-flip-hint i {
+      width: 0.85rem;
+      height: 0.85rem;
+    }
+
+    @media (max-width: 520px) {
+      .share-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Main page wrapper -->
+  <div class="share-page-wrapper" id="share-viewer">
+    <!-- Stars background -->
+    <div class="share-stars"></div>
+    <!-- Colour ripple glow -->
+    <div id="theme-ripple-overlay"></div>
+
+    <!-- Error state (shown if card not found) -->
+    <div id="error-state">
+      <i data-lucide="alert-circle" style="width:48px;height:48px;color:var(--accent-primary,#06b6d4);margin-bottom:1rem;opacity:0.8;"></i>
+      <h3 style="color:#fff;margin:0 0 0.5rem;font-size:1.15rem;font-weight:600;font-family:'Outfit',sans-serif;">Verification Failed</h3>
+      <p style="font-size:0.85rem;max-width:280px;margin:0 auto;line-height:1.5;color:var(--text-muted);" id="error-msg-text">No library card was found in the database matching this ID.</p>
+      <a href="index.html" class="btn btn-secondary" style="margin-top:1.5rem;">
+        <i data-lucide="arrow-left"></i>
+        <span>Return to Registration</span>
+      </a>
+    </div>
+
+    <!-- Main viewer content (shown when card loads) -->
+    <div class="share-viewer-content" id="viewer-content-wrapper" style="display:none;">
+
+      <!-- Header -->
+      <div class="share-header">
+        <div class="share-logo">
+          <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+            style="width:2.2rem;height:2.2rem;filter:drop-shadow(0 2px 8px rgba(6,182,212,0.45));">
+            <defs>
+              <linearGradient id="logo-grad-primary-viewer" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="var(--accent-primary,#06b6d4)" stop-opacity="1" />
+                <stop offset="100%" stop-color="var(--accent-primary,#06b6d4)" stop-opacity="0.25" />
+              </linearGradient>
+              <linearGradient id="logo-grad-dark-viewer" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="rgba(0,0,0,0.5)" />
+                <stop offset="100%" stop-color="rgba(0,0,0,0.15)" />
+              </linearGradient>
+              <linearGradient id="logo-grad-light-viewer" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="rgba(255,255,255,0.2)" />
+                <stop offset="100%" stop-color="rgba(255,255,255,0.05)" />
+              </linearGradient>
+            </defs>
+            <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-viewer)" />
+            <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-viewer)" />
+            <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-viewer)" />
+            <path d="M12 12V22" stroke="var(--accent-primary,#06b6d4)" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M12 12L2 7" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+            <path d="M12 12L22 7" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+          </svg>
+          <h2>AETHER LMS PORTAL</h2>
+        </div>
+        <p class="share-tagline">Secure Digital Library Credentials Verification</p>
+      </div>
+
+      <!-- Card container — same structure as home page -->
+      <div class="share-card-wrap">
+        <div class="card-perspective" id="card-perspective">
+          <div class="library-card" id="library-id-card">
+            
+            <!-- Front Side -->
+            <div class="library-card-side card-front">
+              <div class="library-card-glow"></div>
+              <div class="card-header">
+                <div class="card-logo">
+                  <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="logo-grad-primary-card" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="var(--user-card-theme,var(--accent-primary,#06b6d4))" stop-opacity="1" />
+                        <stop offset="100%" stop-color="var(--user-card-theme,var(--accent-primary,#06b6d4))" stop-opacity="0.25" />
+                      </linearGradient>
+                      <linearGradient id="logo-grad-dark-card" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="rgba(0,0,0,0.5)" />
+                        <stop offset="100%" stop-color="rgba(0,0,0,0.15)" />
+                      </linearGradient>
+                      <linearGradient id="logo-grad-light-card" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="rgba(255,255,255,0.2)" />
+                        <stop offset="100%" stop-color="rgba(255,255,255,0.05)" />
+                      </linearGradient>
+                    </defs>
+                    <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-card)" />
+                    <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-card)" />
+                    <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-card)" />
+                    <path d="M12 12V22" stroke="var(--user-card-theme,var(--accent-primary,#06b6d4))" stroke-width="1.5" stroke-linecap="round" />
+                    <path d="M12 12L2 7" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+                    <path d="M12 12L22 7" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+                  </svg>
+                  <span class="card-logo-text">AETHER LMS</span>
+                </div>
+                <div class="card-type tier-standard" id="preview-tier">
+                  <i data-lucide="shield"></i>
+                  <span>Standard</span>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <div class="card-avatar-container" id="preview-avatar-container">
+                  <i data-lucide="user" class="card-avatar-placeholder" id="preview-avatar-icon"></i>
+                  <img src="" alt="Avatar" class="card-avatar" id="preview-avatar" crossorigin="anonymous" style="display:none;">
+                </div>
+
+                <div class="card-info">
+                  <div class="card-name" id="preview-name">Your User Name</div>
+                  <div class="card-student-details">
+                    <span id="preview-dept">DEPT N/A</span> &bull; <span id="preview-batch">BATCH N/A</span> &bull; <span id="preview-semester">SEMESTER N/A</span>
+                  </div>
+                  <div class="card-email" id="preview-email">example@domain.com</div>
+                  <div class="card-tel" id="preview-phone">+00 000-0000</div>
+                  <div class="card-meta-row">
+                    <div>LIMIT: <span id="preview-limit" style="font-weight:700;">1 BOOK</span></div>
+                    <div>TERM: <span id="preview-term" style="font-weight:700;">DEC 2026</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <div class="card-id-block">
+                  <span class="card-id-label">Membership Key</span>
+                  <span class="card-id-number" id="preview-card-key">LMS-4820-91B</span>
+                </div>
+                <div class="card-barcode-container">
+                  <svg class="barcode-svg" id="barcode-elem" viewBox="0 0 100 20" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0" y="0" width="3" height="20" /><rect x="5" y="0" width="1" height="20" />
+                    <rect x="8" y="0" width="2" height="20" /><rect x="12" y="0" width="4" height="20" />
+                    <rect x="18" y="0" width="1" height="20" /><rect x="21" y="0" width="3" height="20" />
+                    <rect x="26" y="0" width="2" height="20" /><rect x="30" y="0" width="1" height="20" />
+                    <rect x="33" y="0" width="4" height="20" /><rect x="39" y="0" width="2" height="20" />
+                    <rect x="43" y="0" width="1" height="20" /><rect x="46" y="0" width="3" height="20" />
+                    <rect x="51" y="0" width="2" height="20" /><rect x="55" y="0" width="1" height="20" />
+                    <rect x="58" y="0" width="4" height="20" /><rect x="64" y="0" width="1" height="20" />
+                    <rect x="67" y="0" width="3" height="20" /><rect x="72" y="0" width="2" height="20" />
+                    <rect x="76" y="0" width="1" height="20" /><rect x="79" y="0" width="4" height="20" />
+                    <rect x="85" y="0" width="2" height="20" /><rect x="89" y="0" width="1" height="20" />
+                    <rect x="92" y="0" width="3" height="20" /><rect x="97" y="0" width="3" height="20" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Back Side -->
+            <div class="library-card-side card-back">
+              <div class="library-card-glow"></div>
+              <div class="card-header">
+                <div class="card-logo">
+                  <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="logo-grad-primary-card-back" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="var(--user-card-theme,var(--accent-primary,#06b6d4))" stop-opacity="1" />
+                        <stop offset="100%" stop-color="var(--user-card-theme,var(--accent-primary,#06b6d4))" stop-opacity="0.25" />
+                      </linearGradient>
+                      <linearGradient id="logo-grad-dark-card-back" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="rgba(0,0,0,0.5)" />
+                        <stop offset="100%" stop-color="rgba(0,0,0,0.15)" />
+                      </linearGradient>
+                      <linearGradient id="logo-grad-light-card-back" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="rgba(255,255,255,0.2)" />
+                        <stop offset="100%" stop-color="rgba(255,255,255,0.05)" />
+                      </linearGradient>
+                    </defs>
+                    <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-card-back)" />
+                    <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-card-back)" />
+                    <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-card-back)" />
+                    <path d="M12 12V22" stroke="var(--user-card-theme,var(--accent-primary,#06b6d4))" stroke-width="1.5" stroke-linecap="round" />
+                    <path d="M12 12L2 7" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+                    <path d="M12 12L22 7" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+                  </svg>
+                  <span class="card-logo-text">AETHER LMS</span>
+                </div>
+                <div class="card-back-badge">
+                  <i data-lucide="lock"></i>
+                  <span>SECURITY SEAL</span>
+                </div>
+              </div>
+
+              <div class="card-body-back">
+                <div class="card-back-left">
+                  <h5>MEMBERSHIP TERMS &amp; CONDITIONS</h5>
+                  <ul class="guidelines-list">
+                    <li>This card is an official property of AETHER Library.</li>
+                    <li>Always carry it when visiting or entering campus premises.</li>
+                    <li>Lending this card to anyone else is strictly prohibited.</li>
+                    <li>Lost cards must be reported immediately to administrative office.</li>
+                  </ul>
+                  <div class="card-back-address-block">
+                    <span class="addr-label">Clearance / Address:</span>
+                    <span class="addr-value" id="preview-address">No specific special clearances or address declared.</span>
+                  </div>
+                </div>
+
+                <div class="card-back-right">
+                  <div class="qr-container">
+                    <img id="preview-qr" src="" alt="QR Code" crossorigin="anonymous">
+                  </div>
+                  <div class="signature-container">
+                    <div class="signature-line" id="librarian-signature">Aetheris</div>
+                    <span class="signature-label">Chief Librarian</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-footer-back">
+                <span class="security-token">
+                  <i data-lucide="shield-check"></i>
+                  <span>SECURE PROTOCOL V1.82</span>
+                </span>
+                <span class="card-back-glow-seal">
+                  <i data-lucide="cpu"></i>
+                </span>
+              </div>
+            </div>
+
+          </div><!-- /.library-card -->
+        </div><!-- /.card-perspective -->
+      </div><!-- /.share-card-wrap -->
+
+      <!-- Click hint -->
+      <div class="share-flip-hint" id="flip-hint">
+        <i data-lucide="mouse-pointer-click"></i>
+        <span>Click card to flip &nbsp;·&nbsp; Hover to tilt</span>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="share-actions">
+        <button type="button" class="btn btn-primary" id="btn-viewer-flip">
+          <i data-lucide="rotate-3d"></i>
+          <span>Flip Card</span>
+        </button>
+        <a href="index.html" class="btn btn-secondary" id="btn-viewer-create">
+          <i data-lucide="user-plus"></i>
+          <span>Create Your Own Card</span>
+        </a>
+      </div>
+
+    </div><!-- /#viewer-content-wrapper -->
+
+  </div><!-- /.share-page-wrapper -->
+
+  <!-- Load environment configuration -->
+  <script src="env.js"></script>
+
+  <!-- Core JavaScript execution -->
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // ── 1. Sync Light/Dark theme from localStorage ──
+      const savedTheme = localStorage.getItem('lms-theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+      }
+
+      // ── 2. Initial icon render ──
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      // ── 3. DOM references ──
+      const errorState          = document.getElementById('error-state');
+      const errorMsgText        = document.getElementById('error-msg-text');
+      const viewerContentWrapper= document.getElementById('viewer-content-wrapper');
+      const libraryCard         = document.getElementById('library-id-card');
+      const cardPerspective     = document.getElementById('card-perspective');
+      const btnViewerFlip       = document.getElementById('btn-viewer-flip');
+      const previewName         = document.getElementById('preview-name');
+      const previewDept         = document.getElementById('preview-dept');
+      const previewBatch        = document.getElementById('preview-batch');
+      const previewSemester     = document.getElementById('preview-semester');
+      const previewEmail        = document.getElementById('preview-email');
+      const previewPhone        = document.getElementById('preview-phone');
+      const previewLimit        = document.getElementById('preview-limit');
+      const previewTerm         = document.getElementById('preview-term');
+      const previewCardKey      = document.getElementById('preview-card-key');
+      const previewAddress      = document.getElementById('preview-address');
+      const previewAvatar       = document.getElementById('preview-avatar');
+      const previewAvatarContainer = document.getElementById('preview-avatar-container');
+      const previewQr           = document.getElementById('preview-qr');
+
+      const DEFAULTS = {
+        name: 'Your User Name',
+        email: 'example@domain.com',
+        phone: '+00 000-0000',
+        tier: 'Standard',
+        limit: 1,
+        term: 'DEC 2026',
+        theme: '#06b6d4'
+      };
+
+      // ── 4. Parse hash key ──
+      const hash = window.location.hash ? window.location.hash.substring(1).trim() : '';
+      if (!hash) {
+        showError('No library card key provided in URL.');
+        return;
+      }
+      const cardKey = hash.startsWith('LMS-') ? hash : `LMS-${hash}`;
+      console.log('Loading card key:', cardKey);
+
+      // ── 5. Firebase / Firestore init ──
+      let firestoreDb = null;
+      if (window.ENV && window.ENV.FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+        try {
+          if (!firebase.apps.length) firebase.initializeApp(window.ENV.FIREBASE_CONFIG);
+          firestoreDb = firebase.firestore();
+        } catch (e) {
+          console.error('Firebase init failed:', e);
+        }
+      }
+
+      // ── 6. Fetch member data ──
+      async function fetchMember(key) {
+        // Local cache first
+        try {
+          const cached = JSON.parse(localStorage.getItem('aether_lms_members')) || {};
+          if (cached[key]) return cached[key];
+        } catch (e) { /* ignore */ }
+
+        // Firestore
+        if (firestoreDb) {
+          try {
+            const doc = await Promise.race([
+              firestoreDb.collection('members').doc(key).get(),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore timeout')), 3000))
+            ]);
+            if (doc.exists && doc.data()) return doc.data();
+          } catch (err) { console.warn('Firestore fetch failed:', err); }
+        }
+
+        // Firebase REST fallback
+        const firebaseUrl = (window.ENV && window.ENV.FIREBASE_URL) ? window.ENV.FIREBASE_URL.replace(/\/$/, '') : null;
+        if (firebaseUrl) {
+          try {
+            const response = await Promise.race([
+              fetch(`${firebaseUrl}/members/${key}.json`),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('REST timeout')), 3000))
+            ]);
+            if (response.ok) {
+              const data = await response.json();
+              if (data) return data;
+            }
+          } catch (err) { console.warn('Firebase REST fetch failed:', err); }
+        }
+        return null;
+      }
+
+      // ── 7. Load and render ──
+      try {
+        const member = await fetchMember(cardKey);
+        if (!member) {
+          showError(`No library card was found matching ID ${cardKey}`);
+          return;
+        }
+        renderCard(member);
+      } catch (err) {
+        console.error('Fetch failed:', err);
+        showError('Network error connecting to database. Please refresh.');
+      }
+
+      // ── 8. Error display ──
+      function showError(msg) {
+        errorMsgText.textContent = msg;
+        errorState.style.display = 'flex';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+
+      // ── 9. Build avatar URL ──
+      function buildAvatarSrc(av) {
+        if (!av || typeof av !== 'string') return '';
+        if (av.startsWith('c:')) {
+          const cn = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
+          return `https://res.cloudinary.com/${cn}/image/upload/${av.substring(2)}`;
+        }
+        if (av.startsWith('http://') || av.startsWith('https://')) return av;
+        if (av.includes('lms_avatars/') || av.includes('lms-avatars/')) {
+          const cn = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
+          return `https://res.cloudinary.com/${cn}/image/upload/${av}`;
+        }
+        return '';
+      }
+
+      // ── 10. QR Code ──
+      function updateQrCode(key) {
+        if (!previewQr) return;
+        try {
+          if (typeof QRious !== 'undefined') {
+            const qr = new QRious({ value: key, size: 150, background: '#12131a', foreground: '#ffffff', level: 'H' });
+            previewQr.src = qr.toDataURL();
+          } else {
+            previewQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(key)}&color=ffffff&bgcolor=12131a`;
+          }
+        } catch (e) {
+          previewQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(key)}&color=ffffff&bgcolor=12131a`;
+        }
+      }
+
+      // ── 11. Render card data ──
+      function renderCard(m) {
+        const semRevMap = { '1':'1st Sem','2':'2nd Sem','3':'3rd Sem','4':'4th Sem','5':'5th Sem','6':'6th Sem','7':'7th Sem','8':'8th Sem','9':'9th Sem','10':'10th Sem' };
+        const tierMap   = { 'S':'Standard','P':'Premium','V':'VIP' };
+
+        const name  = m.n  || DEFAULTS.name;
+        const dept  = m.d  || 'DEPT N/A';
+        const batch = m.b  ? (String(m.b).match(/^\d+$/) ? `Batch ${m.b}` : m.b) : 'BATCH N/A';
+        const sem   = m.s  ? (semRevMap[m.s] || m.s) : 'SEMESTER N/A';
+        const email = m.e  || DEFAULTS.email;
+        const phone = m.p  || DEFAULTS.phone;
+        const limit = m.l  || `${DEFAULTS.limit} BOOKS`;
+        const term  = m.t  || DEFAULTS.term;
+        const key   = m.k  || '';
+        const theme = m.th ? (m.th.startsWith('#') ? m.th : `#${m.th}`) : DEFAULTS.theme;
+        const addr  = m.a  || 'No specific special clearances or address declared.';
+        const tier  = tierMap[m.tr] || m.tr || DEFAULTS.tier;
+
+        if (previewName)     previewName.textContent     = name;
+        if (previewDept)     previewDept.textContent     = dept;
+        if (previewBatch)    previewBatch.textContent    = batch.toUpperCase();
+        if (previewSemester) previewSemester.textContent = sem.toUpperCase();
+        if (previewEmail)    previewEmail.textContent    = email;
+        if (previewPhone)    previewPhone.textContent    = phone;
+        if (previewLimit)    previewLimit.textContent    = limit;
+        if (previewTerm)     previewTerm.textContent     = term;
+        if (previewCardKey)  previewCardKey.textContent  = key;
+        if (previewAddress)  previewAddress.textContent  = addr;
+
+        // Theme
+        if (libraryCard) libraryCard.style.setProperty('--user-card-theme', theme);
+        document.documentElement.style.setProperty('--accent-primary', theme);
+        document.documentElement.style.setProperty('--user-card-theme', theme);
+
+        // Background glow colour
+        const glow = document.getElementById('theme-ripple-overlay');
+        if (glow) glow.style.background = `radial-gradient(circle at 50% 50%, color-mix(in srgb, ${theme} 12%, transparent) 0%, transparent 60%)`;
+
+        // Avatar
+        const avatarSrc = buildAvatarSrc(m.av);
+        if (avatarSrc && previewAvatar) {
+          previewAvatar.src = avatarSrc;
+          previewAvatar.style.display = 'block';
+          if (previewAvatarContainer) previewAvatarContainer.classList.add('has-image');
+        } else {
+          if (previewAvatar) previewAvatar.style.display = 'none';
+          if (previewAvatarContainer) previewAvatarContainer.classList.remove('has-image');
+        }
+
+        // Tier badge
+        const previewTierEl = document.getElementById('preview-tier');
+        if (previewTierEl) {
+          previewTierEl.className = 'card-type';
+          let iconName = 'shield', tierClass = 'tier-standard';
+          if (tier === 'Premium') { iconName = 'zap';    tierClass = 'tier-premium'; }
+          else if (tier === 'VIP')  { iconName = 'crown'; tierClass = 'tier-vip'; }
+          previewTierEl.classList.add(tierClass);
+          previewTierEl.innerHTML = `<i data-lucide="${iconName}"></i><span>${tier}</span>`;
+        }
+
+        // QR
+        updateQrCode(key);
+
+        // Show content
+        viewerContentWrapper.style.display = 'flex';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+
+      // ── 12. Hologram tilt interactions (identical to homepage script.js) ──
+      let isFlipping = false;
+
+      const handleTiltMove = (e, container) => {
+        if (isFlipping) return;
+        libraryCard.style.transition = 'none';
+        const cardRect = container.getBoundingClientRect();
+        const x  = e.clientX - cardRect.left;
+        const y  = e.clientY - cardRect.top;
+        const px = (x / cardRect.width)  - 0.5;
+        const py = (y / cardRect.height) - 0.5;
+        const rotateY = px * 20;
+        const rotateX = -py * 20;
+        const isFlipped = libraryCard.classList.contains('flipped');
+        const baseRotationY = isFlipped ? 180 : 0;
+        libraryCard.style.transform = `rotateX(${rotateX}deg) rotateY(${baseRotationY + rotateY}deg)`;
+        libraryCard.style.setProperty('--hologram-pos', `${x / cardRect.width * 100}% ${y / cardRect.height * 100}%`);
+        const shineOverlays = libraryCard.querySelectorAll('.library-card-glow');
+        shineOverlays.forEach(overlay => {
+          overlay.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.15) 0%, transparent 60%)`;
+        });
+      };
+
+      const handleTiltLeave = () => {
+        if (isFlipping) return;
+        libraryCard.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+        const isFlipped = libraryCard.classList.contains('flipped');
+        libraryCard.style.transform = `rotateX(0deg) rotateY(${isFlipped ? 180 : 0}deg)`;
+        const shineOverlays = libraryCard.querySelectorAll('.library-card-glow');
+        shineOverlays.forEach(overlay => {
+          overlay.style.background = `radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--user-card-theme, var(--accent-primary)) 8%, transparent) 0%, transparent 50%)`;
+        });
+      };
+
+      if (cardPerspective) {
+        cardPerspective.addEventListener('mousemove', (e) => handleTiltMove(e, cardPerspective));
+        cardPerspective.addEventListener('mouseleave', handleTiltLeave);
+      }
+
+      // ── 13. Card flip — click on CARD itself ──
+      function toggleCardFlip() {
+        if (!libraryCard || isFlipping) return;
+        isFlipping = true;
+        libraryCard.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+        libraryCard.classList.toggle('flipped');
+        const isFlipped = libraryCard.classList.contains('flipped');
+        libraryCard.style.transform = `rotateX(0deg) rotateY(${isFlipped ? 180 : 0}deg)`;
+        setTimeout(() => { isFlipping = false; }, 820);
+      }
+
+      // Click on the card itself
+      if (libraryCard) {
+        libraryCard.addEventListener('click', toggleCardFlip);
+      }
+
+      // "Flip Card" button
+      if (btnViewerFlip) {
+        btnViewerFlip.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleCardFlip();
+        });
+      }
+
+    });
+  </script>
+</body>
+
+</html>

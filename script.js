@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Override Event constructor to ensure programmatically dispatched events bubble by default
   const OriginalEvent = window.Event;
-  window.Event = function(type, options) {
+  window.Event = function (type, options) {
     if (type === 'input' || type === 'change') {
       options = Object.assign({ bubbles: true }, options);
     }
@@ -89,63 +89,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  function isViewingShared() {
-    const hash = window.location.hash;
-    return hash && decodeURIComponent(hash).startsWith('#share=');
-  }
+  
 
-  function getSharePayload() {
-    const deptInput = document.getElementById('department');
-    const deptValText = deptInput ? deptInput.value.trim() : 'DEPT';
-    const semInput = document.getElementById('semester');
-    const semValText = semInput ? semInput.value.trim() : 'SEMESTER';
-
-    const semMap = {
-      '1st Sem': '1', '2nd Sem': '2', '3rd Sem': '3', '4th Sem': '4', '5th Sem': '5',
-      '6th Sem': '6', '7th Sem': '7', '8th Sem': '8', '9th Sem': '9', '10th Sem': '10'
-    };
-    const tierMap = { 'Standard': 'S', 'Premium': 'P', 'VIP': 'V' };
-
-    const nameVal = previewName.textContent === DEFAULTS.name ? "" : previewName.textContent;
-    const deptVal = (deptValText === 'DEPT' || deptValText === 'Select Department' || deptValText === "") ? "" : deptValText;
-    const sessionInput = document.getElementById('admission_session');
-    const batchValText = sessionInput ? sessionInput.value.trim() : 'Batch 60';
-    const batchVal = (batchValText === 'Batch 60' || batchValText === "") ? "" : batchValText.replace(/Batch\s+/i, '');
-    const semVal = (semValText === 'SEMESTER' || semValText === 'Select Semester' || semValText === "") ? "" : (semMap[semValText] || semValText);
-    const emailVal = previewEmail.textContent === DEFAULTS.email ? "" : previewEmail.textContent;
-    const phoneVal = previewPhone.textContent === DEFAULTS.phone ? "" : previewPhone.textContent;
-    const limitValText = previewLimit.textContent;
-    const limitDigits = limitValText.match(/\d+/);
-    const limitVal = (limitDigits && limitDigits[0] === String(DEFAULTS.limit)) ? "" : (limitDigits ? limitDigits[0] : "");
-    const termVal = previewTerm.textContent === DEFAULTS.term ? "" : previewTerm.textContent;
-    const keyValText = previewCardKey.textContent;
-    const keyVal = keyValText.startsWith('LMS-') ? keyValText.replace('LMS-', '') : keyValText;
-    const themeValText = libraryCard.style.getPropertyValue('--user-card-theme') || DEFAULTS.theme;
-    const themeVal = themeValText === DEFAULTS.theme ? "" : themeValText.replace('#', '');
-    const addrText = document.getElementById('preview-address') ? document.getElementById('preview-address').textContent : '';
-    const addrVal = (addrText === '' || addrText === 'No specific special clearances or address declared.') ? "" : addrText;
-    const tierText = previewTier.querySelector('span') ? previewTier.querySelector('span').textContent : 'Standard';
-    const tierVal = tierText === DEFAULTS.tier ? "" : (tierMap[tierText] || tierText);
-
-    const cardDataArray = [
-      nameVal,
-      deptVal,
-      batchVal,
-      semVal,
-      emailVal,
-      phoneVal,
-      limitVal,
-      termVal,
-      keyVal,
-      themeVal,
-      addrVal,
-      tierVal,
-      cloudinaryAvatarUrl ? getCloudinaryPath(cloudinaryAvatarUrl) : compressedAvatarBase64
-    ];
-
-    const rawString = cardDataArray.join('\u001f');
-    return btoa(unescape(encodeURIComponent(rawString))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  }
+  
 
   function triggerConfetti() {
     const canvas = document.createElement('canvas');
@@ -591,6 +537,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSubmit = document.getElementById('submit-form-btn');
   const successToast = document.getElementById('success-toast');
   const toastMessage = document.getElementById('toast-message');
+  const cardActionsWrapper = document.querySelector('.card-actions-wrapper');
+
+  let isCardCreated = false;
+
+  function updateSubmitButtonText() {
+    if (!btnSubmit) return;
+    const span = btnSubmit.querySelector('span');
+    if (span) {
+      if (isCardCreated) {
+        span.innerHTML = 'Update<span class="btn-text-full"> Member</span>';
+      } else {
+        span.innerHTML = 'Create<span class="btn-text-full"> Member</span>';
+      }
+    }
+  }
+
+  function updateCardActionsVisibility() {
+    if (!cardActionsWrapper) return;
+    cardActionsWrapper.style.display = isCardCreated ? 'grid' : 'none';
+  }
 
   const DEFAULTS = {
     name: 'Your User Name',
@@ -637,7 +603,7 @@ document.addEventListener('DOMContentLoaded', () => {
   generateCardKey();
 
   const updatePreviewName = () => {
-    if (isViewingShared()) return;
+    
     const first = inputFirstName ? inputFirstName.value.trim() : '';
     const last = inputLastName ? inputLastName.value.trim() : '';
     if (!first && !last) {
@@ -650,14 +616,57 @@ document.addEventListener('DOMContentLoaded', () => {
   if (inputLastName) inputLastName.addEventListener('input', updatePreviewName);
 
   inputEmail.addEventListener('input', (e) => {
-    if (isViewingShared()) return;
+    
     previewEmail.textContent = e.target.value.trim() || DEFAULTS.email;
   });
 
   inputPhone.addEventListener('input', (e) => {
-    if (isViewingShared()) return;
+    
     previewPhone.textContent = e.target.value.trim() || DEFAULTS.phone;
   });
+
+  async function checkEmailOrStudentIdExists() {
+    
+    const emailVal = inputEmail ? inputEmail.value.trim().toLowerCase() : '';
+    const studentIdInput = document.getElementById('student_id');
+    const studentIdVal = studentIdInput ? studentIdInput.value.trim().toLowerCase() : '';
+    if (!emailVal && !studentIdVal) return;
+
+    let members = {};
+    try {
+      members = await DB.getAllMembers();
+    } catch (err) {
+      members = DB.getLocalMembers();
+    }
+
+    const matched = Object.values(members).find(m => {
+      if (!m) return false;
+      const mEmail = (m.e || '').trim().toLowerCase();
+      const mStudentId = m.student_info ? (m.student_info.student_id || '').trim().toLowerCase() : '';
+      if (emailVal && mEmail && emailVal === mEmail) return true;
+      if (studentIdVal && mStudentId && studentIdVal === mStudentId) return true;
+      return false;
+    });
+
+    if (matched) {
+      console.log("Input: Found existing member. Syncing key:", matched.k);
+      if (previewCardKey) {
+        previewCardKey.textContent = matched.k;
+        updateQrCodeElement(matched.k);
+      }
+      isCardCreated = true;
+      updateSubmitButtonText();
+      updateCardActionsVisibility();
+    }
+  }
+
+  if (inputEmail) {
+    inputEmail.addEventListener('blur', checkEmailOrStudentIdExists);
+  }
+  const studentIdInput = document.getElementById('student_id');
+  if (studentIdInput) {
+    studentIdInput.addEventListener('blur', checkEmailOrStudentIdExists);
+  }
 
   const radioTiers = document.querySelectorAll('input[name="tier"]');
   const tierMap = {
@@ -668,7 +677,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   radioTiers.forEach(radio => {
     radio.addEventListener('change', (e) => {
-      if (isViewingShared()) return;
+      
       if (e.target.checked) {
         const tierData = tierMap[e.target.value] || tierMap['Standard'];
 
@@ -690,7 +699,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   inputCardTheme.addEventListener('input', (e) => {
-    if (isViewingShared()) return;
+    
     const chosenColor = e.target.value;
     labelColorHex.textContent = chosenColor;
 
@@ -719,7 +728,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   inputBorrowLimit.addEventListener('input', (e) => {
-    if (isViewingShared()) return;
+    
     const value = parseInt(e.target.value);
     labelLimitValue.textContent = value;
     previewLimit.textContent = `${value} BOOK${value > 1 ? 'S' : ''}`;
@@ -745,7 +754,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   inputMembershipExpiry.addEventListener('input', (e) => {
-    if (isViewingShared()) return;
+    
     if (!e.target.value) {
       previewTerm.textContent = DEFAULTS.term;
       return;
@@ -764,7 +773,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return hashHex;
   }
 
-  async function uploadToCloudinary(base64Data) {
+  async function uploadToCloudinary(fileOrBlob) {
     const env = window.ENV || {};
     const cloudName = env.CLOUDINARY_CLOUD_NAME || 'dorjgyfdl';
     const uploadPreset = env.CLOUDINARY_UPLOAD_PRESET || 'lms-form';
@@ -776,17 +785,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const formData = new FormData();
-    if (base64Data.startsWith('data:')) {
-      formData.append('file', base64Data);
-    } else {
-      formData.append('file', `data:image/jpeg;base64,${base64Data}`);
-    }
+    formData.append('file', fileOrBlob);
 
     if (uploadPreset) {
-
       formData.append('upload_preset', uploadPreset);
     } else {
-
       if (!apiKey || !apiSecret) {
         throw new Error('Neither Cloudinary upload_preset nor api_key/api_secret are configured in env.js');
       }
@@ -817,6 +820,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function getCloudinaryPath(url) {
     if (!url) return '';
+    if (url.startsWith('c:')) return url;
     const match = url.match(/\/image\/upload\/(.+)$/);
     return match ? 'c:' + match[1] : 'c:' + url;
   }
@@ -918,26 +922,26 @@ document.addEventListener('DOMContentLoaded', () => {
       const radius = 34;
       const circumference = 2 * Math.PI * radius; // ~213.628
       const offset = circumference - (targetPercent / 100) * circumference;
-      
+
       if (!animate) {
         progressRingBar.style.transition = 'none';
       } else {
         progressRingBar.style.transition = 'stroke-dashoffset 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
       }
-      
+
       progressRingBar.style.strokeDashoffset = offset;
-      
+
       if (!animate) {
         // Force reflow to clear transitons immediately
         progressRingBar.getBoundingClientRect();
       }
     }
-    
+
     if (progressRingText) {
       if (progressAnimationInterval) {
         cancelAnimationFrame(progressAnimationInterval);
       }
-      
+
       if (!animate) {
         progressRingText.textContent = `${targetPercent}%`;
         currentProgressValue = targetPercent;
@@ -945,16 +949,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const duration = 500; // Matches CSS transition duration
         const startValue = currentProgressValue;
         const startTime = performance.now();
-        
+
         function updateCounter(now) {
           const elapsed = now - startTime;
           const progress = Math.min(elapsed / duration, 1);
           const ease = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
           const currentValue = Math.round(startValue + ease * (targetPercent - startValue));
-          
+
           progressRingText.textContent = `${currentValue}%`;
           currentProgressValue = currentValue;
-          
+
           if (progress < 1) {
             progressAnimationInterval = requestAnimationFrame(updateCounter);
           } else {
@@ -962,7 +966,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentProgressValue = targetPercent;
           }
         }
-        
+
         progressAnimationInterval = requestAnimationFrame(updateCounter);
       }
     } else {
@@ -979,7 +983,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function showProcessing(titleText, packageLabelText) {
     if (processingTitle) processingTitle.textContent = titleText;
-    
+
     const packageLabel = document.getElementById('step-package-label');
     if (packageLabel && packageLabelText) {
       packageLabel.textContent = packageLabelText;
@@ -989,7 +993,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setStepState('step-render-front', 'pending');
     setStepState('step-render-back', 'pending');
     setStepState('step-package', 'pending');
-    
+
     currentProgressValue = 0;
     if (progressAnimationInterval) {
       cancelAnimationFrame(progressAnimationInterval);
@@ -1003,7 +1007,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (processingOverlay) processingOverlay.classList.remove('active');
   }
 
-  let compressedAvatarBase64 = '';
+  let selectedAvatarBlob = null;
   let cloudinaryAvatarUrl = '';
 
   function compressAvatar(dataUrl, callback) {
@@ -1033,7 +1037,165 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   let isUploadingAvatar = false;
+  let isUploadingEnrollment = false;
   let selectedFileForCrop = null;
+
+  let firestoreDb = null;
+  if (window.ENV && window.ENV.FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(window.ENV.FIREBASE_CONFIG);
+      }
+      firestoreDb = firebase.firestore();
+      console.log("Firebase & Firestore initialized successfully.");
+    } catch (e) {
+      console.error("Firebase/Firestore initialization failed:", e);
+    }
+  }
+
+  const DB = {
+    getFirebaseUrl() {
+      return (window.ENV && window.ENV.FIREBASE_URL) ? window.ENV.FIREBASE_URL.replace(/\/$/, '') : null;
+    },
+
+    async saveMember(member) {
+      // Always save locally first for instant access
+      const members = this.getLocalMembers();
+      members[member.k] = member;
+      localStorage.setItem('aether_lms_members', JSON.stringify(members));
+
+      if (firestoreDb) {
+        firestoreDb.collection('members').doc(member.k).set(member)
+          .then(() => console.log("Member saved to Firestore:", member.k))
+          .catch(err => console.warn('Firestore set failed:', err));
+      }
+
+      const firebaseUrl = this.getFirebaseUrl();
+      if (firebaseUrl) {
+        fetch(`${firebaseUrl}/members/${member.k}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(member)
+        })
+          .then(response => {
+            if (!response.ok) console.warn('Firebase REST save failed with status:', response.status);
+          })
+          .catch(err => console.warn('Firebase REST save failed:', err));
+      }
+
+      return member;
+    },
+
+    async getMember(key) {
+      const localMembers = this.getLocalMembers();
+      if (localMembers[key]) {
+        return localMembers[key];
+      }
+
+      if (firestoreDb) {
+        try {
+          const doc = await Promise.race([
+            firestoreDb.collection('members').doc(key).get(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore request timeout')), 1500))
+          ]);
+          if (doc.exists) {
+            const data = doc.data();
+            if (data) {
+              localMembers[key] = data;
+              localStorage.setItem('aether_lms_members', JSON.stringify(localMembers));
+              return data;
+            }
+          }
+        } catch (err) {
+          console.warn('Firestore get failed or timed out:', err);
+        }
+      }
+
+      const firebaseUrl = this.getFirebaseUrl();
+      if (firebaseUrl) {
+        try {
+          const response = await Promise.race([
+            fetch(`${firebaseUrl}/members/${key}.json`),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('REST request timeout')), 1500))
+          ]);
+          if (response.ok) {
+            const data = await response.json();
+            if (data) {
+              // Cache locally
+              localMembers[key] = data;
+              localStorage.setItem('aether_lms_members', JSON.stringify(localMembers));
+              return data;
+            }
+          }
+        } catch (err) {
+          console.warn('Firebase REST get failed or timed out:', err);
+        }
+      }
+      return null;
+    },
+
+    async deleteMember(key) {
+      const members = this.getLocalMembers();
+      delete members[key];
+      localStorage.setItem('aether_lms_members', JSON.stringify(members));
+
+      if (firestoreDb) {
+        firestoreDb.collection('members').doc(key).delete()
+          .then(() => console.log("Member deleted from Firestore:", key))
+          .catch(err => console.warn('Firestore delete failed:', err));
+      }
+
+      const firebaseUrl = this.getFirebaseUrl();
+      if (firebaseUrl) {
+        fetch(`${firebaseUrl}/members/${key}.json`, {
+          method: 'DELETE'
+        })
+          .then(response => {
+            if (!response.ok) console.warn('Firebase REST delete failed with status:', response.status);
+          })
+          .catch(err => console.warn('Firebase REST delete failed:', err));
+      }
+    },
+
+    async getAllMembers() {
+
+      if (firestoreDb) {
+        try {
+          const snapshot = await firestoreDb.collection('members').get();
+          const members = {};
+          snapshot.forEach(doc => {
+            members[doc.id] = doc.data();
+          });
+          return members;
+        } catch (err) {
+          console.error('Firestore fetch failed:', err);
+          throw err;
+        }
+      }
+
+      const firebaseUrl = this.getFirebaseUrl();
+      if (firebaseUrl) {
+        try {
+          const response = await fetch(`${firebaseUrl}/members.json`);
+          if (!response.ok) throw new Error('Firebase REST fetch failed');
+          const data = await response.json();
+          return data || {};
+        } catch (err) {
+          console.warn('Firebase REST fetch failed, reading from LocalStorage:', err);
+        }
+      }
+
+      return this.getLocalMembers();
+    },
+
+    getLocalMembers() {
+      try {
+        return JSON.parse(localStorage.getItem('aether_lms_members')) || {};
+      } catch (e) {
+        return {};
+      }
+    }
+  };
 
   const cropModal = document.getElementById('crop-modal');
   const cropSourceImage = document.getElementById('crop-source-image');
@@ -1152,7 +1314,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Touch support for mobile devices
     cropContainer.addEventListener('touchstart', (e) => {
       if (e.touches.length === 1) {
         cropState.isDragging = true;
@@ -1184,7 +1345,6 @@ document.addEventListener('DOMContentLoaded', () => {
       cropState.isDragging = false;
     });
 
-    // Scroll wheel zoom support
     cropContainer.addEventListener('wheel', (e) => {
       e.preventDefault();
       const zoomStep = 0.05;
@@ -1252,8 +1412,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const sourceH = 180 / scale;
 
       const canvas = document.createElement('canvas');
-      canvas.width = 150;
-      canvas.height = 150;
+      canvas.width = sourceW;
+      canvas.height = sourceH;
       const ctx = canvas.getContext('2d');
 
       ctx.imageSmoothingEnabled = true;
@@ -1262,42 +1422,31 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.drawImage(
         cropSourceImage,
         sourceX, sourceY, sourceW, sourceH,
-        0, 0, 150, 150
+        0, 0, sourceW, sourceH
       );
 
-      const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
-      const base64Data = croppedDataUrl.split(',')[1];
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          showToast('Crop Failed', 'Could not generate photo crop.', 'error');
+          return;
+        }
 
-      compressedAvatarBase64 = base64Data;
+        selectedAvatarBlob = blob;
 
-      if (previewAvatar) {
-        previewAvatar.src = croppedDataUrl;
-      }
-      if (previewAvatarContainer) {
-        previewAvatarContainer.classList.add('has-image');
-      }
+        if (previewAvatar) {
+          previewAvatar.src = URL.createObjectURL(blob);
+        }
+        if (previewAvatarContainer) {
+          previewAvatarContainer.classList.add('has-image');
+        }
 
-      saveFormDraft();
+        saveFormDraft();
 
-      closeCropModal();
+        closeCropModal();
 
-      labelFile.textContent = 'Uploading...';
-      isUploadingAvatar = true;
-
-      uploadToCloudinary(base64Data)
-        .then(url => {
-          cloudinaryAvatarUrl = url;
-          labelFile.textContent = selectedFileForCrop ? selectedFileForCrop.name : 'avatar.jpg';
-          isUploadingAvatar = false;
-          showToast('Photo Uploaded', 'Student photo uploaded to Cloudinary.', 'success');
-          saveFormDraft();
-        })
-        .catch(err => {
-          console.error('Cloudinary background upload failed:', err);
-          labelFile.textContent = 'Upload failed';
-          isUploadingAvatar = false;
-          showToast('Upload Failed', 'Could not upload student photo.', 'error');
-        });
+        labelFile.textContent = selectedFileForCrop ? selectedFileForCrop.name : 'avatar.jpg';
+        showToast('Photo Adjusted', 'Student photo preview updated.', 'success');
+      }, 'image/jpeg', 0.95);
     });
   }
 
@@ -1316,7 +1465,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   inputAvatar.addEventListener('change', (e) => {
-    if (isViewingShared()) return;
+    
     const file = e.target.files[0];
     if (file) {
       const maxSize = 1048576;
@@ -1346,7 +1495,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     dropzoneAvatar.classList.remove('has-file');
     labelFile.textContent = 'Choose image or drag here';
-    compressedAvatarBase64 = '';
+    selectedAvatarBlob = null;
     cloudinaryAvatarUrl = '';
     isUploadingAvatar = false;
     selectedFileForCrop = null;
@@ -1381,11 +1530,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   let cloudinaryEnrollmentUrl = '';
-  let tempEnrollmentBase64 = '';
+  let selectedEnrollmentFile = null;
 
   if (inputEnrollment && dropzoneEnrollment && labelEnrollmentFile) {
     inputEnrollment.addEventListener('change', (e) => {
-      if (isViewingShared()) return;
+      
       const file = e.target.files[0];
       if (file) {
         const maxSize = 1048576;
@@ -1393,24 +1542,19 @@ document.addEventListener('DOMContentLoaded', () => {
           showToast('File Too Large', 'Enrollment proof must be less than 1MB.', true);
           inputEnrollment.value = '';
           cloudinaryEnrollmentUrl = '';
-          tempEnrollmentBase64 = '';
+          selectedEnrollmentFile = null;
           dropzoneEnrollment.classList.remove('has-file');
           labelEnrollmentFile.textContent = 'Choose PDF or Image';
           return;
         }
         dropzoneEnrollment.classList.add('has-file');
-        labelEnrollmentFile.textContent = 'Document selected';
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          tempEnrollmentBase64 = event.target.result;
-          labelEnrollmentFile.textContent = file.name;
-          saveFormDraft();
-        };
-        reader.readAsDataURL(file);
+        labelEnrollmentFile.textContent = file.name;
+        selectedEnrollmentFile = file;
+        showToast('Document Attached', 'Enrollment proof selected.', 'success');
+        saveFormDraft();
       } else {
         cloudinaryEnrollmentUrl = '';
-        tempEnrollmentBase64 = '';
+        selectedEnrollmentFile = null;
         dropzoneEnrollment.classList.remove('has-file');
         labelEnrollmentFile.textContent = 'Choose PDF or Image';
         saveFormDraft();
@@ -1467,7 +1611,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     libraryCard.style.transform = `rotateX(${rotateX}deg) rotateY(${baseRotationY + rotateY}deg)`;
 
-    const glowAngle = Math.atan2(y - cardRect.height / 2, x - cardRect.width / 2) * (180 / Math.PI);
     libraryCard.style.setProperty('--hologram-pos', `${x / cardRect.width * 100}% ${y / cardRect.height * 100}%`);
 
     const shineOverlays = libraryCard.querySelectorAll('.library-card-glow');
@@ -1494,17 +1637,13 @@ document.addEventListener('DOMContentLoaded', () => {
     cardPerspective.addEventListener('mouseleave', handleTiltLeave);
   }
 
-  const viewerCardPlacement = document.getElementById('viewer-card-placement');
-  if (viewerCardPlacement) {
-    viewerCardPlacement.addEventListener('mousemove', (e) => handleTiltMove(e, viewerCardPlacement));
-    viewerCardPlacement.addEventListener('mouseleave', handleTiltLeave);
-  }
+
 
   btnReset.addEventListener('click', () => {
     localStorage.removeItem('aether_lms_form_draft');
 
     setTimeout(() => {
-      if (isViewingShared()) return;
+      
 
       previewName.textContent = DEFAULTS.name;
       previewEmail.textContent = DEFAULTS.email;
@@ -1524,6 +1663,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       resetAvatarPreview();
       generateCardKey();
+      isCardCreated = false;
+      updateSubmitButtonText();
+      updateCardActionsVisibility();
 
       const controls = form.querySelectorAll('.input-control');
       controls.forEach(control => {
@@ -1581,7 +1723,7 @@ document.addEventListener('DOMContentLoaded', () => {
         labelEnrollmentFile.textContent = 'Choose PDF or Image';
       }
       cloudinaryEnrollmentUrl = '';
-      tempEnrollmentBase64 = '';
+      selectedEnrollmentFile = null;
 
       previewTier.className = 'card-type tier-standard';
       previewTier.innerHTML = `<i data-lucide="shield"></i><span>Standard</span>`;
@@ -1595,7 +1737,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 50);
   });
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     let isFormValid = true;
@@ -1629,7 +1771,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (!isFormValid) {
-
       const formPanel = document.getElementById('registration-form-panel');
       formPanel.style.animation = 'shake-panel 0.4s ease';
       setTimeout(() => {
@@ -1640,19 +1781,83 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnSubmit.classList.add('is-loading');
 
+    // Duplicate validation (excluding current card key)
+    let members = {};
+    try {
+      members = await DB.getAllMembers();
+    } catch (err) {
+      console.warn("Could not check duplicate info from database:", err);
+      members = DB.getLocalMembers();
+    }
+
+    const keyVal = previewCardKey ? previewCardKey.textContent : '';
+    const currentEmail = inputEmail ? inputEmail.value.trim().toLowerCase() : '';
+    const currentStudentId = document.getElementById('student_id') ? document.getElementById('student_id').value.trim().toLowerCase() : '';
+
+    const duplicate = Object.values(members).find(m => {
+      if (!m) return false;
+      // Skip comparing against own card key (allows updates)
+      if (m.k === keyVal) return false;
+
+      const mEmail = (m.e || '').trim().toLowerCase();
+      const mStudentId = m.student_info ? (m.student_info.student_id || '').trim().toLowerCase() : '';
+
+      if (currentEmail && mEmail && currentEmail === mEmail) return true;
+      if (currentStudentId && mStudentId && currentStudentId === mStudentId) return true;
+
+      return false;
+    });
+
+    if (duplicate) {
+      // If a member with this email or student ID already exists, we adopt their existing key
+      // and allow updates instead of creating a duplicate entry under a new key.
+      console.log("Submit: Adopting existing key for matching duplicate member:", duplicate.k);
+      if (previewCardKey) {
+        previewCardKey.textContent = duplicate.k;
+        updateQrCodeElement(duplicate.k);
+      }
+      isCardCreated = true;
+      updateSubmitButtonText();
+      updateCardActionsVisibility();
+    }
+
+    const isUpdating = isCardCreated;
+    if (isUpdating) {
+      showToast('Updating Member', 'Saving member record to database...', 'loading');
+    } else {
+      showToast('Creating Member', 'Registering member to database...', 'loading');
+    }
+
     setTimeout(async () => {
-      if (compressedAvatarBase64 && !cloudinaryAvatarUrl) {
+      // Upload avatar to Cloudinary if a new one is selected
+      if (selectedAvatarBlob) {
         try {
-          cloudinaryAvatarUrl = await uploadToCloudinary(compressedAvatarBase64);
+          updateToastMessage('Saving student photo to cloud...');
+          cloudinaryAvatarUrl = await uploadToCloudinary(selectedAvatarBlob);
+          selectedAvatarBlob = null; // Clear local data on success
+          if (previewAvatar && cloudinaryAvatarUrl) {
+            previewAvatar.src = buildAvatarSrc(cloudinaryAvatarUrl);
+          }
+          saveFormDraft();
         } catch (err) {
-          console.error(err);
+          console.error('Cloudinary avatar upload failed:', err);
+          showToast('Upload Failed', 'Could not upload student photo. Please try again.', 'error');
+          btnSubmit.classList.remove('is-loading');
+          return;
         }
       }
-      if (tempEnrollmentBase64) {
+
+      // Upload enrollment proof to Cloudinary if a new one is selected
+      if (selectedEnrollmentFile) {
         try {
-          cloudinaryEnrollmentUrl = await uploadToCloudinary(tempEnrollmentBase64);
+          updateToastMessage('Saving enrollment proof to cloud...');
+          cloudinaryEnrollmentUrl = await uploadToCloudinary(selectedEnrollmentFile);
+          selectedEnrollmentFile = null; // Clear local data on success
         } catch (err) {
-          console.error(err);
+          console.error('Cloudinary enrollment proof upload failed:', err);
+          showToast('Upload Failed', 'Could not upload enrollment proof. Please try again.', 'error');
+          btnSubmit.classList.remove('is-loading');
+          return;
         }
       }
 
@@ -1667,8 +1872,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('success-summary-name').textContent = nameVal;
       document.getElementById('success-summary-tier').textContent = tierVal;
       document.getElementById('success-summary-key').textContent = keyVal;
-
-      const payload = getSharePayload();
 
       const deptInput = document.getElementById('department');
       const deptValText = deptInput ? deptInput.value.trim() : 'DEPT';
@@ -1718,7 +1921,7 @@ document.addEventListener('DOMContentLoaded', () => {
         th: themeValText,
         a: (addrText === '' || addrText === 'No specific special clearances or address declared.') ? '' : addrText,
         tr: tierVal,
-        av: cloudinaryAvatarUrl || compressedAvatarBase64,
+        av: cloudinaryAvatarUrl,
         ep: cloudinaryEnrollmentUrl || '',
 
         student_info: {
@@ -1762,28 +1965,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       };
 
-      DB.saveMember(memberRecord);
-
       const successModal = document.getElementById('success-modal');
-      if (successModal) {
-        successModal.classList.add('open');
-      }
 
-      triggerConfetti();
+      updateToastMessage('Saving member record...');
+      try {
+        await DB.saveMember(memberRecord);
+        isCardCreated = true;
+        updateSubmitButtonText();
+        updateCardActionsVisibility();
+
+        if (isUpdating) {
+          showToast('Member Updated', 'Member record updated successfully.', 'success');
+        } else {
+          showToast('Member Created', 'Member record registered successfully.', 'success');
+        }
+
+        if (successModal) {
+          successModal.classList.add('open');
+        }
+
+        triggerConfetti();
+      } catch (dbErr) {
+        console.error("Database save failed:", dbErr);
+        showToast('Save Failed', 'Could not save member record to database.', 'error');
+      }
 
       const btnSuccessView = document.getElementById('btn-success-view');
       if (btnSuccessView) {
         btnSuccessView.onclick = () => {
-          successModal.classList.remove('open');
+          if (successModal) successModal.classList.remove('open');
 
-          window.location.hash = `share=${payload}`;
+          const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
+          window.location.href = `${baseUrl}share.html#${keyVal}`;
         };
       }
 
       const btnSuccessClose = document.getElementById('btn-success-close');
       if (btnSuccessClose) {
         btnSuccessClose.onclick = () => {
-          successModal.classList.remove('open');
+          if (successModal) successModal.classList.remove('open');
         };
       }
     }, 1600);
@@ -1838,7 +2058,7 @@ document.addEventListener('DOMContentLoaded', () => {
     hasSearch: true,
     searchPlaceholder: 'Search department...',
     onChange: (val) => {
-      if (isViewingShared()) return;
+      
       const el = document.getElementById('preview-dept');
       if (el) el.textContent = val ? val.toUpperCase() : 'DEPT N/A';
     }
@@ -1855,7 +2075,7 @@ document.addEventListener('DOMContentLoaded', () => {
     hasSearch: true,
     searchPlaceholder: 'Search semester...',
     onChange: (val) => {
-      if (isViewingShared()) return;
+      
       const el = document.getElementById('preview-semester');
       if (el) el.textContent = val ? val.toUpperCase() : 'SEMESTER N/A';
     }
@@ -1943,7 +2163,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (inputBatch) {
     inputBatch.addEventListener('input', (e) => {
-      if (isViewingShared()) return;
+      
       const el = document.getElementById('preview-batch');
       if (el) el.textContent = e.target.value.trim().toUpperCase() || 'BATCH N/A';
     });
@@ -1952,7 +2172,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const inputSemester = document.getElementById('semester');
   if (inputSemester) {
     inputSemester.addEventListener('input', (e) => {
-      if (isViewingShared()) return;
+      
       const el = document.getElementById('preview-semester');
       if (el) el.textContent = e.target.value.trim().toUpperCase() || 'SEMESTER N/A';
     });
@@ -2005,7 +2225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function debounce(func, wait) {
     let timeout;
-    return function(...args) {
+    return function (...args) {
       const context = this;
       clearTimeout(timeout);
       timeout = setTimeout(() => func.apply(context, args), wait);
@@ -2017,10 +2237,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log("saveFormDraft: autosave is currently blocked. Skipping save.");
       return;
     }
-    if (isViewingShared()) {
-      console.log("saveFormDraft: Shared card view is active. Skipping draft save.");
-      return;
-    }
+    
 
     const draft = {};
     const inputs = form.querySelectorAll('input, textarea, select');
@@ -2047,17 +2264,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    if (compressedAvatarBase64) {
-      draft['avatar_base64'] = compressedAvatarBase64;
-    }
-    if (tempEnrollmentBase64) {
-      draft['enrollment_base64'] = tempEnrollmentBase64;
-    }
     if (cloudinaryAvatarUrl) {
       draft['cloudinaryAvatarUrl'] = cloudinaryAvatarUrl;
     }
     if (cloudinaryEnrollmentUrl) {
       draft['cloudinaryEnrollmentUrl'] = cloudinaryEnrollmentUrl;
+    }
+    if (previewCardKey && previewCardKey.textContent) {
+      draft['card_key'] = previewCardKey.textContent;
     }
 
     console.log("saveFormDraft: saving draft to localStorage", draft);
@@ -2109,29 +2323,36 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    if (draft['avatar_base64']) {
-      compressedAvatarBase64 = draft['avatar_base64'];
+    if (draft['cloudinaryAvatarUrl']) {
+      cloudinaryAvatarUrl = draft['cloudinaryAvatarUrl'];
       if (previewAvatar) {
-        previewAvatar.src = 'data:image/jpeg;base64,' + compressedAvatarBase64;
+        previewAvatar.src = buildAvatarSrc(cloudinaryAvatarUrl);
       }
       if (previewAvatarContainer) {
         previewAvatarContainer.classList.add('has-image');
       }
     }
-    if (draft['enrollment_base64']) {
-      tempEnrollmentBase64 = draft['enrollment_base64'];
+    if (draft['cloudinaryEnrollmentUrl']) {
+      cloudinaryEnrollmentUrl = draft['cloudinaryEnrollmentUrl'];
       if (dropzoneEnrollment) {
         dropzoneEnrollment.classList.add('has-file');
       }
       if (labelEnrollmentFile) {
-        labelEnrollmentFile.textContent = 'Temporary Attachment Loaded';
+        const match = cloudinaryEnrollmentUrl.match(/\/([^\/]+)$/);
+        labelEnrollmentFile.textContent = match ? match[1] : 'Document Attached';
       }
     }
-    if (draft['cloudinaryAvatarUrl']) {
-      cloudinaryAvatarUrl = draft['cloudinaryAvatarUrl'];
-    }
-    if (draft['cloudinaryEnrollmentUrl']) {
-      cloudinaryEnrollmentUrl = draft['cloudinaryEnrollmentUrl'];
+    if (draft['card_key']) {
+      if (previewCardKey) {
+        previewCardKey.textContent = draft['card_key'];
+        updateQrCodeElement(draft['card_key']);
+      }
+      const localMembers = DB.getLocalMembers();
+      if (localMembers[draft['card_key']]) {
+        isCardCreated = true;
+        updateSubmitButtonText();
+        updateCardActionsVisibility();
+      }
     }
 
     if (draft['dob'] && dobPicker) {
@@ -2483,7 +2704,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (inputAddress) {
     inputAddress.addEventListener('input', (e) => {
-      if (isViewingShared()) return;
+      
       const el = document.getElementById('preview-address');
       if (el) el.textContent = e.target.value.trim() || 'No specific special clearances or address declared.';
     });
@@ -2780,7 +3001,7 @@ document.addEventListener('DOMContentLoaded', () => {
           console.timeEnd('html-to-image toBlob');
         } catch (e) {
           console.warn('html-to-image failed, falling back to html2canvas:', e);
-          
+
           if (!frontBlob) {
             // Front side rendering with html2canvas fallback
             setStepState('step-render-front', 'current');
@@ -2932,7 +3153,7 @@ document.addEventListener('DOMContentLoaded', () => {
           canvasBack = await htmlToImage.toCanvas(backClone, { pixelRatio: 2, cacheBust: true });
         } catch (e) {
           console.warn('html-to-image failed, falling back to html2canvas:', e);
-          
+
           if (!canvasFront) {
             // Front side rendering with html2canvas fallback
             setStepState('step-render-front', 'current');
@@ -3070,20 +3291,25 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // If there is an avatar selected, but it hasn't been uploaded to Cloudinary yet (or upload failed earlier):
-      if (compressedAvatarBase64 && !cloudinaryAvatarUrl) {
+      if (selectedAvatarBlob && !cloudinaryAvatarUrl) {
         showToast('Uploading Photo', 'Please wait while the student photo is being uploaded...', 'loading');
         try {
-          cloudinaryAvatarUrl = await uploadToCloudinary(compressedAvatarBase64);
+          cloudinaryAvatarUrl = await uploadToCloudinary(selectedAvatarBlob);
+          selectedAvatarBlob = null;
+          if (previewAvatar && cloudinaryAvatarUrl) {
+            previewAvatar.src = buildAvatarSrc(cloudinaryAvatarUrl);
+          }
+          saveFormDraft();
           showToast('Upload Complete', 'Student photo uploaded successfully.', 'success');
         } catch (err) {
           console.error('Cloudinary upload on share failed:', err);
-          showToast('Upload Failed', 'Could not upload student photo. Using fallback link.', 'error');
+          showToast('Upload Failed', 'Could not upload student photo.', 'error');
         }
       }
 
-      const payload = getSharePayload();
-      const currentUrl = window.location.href.split('#')[0];
-      const finalShareUrl = `${currentUrl}#share=${payload}`;
+      const keyVal = previewCardKey ? previewCardKey.textContent : '';
+      const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
+      const finalShareUrl = `${baseUrl}share.html#${keyVal}`;
 
       shareLinkUrl.value = finalShareUrl;
 
@@ -3150,16 +3376,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const beamContainer = document.querySelector('.beam-container');
   const skelRails = document.querySelectorAll('.skel-rail');
 
+  function buildAvatarSrc(av) {
+    if (!av) return '';
+    if (typeof av !== 'string') return '';
+    if (av.startsWith('c:')) {
+      const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
+      return `https://res.cloudinary.com/${cloudName}/image/upload/${av.substring(2)}`;
+    }
+    if (av.startsWith('http://') || av.startsWith('https://')) {
+      return av;
+    }
+    if (av.includes('lms_avatars/') || av.includes('lms-avatars/')) {
+      const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
+      return `https://res.cloudinary.com/${cloudName}/image/upload/${av}`;
+    }
+    return '';
+  }
+
   function checkSharedLink() {
     const rawHash = window.location.hash;
     const hash = rawHash ? decodeURIComponent(rawHash) : '';
     const appWrapper = document.querySelector('.app-wrapper');
-    const sharedViewerMode = document.getElementById('shared-viewer-mode');
     const adminPanelMode = document.getElementById('admin-panel-mode');
     const adminLoginMode = document.getElementById('admin-login-mode');
     const adminLoginError = document.getElementById('admin-login-error');
 
-    if (sharedViewerMode) sharedViewerMode.style.display = 'none';
     if (adminPanelMode) adminPanelMode.style.display = 'none';
     if (adminLoginMode) adminLoginMode.style.display = 'none';
     if (appWrapper) appWrapper.style.display = '';
@@ -3169,170 +3410,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (adminLoginError) adminLoginError.style.display = 'none';
 
-    if (hash && hash.startsWith('#share=')) {
-      const sharePayload = hash.replace('#share=', '');
-      try {
-        let decodedData = {};
-
-        let normalizedPayload = sharePayload.replace(/-/g, '+').replace(/_/g, '/');
-        while (normalizedPayload.length % 4) {
-          normalizedPayload += '=';
-        }
-        const decodedString = decodeURIComponent(escape(atob(normalizedPayload)));
-
-        if (decodedString.includes('\u001f')) {
-          const parsed = decodedString.split('\u001f');
-
-          const tierMap = { 'S': 'Standard', 'P': 'Premium', 'V': 'VIP' };
-          const semRevMap = {
-            '1': '1st Sem', '2': '2nd Sem', '3': '3rd Sem', '4': '4th Sem', '5': '5th Sem',
-            '6': '6th Sem', '7': '7th Sem', '8': '8th Sem', '9': '9th Sem', '10': '10th Sem'
-          };
-
-          const rawLimit = parsed[6];
-          const limitText = rawLimit ? `${rawLimit} BOOK${rawLimit > 1 ? 'S' : ''}` : `${DEFAULTS.limit} BOOKS`;
-
-          decodedData = {
-            n: parsed[0] || DEFAULTS.name,
-            d: parsed[1] || 'DEPT N/A',
-            b: parsed[2] ? `Batch ${parsed[2]}` : 'BATCH N/A',
-            s: parsed[3] ? (semRevMap[parsed[3]] || parsed[3]) : 'SEMESTER N/A',
-            e: parsed[4] || DEFAULTS.email,
-            p: parsed[5] || DEFAULTS.phone,
-            l: limitText,
-            t: parsed[7] || DEFAULTS.term,
-            k: parsed[8] ? (parsed[8].startsWith('LMS-') ? parsed[8] : `LMS-${parsed[8]}`) : '',
-            th: parsed[9] ? (parsed[9].startsWith('#') ? parsed[9] : `#${parsed[9]}`) : DEFAULTS.theme,
-            a: parsed[10] || 'No specific special clearances or address declared.',
-            tr: tierMap[parsed[11]] || parsed[11] || DEFAULTS.tier,
-            av: parsed[12] || ''
-          };
-        } else {
-          const parsed = JSON.parse(decodedString);
-          if (Array.isArray(parsed)) {
-            decodedData = {
-              n: parsed[0] || DEFAULTS.name,
-              d: parsed[1] || 'DEPT N/A',
-              b: parsed[2] || 'BATCH N/A',
-              s: parsed[3] || 'SEMESTER N/A',
-              e: parsed[4] || DEFAULTS.email,
-              p: parsed[5] || DEFAULTS.phone,
-              l: parsed[6] || `${DEFAULTS.limit} BOOK${DEFAULTS.limit > 1 ? 'S' : ''}`,
-              t: parsed[7] || DEFAULTS.term,
-              k: parsed[8],
-              th: parsed[9] || DEFAULTS.theme,
-              a: parsed[10] || 'No specific special clearances or address declared.',
-              tr: parsed[11] || DEFAULTS.tier
-            };
-          } else {
-            decodedData = {
-              n: parsed.n || DEFAULTS.name,
-              d: parsed.d || 'DEPT N/A',
-              b: parsed.b || 'BATCH N/A',
-              s: parsed.s || 'SEMESTER N/A',
-              e: parsed.e || DEFAULTS.email,
-              p: parsed.p || DEFAULTS.phone,
-              l: parsed.l || `${DEFAULTS.limit} BOOK${DEFAULTS.limit > 1 ? 'S' : ''}`,
-              t: parsed.t || DEFAULTS.term,
-              k: parsed.k,
-              th: parsed.th || DEFAULTS.theme,
-              a: parsed.a || 'No specific special clearances or address declared.',
-              tr: parsed.tr || DEFAULTS.tier
-            };
-          }
-        }
-
-        if (previewName) previewName.textContent = decodedData.n;
-        if (document.getElementById('preview-dept')) document.getElementById('preview-dept').textContent = decodedData.d;
-        if (document.getElementById('preview-batch')) document.getElementById('preview-batch').textContent = decodedData.b.toUpperCase();
-        if (document.getElementById('preview-semester')) document.getElementById('preview-semester').textContent = decodedData.s.toUpperCase();
-        if (previewEmail) previewEmail.textContent = decodedData.e;
-        if (previewPhone) previewPhone.textContent = decodedData.p;
-        if (previewLimit) previewLimit.textContent = decodedData.l;
-        if (previewTerm) previewTerm.textContent = decodedData.t;
-        if (previewCardKey) previewCardKey.textContent = decodedData.k;
-
-        if (decodedData.av) {
-          if (previewAvatar) {
-            console.log("checkSharedLink: Raw avatar data from payload =", decodedData.av);
-            let avatarSrc = decodedData.av;
-            if (avatarSrc.startsWith('c:')) {
-              const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
-              avatarSrc = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_150,h_150,c_fill/${avatarSrc.substring(2)}`;
-            } else if (avatarSrc.startsWith('http://') || avatarSrc.startsWith('https://')) {
-              if (avatarSrc.includes('cloudinary.com')) {
-                avatarSrc = avatarSrc.replace('/image/upload/', '/image/upload/f_auto,q_auto,w_150,h_150,c_fill/');
-              }
-            } else if (avatarSrc.includes('lms_avatars/') || avatarSrc.includes('lms-avatars/')) {
-              const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
-              avatarSrc = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_150,h_150,c_fill/${avatarSrc}`;
-            } else {
-              avatarSrc = 'data:image/jpeg;base64,' + avatarSrc;
-            }
-            console.log("checkSharedLink: Final constructed avatar URL =", avatarSrc);
-            previewAvatar.src = avatarSrc;
-          }
-          if (previewAvatarContainer) {
-            previewAvatarContainer.classList.add('has-image');
-          }
-        } else {
-          if (previewAvatar) {
-            previewAvatar.src = '';
-          }
-          if (previewAvatarContainer) {
-            previewAvatarContainer.classList.remove('has-image');
-          }
-        }
-
-        const previewAddr = document.getElementById('preview-address');
-        if (previewAddr) previewAddr.textContent = decodedData.a || 'No specific special clearances or address declared.';
-
-        if (previewTier) {
-          previewTier.className = 'card-type';
-          const tierVal = decodedData.tr || 'Standard';
-          let iconName = 'shield';
-          let tierClass = 'tier-standard';
-          if (tierVal === 'Premium') {
-            iconName = 'zap';
-            tierClass = 'tier-premium';
-          } else if (tierVal === 'VIP') {
-            iconName = 'crown';
-            tierClass = 'tier-vip';
-          }
-          previewTier.classList.add(tierClass);
-          previewTier.innerHTML = `<i data-lucide="${iconName}"></i><span>${tierVal}</span>`;
-        }
-
-        if (libraryCard) {
-          libraryCard.style.setProperty('--user-card-theme', decodedData.th);
-        }
-        document.documentElement.style.setProperty('--accent-primary', decodedData.th);
-
-        updateQrCodeElement(decodedData.k);
-
-        if (libraryCard && libraryCard.classList.contains('flipped')) {
-          libraryCard.classList.remove('flipped');
-          libraryCard.style.transform = 'rotateX(0deg) rotateY(0deg)';
-        }
-
-        const viewerCardPlacement = document.getElementById('viewer-card-placement');
-        if (viewerCardPlacement && libraryCard) {
-          viewerCardPlacement.appendChild(libraryCard);
-        }
-
-        if (appWrapper) appWrapper.style.display = 'none';
-        if (mainNavbar) mainNavbar.style.display = 'none';
-        if (beamContainer) beamContainer.style.display = 'none';
-        skelRails.forEach(rail => rail.style.display = 'none');
-        if (sharedViewerMode) sharedViewerMode.style.display = 'flex';
-
-        if (typeof lucide !== 'undefined') {
-          lucide.createIcons();
-        }
-      } catch (err) {
-        console.error('Failed to parse shared preview link:', err);
-      }
-    } else if (hash === '#admin') {
+    if (hash === '#admin') {
       if (appWrapper) appWrapper.style.display = 'none';
       if (mainNavbar) mainNavbar.style.display = 'none';
       if (beamContainer) beamContainer.style.display = 'none';
@@ -3350,15 +3428,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 50);
       }
     } else {
-
-      if (sharedViewerMode) sharedViewerMode.style.display = 'none';
       if (adminPanelMode) adminPanelMode.style.display = 'none';
       if (appWrapper) appWrapper.style.display = '';
       if (mainNavbar) mainNavbar.style.display = '';
       if (beamContainer) beamContainer.style.display = '';
       skelRails.forEach(rail => rail.style.display = '');
 
-      generateCardKey();
+      if (!isCardCreated) {
+        generateCardKey();
+      }
+      updateSubmitButtonText();
+      updateCardActionsVisibility();
 
       if (formCardPlacement && libraryCard && libraryCard.parentElement !== formCardPlacement) {
         formCardPlacement.appendChild(libraryCard);
@@ -3387,20 +3467,16 @@ document.addEventListener('DOMContentLoaded', () => {
         activeRadio.dispatchEvent(new Event('change'));
       }
 
-      if (compressedAvatarBase64) {
+      if (selectedAvatarBlob) {
         if (previewAvatar) {
-          previewAvatar.src = 'data:image/jpeg;base64,' + compressedAvatarBase64;
+          previewAvatar.src = URL.createObjectURL(selectedAvatarBlob);
         }
         if (previewAvatarContainer) {
           previewAvatarContainer.classList.add('has-image');
         }
       } else if (cloudinaryAvatarUrl) {
         if (previewAvatar) {
-          let url = cloudinaryAvatarUrl;
-          if (url && url.includes('cloudinary.com')) {
-            url = url.replace('/image/upload/', '/image/upload/f_auto,q_auto,w_150,h_150,c_fill/');
-          }
-          previewAvatar.src = url;
+          previewAvatar.src = buildAvatarSrc(cloudinaryAvatarUrl);
         }
         if (previewAvatarContainer) {
           previewAvatarContainer.classList.add('has-image');
@@ -3420,18 +3496,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  let firestoreDb = null;
-  if (window.ENV && window.ENV.FIREBASE_CONFIG && typeof firebase !== 'undefined') {
-    try {
-      if (!firebase.apps.length) {
-        firebase.initializeApp(window.ENV.FIREBASE_CONFIG);
-      }
-      firestoreDb = firebase.firestore();
-      console.log("Firebase & Firestore initialized successfully.");
-    } catch (e) {
-      console.error("Firebase/Firestore initialization failed:", e);
-    }
-  }
+
 
   if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth()) {
     firebase.auth().onAuthStateChanged((user) => {
@@ -3472,153 +3537,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const DB = {
-    getFirebaseUrl() {
-      return (window.ENV && window.ENV.FIREBASE_URL) ? window.ENV.FIREBASE_URL.replace(/\/$/, '') : null;
-    },
 
-    async saveMember(member) {
 
-      if (firestoreDb) {
-        try {
-          await firestoreDb.collection('members').doc(member.k).set(member);
-          console.log("Member saved to Firestore:", member.k);
-          return member;
-        } catch (err) {
-          console.warn('Firestore set failed, attempting fallback:', err);
-        }
-      }
-
-      const firebaseUrl = this.getFirebaseUrl();
-      if (firebaseUrl) {
-        try {
-          const response = await fetch(`${firebaseUrl}/members/${member.k}.json`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(member)
-          });
-          if (!response.ok) throw new Error('Firebase REST save failed');
-          return await response.json();
-        } catch (err) {
-          console.warn('Firebase REST save failed, falling back to LocalStorage:', err);
-        }
-      }
-
-      const members = this.getLocalMembers();
-      members[member.k] = member;
-      localStorage.setItem('aether_lms_members', JSON.stringify(members));
-      return member;
-    },
-
-    async deleteMember(key) {
-
-      if (firestoreDb) {
-        try {
-          await firestoreDb.collection('members').doc(key).delete();
-          console.log("Member deleted from Firestore:", key);
-        } catch (err) {
-          console.warn('Firestore delete failed, attempting fallback:', err);
-        }
-      }
-
-      const firebaseUrl = this.getFirebaseUrl();
-      if (firebaseUrl) {
-        try {
-          const response = await fetch(`${firebaseUrl}/members/${key}.json`, {
-            method: 'DELETE'
-          });
-          if (!response.ok) throw new Error('Firebase REST delete failed');
-        } catch (err) {
-          console.warn('Firebase REST delete failed, removing locally:', err);
-        }
-      }
-
-      const members = this.getLocalMembers();
-      delete members[key];
-      localStorage.setItem('aether_lms_members', JSON.stringify(members));
-    },
-
-    async getAllMembers() {
-
-      if (firestoreDb) {
-        try {
-          const snapshot = await firestoreDb.collection('members').get();
-          const members = {};
-          snapshot.forEach(doc => {
-            members[doc.id] = doc.data();
-          });
-          return members;
-        } catch (err) {
-          console.error('Firestore fetch failed:', err);
-          throw err;
-        }
-      }
-
-      const firebaseUrl = this.getFirebaseUrl();
-      if (firebaseUrl) {
-        try {
-          const response = await fetch(`${firebaseUrl}/members.json`);
-          if (!response.ok) throw new Error('Firebase REST fetch failed');
-          const data = await response.json();
-          return data || {};
-        } catch (err) {
-          console.warn('Firebase REST fetch failed, reading from LocalStorage:', err);
-        }
-      }
-
-      return this.getLocalMembers();
-    },
-
-    getLocalMembers() {
-      try {
-        return JSON.parse(localStorage.getItem('aether_lms_members')) || {};
-      } catch (e) {
-        return {};
-      }
-    }
-  };
-
-  function serializeMemberToPayload(m) {
-    const semMap = {
-      '1st Sem': '1', '2nd Sem': '2', '3rd Sem': '3', '4th Sem': '4', '5th Sem': '5',
-      '6th Sem': '6', '7th Sem': '7', '8th Sem': '8', '9th Sem': '9', '10th Sem': '10'
-    };
-    const tierMap = { 'Standard': 'S', 'Premium': 'P', 'VIP': 'V' };
-
-    const nameVal = m.n === DEFAULTS.name ? "" : m.n;
-    const deptVal = (m.d === 'DEPT' || m.d === 'Select Department' || !m.d) ? "" : m.d;
-    const batchVal = m.b === 'Batch 60' ? "" : m.b.replace(/Batch\s+/i, '');
-    const semVal = (!m.s || m.s === 'SEMESTER' || m.s === 'Select Semester') ? "" : (semMap[m.s] || m.s);
-    const emailVal = m.e === DEFAULTS.email ? "" : m.e;
-    const phoneVal = m.p === DEFAULTS.phone ? "" : m.p;
-
-    const limitDigits = m.l.match(/\d+/);
-    const limitVal = (limitDigits && limitDigits[0] === String(DEFAULTS.limit)) ? "" : (limitDigits ? limitDigits[0] : "");
-    const termVal = m.t === DEFAULTS.term ? "" : m.t;
-    const keyVal = m.k.startsWith('LMS-') ? m.k.replace('LMS-', '') : m.k;
-    const themeVal = m.th === DEFAULTS.theme ? "" : m.th.replace('#', '');
-    const addrVal = (m.a === '' || m.a === 'No specific special clearances or address declared.') ? "" : m.a;
-    const tierVal = m.tr === DEFAULTS.tier ? "" : (tierMap[m.tr] || m.tr);
-
-    const cardDataArray = [
-      nameVal,
-      deptVal,
-      batchVal,
-      semVal,
-      emailVal,
-      phoneVal,
-      limitVal,
-      termVal,
-      keyVal,
-      themeVal,
-      addrVal,
-      tierVal,
-      m.av ? (m.av.startsWith('http') ? getCloudinaryPath(m.av) : m.av) : ""
-    ];
-
-    const rawString = cardDataArray.join('\u001f');
-    return btoa(unescape(encodeURIComponent(rawString))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  }
+  
 
   let isAdminAuthenticated = sessionStorage.getItem('isAdminAuthenticated') === 'true';
   const adminLoginForm = document.getElementById('admin-login-form');
@@ -4020,15 +3941,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const btnViewerCreate = document.getElementById('btn-viewer-create');
-  if (btnViewerCreate) {
-    btnViewerCreate.addEventListener('click', (e) => {
-      e.preventDefault();
-
-      history.replaceState(null, '', window.location.pathname);
-      checkSharedLink();
-    });
-  }
+  
 
   window.addEventListener('hashchange', checkSharedLink);
   checkSharedLink();

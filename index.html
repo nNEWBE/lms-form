@@ -894,32 +894,22 @@
                     }
                   }
 
-                  if (draft['avatar_base64']) {
+                  if (draft['cloudinaryAvatarUrl']) {
                     const previewAvatar = document.getElementById('preview-avatar');
                     const previewAvatarContainer = document.getElementById('preview-avatar-container');
                     if (previewAvatar && previewAvatarContainer) {
-                      previewAvatar.src = 'data:image/jpeg;base64,' + draft['avatar_base64'];
-                      previewAvatarContainer.classList.add('has-image');
-                    }
-                  } else if (draft['cloudinaryAvatarUrl']) {
-                    const previewAvatar = document.getElementById('preview-avatar');
-                    const previewAvatarContainer = document.getElementById('preview-avatar-container');
-                    if (previewAvatar && previewAvatarContainer) {
-                      let url = draft['cloudinaryAvatarUrl'];
-                      if (url && url.includes('cloudinary.com')) {
-                        url = url.replace('/image/upload/', '/image/upload/f_auto,q_auto,w_150,h_150,c_fill/');
-                      }
-                      previewAvatar.src = url;
+                      previewAvatar.src = draft['cloudinaryAvatarUrl'];
                       previewAvatarContainer.classList.add('has-image');
                     }
                   }
 
-                  if (draft['enrollment_base64']) {
+                  if (draft['cloudinaryEnrollmentUrl']) {
                     const dropzoneEnrollment = document.getElementById('enrollment-dropzone');
                     const labelEnrollmentFile = document.getElementById('enrollment-file-label');
                     if (dropzoneEnrollment && labelEnrollmentFile) {
                       dropzoneEnrollment.classList.add('has-file');
-                      labelEnrollmentFile.textContent = 'Temporary Attachment Loaded';
+                      const match = draft['cloudinaryEnrollmentUrl'].match(/\/([^\/]+)$/);
+                      labelEnrollmentFile.textContent = match ? match[1] : 'Document Attached';
                     }
                   }
                 }
@@ -1116,7 +1106,7 @@
           </div>
         </div>
 
-        <div class="card-actions-wrapper">
+        <div class="card-actions-wrapper" style="display: none;">
           <button type="button" class="action-btn btn-flip" id="btn-flip-card" title="Flip to see front/back of card">
             <i data-lucide="rotate-3d"></i>
             <span>Flip Card</span>
@@ -1272,56 +1262,6 @@
           <i data-lucide="check" style="width: 16px; height: 16px;"></i>
           <span>Apply</span>
         </button>
-      </div>
-    </div>
-  </div>
-
-  <div class="shared-card-viewer-overlay" id="shared-viewer-mode" style="display: none;">
-    <div class="viewer-stars-container"></div>
-    <div class="viewer-content">
-      <div class="viewer-header">
-        <div class="viewer-logo">
-          <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-            style="width: 2.2rem; height: 2.2rem; filter: drop-shadow(0 2px 8px rgba(6, 182, 212, 0.45));">
-            <defs>
-              <linearGradient id="logo-grad-primary-viewer" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="1" />
-                <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.25" />
-              </linearGradient>
-              <linearGradient id="logo-grad-dark-viewer" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="rgba(0, 0, 0, 0.5)" />
-                <stop offset="100%" stop-color="rgba(0, 0, 0, 0.15)" />
-              </linearGradient>
-              <linearGradient id="logo-grad-light-viewer" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="rgba(255, 255, 255, 0.2)" />
-                <stop offset="100%" stop-color="rgba(255, 255, 255, 0.05)" />
-              </linearGradient>
-            </defs>
-            <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-viewer)" />
-            <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-viewer)" />
-            <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-viewer)" />
-            <path d="M12 12V22" stroke="var(--accent-primary)" stroke-width="1.5" stroke-linecap="round" />
-            <path d="M12 12L2 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
-            <path d="M12 12L22 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
-          </svg>
-          <h2>AETHER LMS PORTAL</h2>
-        </div>
-        <p class="viewer-tagline">Secure Digital Library Credentials Verification</p>
-      </div>
-
-      <div class="viewer-card-placement" id="viewer-card-placement">
-        
-      </div>
-
-      <div class="viewer-actions">
-        <button type="button" class="btn btn-primary" id="btn-viewer-flip">
-          <i data-lucide="rotate-3d"></i>
-          <span>Flip Card</span>
-        </button>
-        <a href="#" class="btn btn-secondary" id="btn-viewer-create">
-          <i data-lucide="user-plus"></i>
-          <span>Create Your Own Card</span>
-        </a>
       </div>
     </div>
   </div>
@@ -1711,7 +1651,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="env.js"></script>
-  <script src="script.js?v=9"></script>
+  <script src="script.js?v=24"></script>
 </body>
 
 </html>
