@@ -27,6 +27,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (savedTheme === 'light') {
     document.body.classList.add('light-mode');
   }
+  const savedColor = localStorage.getItem('lms-card-theme-color');
+  if (savedColor) {
+    document.documentElement.style.setProperty('--accent-primary', savedColor);
+  }
   themeToggle.addEventListener('click', (e) => {
     const isLight = !document.body.classList.contains('light-mode');
 
@@ -215,6 +219,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const previewAvatar = document.getElementById('preview-avatar');
   const previewAvatarIcon = document.getElementById('preview-avatar-icon');
   const previewAvatarContainer = document.getElementById('preview-avatar-container');
+  if (libraryCard && savedColor) {
+    libraryCard.style.setProperty('--user-card-theme', savedColor);
+  }
 
   if (previewAvatar) {
     previewAvatar.addEventListener('error', () => {
@@ -591,6 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function generateCardKey() {
+    if (!previewCardKey) return;
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const randPart1 = Math.floor(1000 + Math.random() * 9000);
     const randPart2 = Math.floor(10 + Math.random() * 89);
@@ -615,15 +623,17 @@ document.addEventListener('DOMContentLoaded', () => {
   if (inputFirstName) inputFirstName.addEventListener('input', updatePreviewName);
   if (inputLastName) inputLastName.addEventListener('input', updatePreviewName);
 
-  inputEmail.addEventListener('input', (e) => {
-    
-    previewEmail.textContent = e.target.value.trim() || DEFAULTS.email;
-  });
+  if (inputEmail) {
+    inputEmail.addEventListener('input', (e) => {
+      previewEmail.textContent = e.target.value.trim() || DEFAULTS.email;
+    });
+  }
 
-  inputPhone.addEventListener('input', (e) => {
-    
-    previewPhone.textContent = e.target.value.trim() || DEFAULTS.phone;
-  });
+  if (inputPhone) {
+    inputPhone.addEventListener('input', (e) => {
+      previewPhone.textContent = e.target.value.trim() || DEFAULTS.phone;
+    });
+  }
 
   async function checkEmailOrStudentIdExists() {
     
@@ -698,15 +708,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  inputCardTheme.addEventListener('input', (e) => {
-    
-    const chosenColor = e.target.value;
-    labelColorHex.textContent = chosenColor;
-
-    libraryCard.style.setProperty('--user-card-theme', chosenColor);
-
-    document.documentElement.style.setProperty('--accent-primary', chosenColor);
-  });
+  if (inputCardTheme) {
+    inputCardTheme.addEventListener('input', (e) => {
+      const chosenColor = e.target.value;
+      labelColorHex.textContent = chosenColor;
+      if (libraryCard) libraryCard.style.setProperty('--user-card-theme', chosenColor);
+      document.documentElement.style.setProperty('--accent-primary', chosenColor);
+      try {
+        localStorage.setItem('lms-card-theme-color', chosenColor);
+      } catch (err) {
+        console.warn('Failed to save theme color:', err);
+      }
+    });
+  }
 
   function updateSliderProgress(slider) {
     const min = parseFloat(slider.min) || 1;
@@ -727,25 +741,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  inputBorrowLimit.addEventListener('input', (e) => {
-    
-    const value = parseInt(e.target.value);
-    labelLimitValue.textContent = value;
-    previewLimit.textContent = `${value} BOOK${value > 1 ? 'S' : ''}`;
-    updateSliderTicks(value);
-    updateSliderProgress(e.target);
-  });
-
-  ticksElements.forEach(tick => {
-    tick.addEventListener('click', () => {
-      const val = tick.getAttribute('data-value');
-      inputBorrowLimit.value = val;
-      inputBorrowLimit.dispatchEvent(new Event('input'));
+  if (inputBorrowLimit) {
+    inputBorrowLimit.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      labelLimitValue.textContent = value;
+      previewLimit.textContent = `${value} BOOK${value > 1 ? 'S' : ''}`;
+      updateSliderTicks(value);
+      updateSliderProgress(e.target);
     });
-  });
 
-  updateSliderTicks(parseInt(inputBorrowLimit.value));
-  updateSliderProgress(inputBorrowLimit);
+    ticksElements.forEach(tick => {
+      tick.addEventListener('click', () => {
+        const val = tick.getAttribute('data-value');
+        inputBorrowLimit.value = val;
+        inputBorrowLimit.dispatchEvent(new Event('input'));
+      });
+    });
+
+    updateSliderTicks(parseInt(inputBorrowLimit.value));
+    updateSliderProgress(inputBorrowLimit);
+  }
 
   document.querySelectorAll('input[name="card_status"]').forEach(radio => {
     radio.addEventListener('change', () => {
@@ -753,17 +768,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  inputMembershipExpiry.addEventListener('input', (e) => {
-    
-    if (!e.target.value) {
-      previewTerm.textContent = DEFAULTS.term;
-      return;
-    }
-    const [year, month, day] = e.target.value.split('-');
-    const date = new Date(year, month - 1, day);
-    const monthStr = date.toLocaleString('default', { month: 'short' }).toUpperCase();
-    previewTerm.textContent = `${monthStr} ${year}`;
-  });
+  if (inputMembershipExpiry) {
+    inputMembershipExpiry.addEventListener('input', (e) => {
+      if (!e.target.value) {
+        previewTerm.textContent = DEFAULTS.term;
+        return;
+      }
+      const [year, month, day] = e.target.value.split('-');
+      const date = new Date(year, month - 1, day);
+      const monthStr = date.toLocaleString('default', { month: 'short' }).toUpperCase();
+      previewTerm.textContent = `${monthStr} ${year}`;
+    });
+  }
 
   async function sha1(string) {
     const utf8 = new TextEncoder().encode(string);
@@ -1464,27 +1480,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  inputAvatar.addEventListener('change', (e) => {
-    
-    const file = e.target.files[0];
-    if (file) {
-      const maxSize = 1048576;
-      if (file.size > maxSize) {
-        showToast('File Too Large', 'Student photo must be less than 1MB.', true);
-        inputAvatar.value = '';
+  if (inputAvatar) {
+    inputAvatar.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const maxSize = 1048576;
+        if (file.size > maxSize) {
+          showToast('File Too Large', 'Student photo must be less than 1MB.', true);
+          inputAvatar.value = '';
+          resetAvatarPreview();
+          return;
+        }
+        selectedFileForCrop = file;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          openCropModal(event.target.result);
+        };
+        reader.readAsDataURL(file);
+      } else {
         resetAvatarPreview();
-        return;
       }
-      selectedFileForCrop = file;
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        openCropModal(event.target.result);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      resetAvatarPreview();
-    }
-  });
+    });
+  }
 
   function resetAvatarPreview() {
     if (previewAvatar) {
@@ -1502,32 +1519,35 @@ document.addEventListener('DOMContentLoaded', () => {
     saveFormDraft();
   }
 
-  ['dragenter', 'dragover'].forEach(eventName => {
-    dropzoneAvatar.addEventListener(eventName, (e) => {
-      e.preventDefault();
-      dropzoneAvatar.style.borderColor = 'var(--accent-secondary)';
-      dropzoneAvatar.style.background = 'rgba(139, 92, 246, 0.04)';
-    }, false);
-  });
+  if (dropzoneAvatar) {
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzoneAvatar.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropzoneAvatar.style.borderColor = 'var(--accent-secondary)';
+        dropzoneAvatar.style.background = 'rgba(139, 92, 246, 0.04)';
+      }, false);
+    });
 
-  ['dragleave', 'drop'].forEach(eventName => {
-    dropzoneAvatar.addEventListener(eventName, (e) => {
-      e.preventDefault();
-      dropzoneAvatar.style.borderColor = '';
-      dropzoneAvatar.style.background = '';
-    }, false);
-  });
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzoneAvatar.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropzoneAvatar.style.borderColor = '';
+        dropzoneAvatar.style.background = '';
+      }, false);
+    });
 
-  dropzoneAvatar.addEventListener('drop', (e) => {
-    const dt = e.dataTransfer;
-    const file = dt.files[0];
-    if (file && file.type.startsWith('image/')) {
-      inputAvatar.files = dt.files;
-
-      const event = new Event('change');
-      inputAvatar.dispatchEvent(event);
-    }
-  });
+    dropzoneAvatar.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const file = dt.files[0];
+      if (file && file.type.startsWith('image/')) {
+        if (inputAvatar) {
+          inputAvatar.files = dt.files;
+          const event = new Event('change');
+          inputAvatar.dispatchEvent(event);
+        }
+      }
+    });
+  }
 
   let cloudinaryEnrollmentUrl = '';
   let selectedEnrollmentFile = null;
@@ -1639,105 +1659,109 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-  btnReset.addEventListener('click', () => {
-    localStorage.removeItem('aether_lms_form_draft');
+  if (btnReset) {
+    btnReset.addEventListener('click', () => {
+      localStorage.removeItem('aether_lms_form_draft');
+      localStorage.removeItem('lms-card-theme-color');
 
-    setTimeout(() => {
-      
+      setTimeout(() => {
+        if (previewName) previewName.textContent = DEFAULTS.name;
+        if (previewEmail) previewEmail.textContent = DEFAULTS.email;
+        if (previewPhone) previewPhone.textContent = DEFAULTS.phone;
+        if (previewTier) {
+          previewTier.className = 'card-type tier-standard';
+          previewTier.innerHTML = `<i data-lucide="shield"></i><span>Standard</span>`;
+          if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+          }
+        }
 
-      previewName.textContent = DEFAULTS.name;
-      previewEmail.textContent = DEFAULTS.email;
-      previewPhone.textContent = DEFAULTS.phone;
-      previewTier.textContent = DEFAULTS.tier;
+        if (previewLimit) previewLimit.textContent = `${DEFAULTS.limit} BOOK${DEFAULTS.limit > 1 ? 'S' : ''}`;
+        if (labelLimitValue) labelLimitValue.textContent = DEFAULTS.limit;
+        updateSliderTicks(DEFAULTS.limit);
+        updateSliderProgress(inputBorrowLimit);
 
-      previewLimit.textContent = `${DEFAULTS.limit} BOOK${DEFAULTS.limit > 1 ? 'S' : ''}`;
-      labelLimitValue.textContent = DEFAULTS.limit;
-      updateSliderTicks(DEFAULTS.limit);
-      updateSliderProgress(inputBorrowLimit);
+        if (previewTerm) previewTerm.textContent = DEFAULTS.term;
 
-      previewTerm.textContent = DEFAULTS.term;
+        if (labelColorHex) labelColorHex.textContent = DEFAULTS.theme;
+        if (libraryCard) libraryCard.style.setProperty('--user-card-theme', DEFAULTS.theme);
+        document.documentElement.style.setProperty('--accent-primary', DEFAULTS.theme);
 
-      labelColorHex.textContent = DEFAULTS.theme;
-      libraryCard.style.setProperty('--user-card-theme', DEFAULTS.theme);
-      document.documentElement.style.setProperty('--accent-primary', DEFAULTS.theme);
+        resetAvatarPreview();
+        generateCardKey();
+        isCardCreated = false;
+        updateSubmitButtonText();
+        updateCardActionsVisibility();
 
-      resetAvatarPreview();
-      generateCardKey();
-      isCardCreated = false;
-      updateSubmitButtonText();
-      updateCardActionsVisibility();
+        if (form) {
+          const controls = form.querySelectorAll('.input-control');
+          controls.forEach(control => {
+            control.style.borderColor = '';
+            control.style.boxShadow = '';
+          });
+        }
 
-      const controls = form.querySelectorAll('.input-control');
-      controls.forEach(control => {
-        control.style.borderColor = '';
-        control.style.boxShadow = '';
-      });
+        if (deptSelect) deptSelect.reset();
+        if (semesterSelect) semesterSelect.reset();
+        if (degreeLevelSelect) degreeLevelSelect.reset();
+        if (campusSelect) campusSelect.reset();
+        if (genderSelect) genderSelect.reset();
+        if (bloodGroupSelect) bloodGroupSelect.reset();
+        if (membershipTypeSelect) membershipTypeSelect.reset();
+        if (preferredBranchSelect) preferredBranchSelect.reset();
+        if (borrowingCategorySelect) borrowingCategorySelect.reset();
+        if (preferredContactSelect) preferredContactSelect.reset();
 
-      if (deptSelect) deptSelect.reset();
-      if (semesterSelect) semesterSelect.reset();
-      if (degreeLevelSelect) degreeLevelSelect.reset();
-      if (campusSelect) campusSelect.reset();
-      if (genderSelect) genderSelect.reset();
-      if (bloodGroupSelect) bloodGroupSelect.reset();
-      if (membershipTypeSelect) membershipTypeSelect.reset();
-      if (preferredBranchSelect) preferredBranchSelect.reset();
-      if (borrowingCategorySelect) borrowingCategorySelect.reset();
-      if (preferredContactSelect) preferredContactSelect.reset();
+        const deptTrigger = document.getElementById('custom-select-trigger-dept');
+        if (deptTrigger) deptTrigger.style.borderColor = '';
+        const semesterTrigger = document.getElementById('custom-select-trigger-semester');
+        if (semesterTrigger) semesterTrigger.style.borderColor = '';
+        const degreeLevelTrigger = document.getElementById('custom-select-trigger-degree-level');
+        if (degreeLevelTrigger) degreeLevelTrigger.style.borderColor = '';
+        const campusTrigger = document.getElementById('custom-select-trigger-campus');
+        if (campusTrigger) campusTrigger.style.borderColor = '';
+        const genderTrigger = document.getElementById('custom-select-trigger-gender');
+        if (genderTrigger) genderTrigger.style.borderColor = '';
+        const bloodGroupTrigger = document.getElementById('custom-select-trigger-blood-group');
+        if (bloodGroupTrigger) bloodGroupTrigger.style.borderColor = '';
+        const membershipTypeTrigger = document.getElementById('custom-select-trigger-membership-type');
+        if (membershipTypeTrigger) membershipTypeTrigger.style.borderColor = '';
+        const preferredBranchTrigger = document.getElementById('custom-select-trigger-preferred-branch');
+        if (preferredBranchTrigger) preferredBranchTrigger.style.borderColor = '';
+        const borrowingCategoryTrigger = document.getElementById('custom-select-trigger-borrowing-category');
+        if (borrowingCategoryTrigger) borrowingCategoryTrigger.style.borderColor = '';
+        const preferredContactTrigger = document.getElementById('custom-select-trigger-preferred-contact');
+        if (preferredContactTrigger) preferredContactTrigger.style.borderColor = '';
 
-      const deptTrigger = document.getElementById('custom-select-trigger-dept');
-      if (deptTrigger) deptTrigger.style.borderColor = '';
-      const semesterTrigger = document.getElementById('custom-select-trigger-semester');
-      if (semesterTrigger) semesterTrigger.style.borderColor = '';
-      const degreeLevelTrigger = document.getElementById('custom-select-trigger-degree-level');
-      if (degreeLevelTrigger) degreeLevelTrigger.style.borderColor = '';
-      const campusTrigger = document.getElementById('custom-select-trigger-campus');
-      if (campusTrigger) campusTrigger.style.borderColor = '';
-      const genderTrigger = document.getElementById('custom-select-trigger-gender');
-      if (genderTrigger) genderTrigger.style.borderColor = '';
-      const bloodGroupTrigger = document.getElementById('custom-select-trigger-blood-group');
-      if (bloodGroupTrigger) bloodGroupTrigger.style.borderColor = '';
-      const membershipTypeTrigger = document.getElementById('custom-select-trigger-membership-type');
-      if (membershipTypeTrigger) membershipTypeTrigger.style.borderColor = '';
-      const preferredBranchTrigger = document.getElementById('custom-select-trigger-preferred-branch');
-      if (preferredBranchTrigger) preferredBranchTrigger.style.borderColor = '';
-      const borrowingCategoryTrigger = document.getElementById('custom-select-trigger-borrowing-category');
-      if (borrowingCategoryTrigger) borrowingCategoryTrigger.style.borderColor = '';
-      const preferredContactTrigger = document.getElementById('custom-select-trigger-preferred-contact');
-      if (preferredContactTrigger) preferredContactTrigger.style.borderColor = '';
+        const previewDeptEl = document.getElementById('preview-dept');
+        if (previewDeptEl) previewDeptEl.textContent = 'DEPT N/A';
+        const previewSemEl = document.getElementById('preview-semester');
+        if (previewSemEl) previewSemEl.textContent = 'SEMESTER N/A';
 
-      const previewDeptEl = document.getElementById('preview-dept');
-      if (previewDeptEl) previewDeptEl.textContent = 'DEPT N/A';
-      const previewSemEl = document.getElementById('preview-semester');
-      if (previewSemEl) previewSemEl.textContent = 'SEMESTER N/A';
+        if (inputBatch) {
+          inputBatch.value = '';
+        }
+        const previewBatchEl = document.getElementById('preview-batch');
+        if (previewBatchEl) previewBatchEl.textContent = 'BATCH N/A';
 
-      if (inputBatch) {
-        inputBatch.value = '';
-      }
-      const previewBatchEl = document.getElementById('preview-batch');
-      if (previewBatchEl) previewBatchEl.textContent = 'BATCH N/A';
+        if (dropzoneEnrollment) {
+          dropzoneEnrollment.classList.remove('has-file');
+        }
+        if (labelEnrollmentFile) {
+          labelEnrollmentFile.textContent = 'Choose PDF or Image';
+        }
+        cloudinaryEnrollmentUrl = '';
+        selectedEnrollmentFile = null;
 
-      if (dropzoneEnrollment) {
-        dropzoneEnrollment.classList.remove('has-file');
-      }
-      if (labelEnrollmentFile) {
-        labelEnrollmentFile.textContent = 'Choose PDF or Image';
-      }
-      cloudinaryEnrollmentUrl = '';
-      selectedEnrollmentFile = null;
+        if (dobPicker) dobPicker.reset();
+        if (startDatePicker) startDatePicker.reset();
+        if (expiryDatePicker) expiryDatePicker.reset();
+      }, 50);
+    });
+  }
 
-      previewTier.className = 'card-type tier-standard';
-      previewTier.innerHTML = `<i data-lucide="shield"></i><span>Standard</span>`;
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-      }
-
-      if (dobPicker) dobPicker.reset();
-      if (startDatePicker) startDatePicker.reset();
-      if (expiryDatePicker) expiryDatePicker.reset();
-    }, 50);
-  });
-
-  form.addEventListener('submit', async (e) => {
+  if (form) {
+    form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     let isFormValid = true;
@@ -1996,7 +2020,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (successModal) successModal.classList.remove('open');
 
           const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
-          window.location.href = `${baseUrl}share.html#${keyVal}`;
+          window.location.href = `${baseUrl}pages/share.html#${keyVal}`;
         };
       }
 
@@ -2008,6 +2032,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }, 1600);
   });
+  }
 
   function highlightInputError(input, hasError) {
     let target = input;
@@ -2233,6 +2258,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function saveFormDraft() {
+    if (!form) return;
     if (blockAutosave) {
       console.log("saveFormDraft: autosave is currently blocked. Skipping save.");
       return;
@@ -2284,6 +2310,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function restoreFormDraft() {
+    if (!form) return;
     let rawDraft = null;
     try {
       rawDraft = localStorage.getItem('aether_lms_form_draft');
@@ -2390,8 +2417,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Restore draft before adding auto-save event listeners
   restoreFormDraft();
 
-  form.addEventListener('input', debounce(saveFormDraft, 500));
-  form.addEventListener('change', saveFormDraft);
+  if (form) {
+    form.addEventListener('input', debounce(saveFormDraft, 500));
+    form.addEventListener('change', saveFormDraft);
+  }
 
   const demoAutofillBtn = document.getElementById('demo-autofill-btn');
   if (demoAutofillBtn) {
@@ -3309,7 +3338,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const keyVal = previewCardKey ? previewCardKey.textContent : '';
       const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
-      const finalShareUrl = `${baseUrl}share.html?id=${encodeURIComponent(keyVal)}`;
+      const finalShareUrl = `${baseUrl}pages/share.html?id=${encodeURIComponent(keyVal)}`;
 
       shareLinkUrl.value = finalShareUrl;
 
@@ -3394,8 +3423,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function checkSharedLink() {
-    const rawHash = window.location.hash;
-    const hash = rawHash ? decodeURIComponent(rawHash) : '';
+    const isReadyAdmin = window.location.pathname.includes('admin.html');
+    const isReadyLogin = window.location.pathname.includes('login.html');
     const appWrapper = document.querySelector('.app-wrapper');
     const adminPanelMode = document.getElementById('admin-panel-mode');
     const adminLoginMode = document.getElementById('admin-login-mode');
@@ -3410,15 +3439,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (adminLoginError) adminLoginError.style.display = 'none';
 
-    if (hash === '#admin') {
+    if (isReadyAdmin) {
       if (appWrapper) appWrapper.style.display = 'none';
-      if (mainNavbar) mainNavbar.style.display = 'none';
-      if (beamContainer) beamContainer.style.display = 'none';
-      skelRails.forEach(rail => rail.style.display = 'none');
+      const navAdminBtn = document.querySelector('.admin-panel-btn');
+      if (navAdminBtn) navAdminBtn.style.display = 'none';
 
       if (isAdminAuthenticated) {
         if (adminPanelMode) adminPanelMode.style.display = 'flex';
         renderAdminDirectory();
+      } else {
+        window.location.href = 'login.html';
+      }
+    } else if (isReadyLogin) {
+      if (appWrapper) appWrapper.style.display = 'none';
+      if (isAdminAuthenticated) {
+        window.location.href = 'admin.html';
       } else {
         if (adminLoginMode) adminLoginMode.style.display = 'flex';
 
@@ -3428,12 +3463,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 50);
       }
     } else {
-      if (adminPanelMode) adminPanelMode.style.display = 'none';
-      if (appWrapper) appWrapper.style.display = '';
-      if (mainNavbar) mainNavbar.style.display = '';
-      if (beamContainer) beamContainer.style.display = '';
-      skelRails.forEach(rail => rail.style.display = '');
-
       if (!isCardCreated) {
         generateCardKey();
       }
@@ -3496,52 +3525,60 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-
-
   if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth()) {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         isAdminAuthenticated = true;
         sessionStorage.setItem('isAdminAuthenticated', 'true');
-        if (window.location.hash === '#admin') {
+        if (window.location.pathname.includes('login.html')) {
+          window.location.href = 'admin.html';
+        } else if (window.location.pathname.includes('admin.html')) {
           const adminPanelMode = document.getElementById('admin-panel-mode');
-          if (adminPanelMode && adminPanelMode.style.display !== 'flex') {
-            const adminLoginMode = document.getElementById('admin-login-mode');
-            const appWrapper = document.querySelector('.app-wrapper');
-            const mainNavbar = document.getElementById('main-navbar');
-            const beamContainer = document.querySelector('.beam-container');
-            const skelRails = document.querySelectorAll('.skel-rail');
-
-            if (appWrapper) appWrapper.style.display = 'none';
-            if (mainNavbar) mainNavbar.style.display = 'none';
-            if (beamContainer) beamContainer.style.display = 'none';
-            skelRails.forEach(rail => rail.style.display = 'none');
-            if (adminLoginMode) adminLoginMode.style.display = 'none';
+          if (adminPanelMode) {
             adminPanelMode.style.display = 'flex';
-
-            renderAdminDirectory();
-          } else if (adminPanelMode && adminPanelMode.style.display === 'flex') {
-
             renderAdminDirectory();
           }
         }
       } else {
         if (sessionStorage.getItem('isAdminAuthenticated') === 'true') {
+          isAdminAuthenticated = true;
+          if (window.location.pathname.includes('admin.html')) {
+            const adminPanelMode = document.getElementById('admin-panel-mode');
+            if (adminPanelMode) {
+              adminPanelMode.style.display = 'flex';
+              renderAdminDirectory();
+            }
+          }
+        } else {
           isAdminAuthenticated = false;
-          sessionStorage.removeItem('isAdminAuthenticated');
-          if (window.location.hash === '#admin') {
-            checkSharedLink();
+          if (window.location.pathname.includes('admin.html')) {
+            window.location.href = 'login.html';
           }
         }
       }
     });
+  } else {
+    if (sessionStorage.getItem('isAdminAuthenticated') === 'true') {
+      isAdminAuthenticated = true;
+      if (window.location.pathname.includes('login.html')) {
+        window.location.href = 'admin.html';
+      } else if (window.location.pathname.includes('admin.html')) {
+        const adminPanelMode = document.getElementById('admin-panel-mode');
+        if (adminPanelMode) {
+          adminPanelMode.style.display = 'flex';
+          renderAdminDirectory();
+        }
+      }
+    } else {
+      isAdminAuthenticated = false;
+      if (window.location.pathname.includes('admin.html')) {
+        window.location.href = 'login.html';
+      }
+    }
   }
 
-
-
-  
-
   let isAdminAuthenticated = sessionStorage.getItem('isAdminAuthenticated') === 'true';
+  let currentFilteredMembers = [];
   const adminLoginForm = document.getElementById('admin-login-form');
   const adminLoginError = document.getElementById('admin-login-error');
   const btnLoginCancel = document.getElementById('btn-login-cancel');
@@ -3563,18 +3600,13 @@ document.addEventListener('DOMContentLoaded', () => {
       function handleSuccessfulLogin() {
         isAdminAuthenticated = true;
         sessionStorage.setItem('isAdminAuthenticated', 'true');
-        adminLoginError.style.display = 'none';
+        if (adminLoginError) adminLoginError.style.display = 'none';
         adminLoginForm.reset();
-
-        const adminLoginMode = document.getElementById('admin-login-mode');
-        const adminPanelMode = document.getElementById('admin-panel-mode');
-        if (adminLoginMode) adminLoginMode.style.display = 'none';
-        if (adminPanelMode) adminPanelMode.style.display = 'flex';
-        renderAdminDirectory();
+        window.location.href = 'admin.html';
       }
 
       function handleFailedLogin() {
-        adminLoginError.style.display = 'block';
+        if (adminLoginError) adminLoginError.style.display = 'block';
         const loginPanel = adminLoginForm.closest('.glass-panel');
         if (loginPanel) {
           loginPanel.style.animation = 'shake-panel 0.4s ease';
@@ -3597,13 +3629,19 @@ document.addEventListener('DOMContentLoaded', () => {
           })
           .catch((error) => {
             console.warn("Firebase Auth sign-in failed:", error.code, error.message);
-            handleFailedLogin();
+            const expectedUser = (window.ENV && window.ENV.ADMIN_USERNAME) || 'admin@gmail.com';
+            const expectedPass = (window.ENV && window.ENV.ADMIN_PASSWORD) || 'admin1234';
+            if (emailVal === expectedUser && passVal === expectedPass) {
+              console.log("Firebase Auth failed; local fallback credentials matched successfully.");
+              handleSuccessfulLogin();
+            } else {
+              handleFailedLogin();
+            }
           })
           .finally(() => {
             resetSubmitBtn();
           });
       } else {
-
         console.warn("Firebase Auth SDK not active. Falling back to local credentials.");
         const expectedUser = (window.ENV && window.ENV.ADMIN_USERNAME) || 'admin@gmail.com';
         const expectedPass = (window.ENV && window.ENV.ADMIN_PASSWORD) || 'admin1234';
@@ -3619,8 +3657,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (btnLoginCancel) {
-    btnLoginCancel.addEventListener('click', () => {
-      window.location.hash = '';
+    btnLoginCancel.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = '../index.html';
+      }
     });
   }
 
@@ -3786,25 +3829,97 @@ document.addEventListener('DOMContentLoaded', () => {
       const members = await DB.getAllMembers();
       tableBody.innerHTML = '';
 
+      const allMembers = Object.values(members).filter(Boolean);
+
+      // Update KPI Statistics
+      const totalEl = document.getElementById('stat-total-count');
+      const vipEl = document.getElementById('stat-vip-count');
+      const premiumEl = document.getElementById('stat-premium-count');
+      const activeEl = document.getElementById('stat-active-count');
+
+      if (totalEl) totalEl.textContent = allMembers.length;
+      if (vipEl) vipEl.textContent = allMembers.filter(m => (m.tr || '').toUpperCase() === 'VIP').length;
+      if (premiumEl) premiumEl.textContent = allMembers.filter(m => (m.tr || '').toUpperCase() === 'PREMIUM').length;
+      if (activeEl) activeEl.textContent = allMembers.filter(m => (m.membership_details?.status || '').toUpperCase() === 'ACTIVE').length;
+
+      // Extract unique departments dynamically
+      const departments = new Set();
+      allMembers.forEach(m => {
+        const d = m.d || (m.student_info && m.student_info.department);
+        if (d && d.trim()) {
+          departments.add(d.trim());
+        }
+      });
+      const sortedDepts = Array.from(departments).sort();
+
+      // Populate filter-dept select
+      const filterDeptSelect = document.getElementById('filter-dept');
+      if (filterDeptSelect) {
+        const currentVal = filterDeptSelect.value;
+        const existingOpts = Array.from(filterDeptSelect.options).map(o => o.value).filter(Boolean);
+        const hasChanged = existingOpts.length !== sortedDepts.length || !existingOpts.every((v, i) => v === sortedDepts[i]);
+
+        if (hasChanged) {
+          filterDeptSelect.innerHTML = '<option value="">All Departments</option>';
+          sortedDepts.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d;
+            opt.textContent = d;
+            filterDeptSelect.appendChild(opt);
+          });
+          if (sortedDepts.includes(currentVal)) {
+            filterDeptSelect.value = currentVal;
+          } else {
+            filterDeptSelect.value = '';
+          }
+          rebuildCustomFilterDeptOptions(sortedDepts, filterDeptSelect.value);
+        }
+      }
+
+      // Filter pipeline
       const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-      const filtered = Object.values(members).filter(m => {
+
+      const filterTierSelect = document.getElementById('filter-tier');
+      const tierVal = filterTierSelect ? filterTierSelect.value : '';
+
+      const deptVal = filterDeptSelect ? filterDeptSelect.value : '';
+
+      const filterStatusSelect = document.getElementById('filter-status');
+      const statusVal = filterStatusSelect ? filterStatusSelect.value : '';
+
+      const filtered = allMembers.filter(m => {
         if (!m) return false;
+
+        // 1. Search query filter
         const name = (m.n || '').toLowerCase();
         const key = (m.k || '').toLowerCase();
         const email = (m.e || '').toLowerCase();
-        const dept = (m.d || '').toLowerCase();
-        return name.includes(query) ||
-          key.includes(query) ||
-          email.includes(query) ||
-          dept.includes(query);
+        const dept = (m.d || (m.student_info && m.student_info.department) || '').toLowerCase();
+        const matchesQuery = !query || name.includes(query) || key.includes(query) || email.includes(query) || dept.includes(query);
+
+        // 2. Tier filter
+        const matchesTier = !tierVal || (m.tr || '').toLowerCase() === tierVal.toLowerCase();
+
+        // 3. Department filter
+        const mDept = m.d || (m.student_info && m.student_info.department) || '';
+        const matchesDept = !deptVal || mDept.trim() === deptVal.trim();
+
+        // 4. Status filter
+        const mStatus = m.membership_details?.status || '';
+        const matchesStatus = !statusVal || mStatus.toLowerCase() === statusVal.toLowerCase();
+
+        return matchesQuery && matchesTier && matchesDept && matchesStatus;
       });
+
+      // Cache the filtered list for exports
+      currentFilteredMembers = filtered;
 
       if (filtered.length === 0) {
         tableBody.innerHTML = `
           <tr>
             <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">
               <i data-lucide="info" style="width: 2rem; height: 2rem; margin-bottom: 0.5rem; color: var(--accent-secondary); display: inline-block;"></i>
-              <p style="margin: 0; font-size: 0.85rem;">No members found in database.</p>
+              <p style="margin: 0; font-size: 0.85rem;">No members match the current filters.</p>
             </td>
           </tr>
         `;
@@ -3861,8 +3976,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ${m.e || 'N/A'}
           </td>
           <td style="padding: 0.85rem 1rem; color: var(--text-muted); font-size: 0.78rem;">
-            <div style="color: var(--text-main); font-weight: 500;">${m.d || 'N/A'}</div>
-            <div style="font-size: 0.7rem;">${m.b || 'N/A'}</div>
+            <div style="color: var(--text-main); font-weight: 500;">${m.d || (m.student_info && m.student_info.department) || 'N/A'}</div>
+            <div style="font-size: 0.7rem;">${m.b || (m.student_info && m.student_info.session) || 'N/A'}</div>
           </td>
           <td style="padding: 0.85rem 1rem;">
             <span class="table-tier-badge ${tierClass}">
@@ -3906,12 +4021,133 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  const btnAdminPanel = document.querySelector('.admin-panel-btn');
-  if (btnAdminPanel) {
-    btnAdminPanel.addEventListener('click', (e) => {
-      e.preventDefault();
-      window.location.hash = 'admin';
+  function rebuildCustomFilterDeptOptions(sortedDepts, currentVal) {
+    const optionsContainer = document.getElementById('custom-select-options-filter-dept');
+    if (!optionsContainer) return;
+
+    optionsContainer.innerHTML = '';
+
+    const allOpt = document.createElement('div');
+    allOpt.className = 'custom-option';
+    allOpt.setAttribute('data-value', '');
+    allOpt.textContent = 'All Departments';
+    optionsContainer.appendChild(allOpt);
+
+    sortedDepts.forEach(d => {
+      const opt = document.createElement('div');
+      opt.className = 'custom-option';
+      opt.setAttribute('data-value', d);
+      opt.textContent = d;
+      optionsContainer.appendChild(opt);
     });
+
+    const options = optionsContainer.querySelectorAll('.custom-option');
+    const hiddenSelect = document.getElementById('filter-dept');
+    const displayValue = document.getElementById('custom-select-value-filter-dept');
+    const wrapper = document.getElementById('custom-select-filter-dept');
+
+    options.forEach(option => {
+      option.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const val = option.getAttribute('data-value');
+        hiddenSelect.value = val;
+        hiddenSelect.dispatchEvent(new Event('change'));
+        hiddenSelect.dispatchEvent(new Event('input'));
+        wrapper.classList.remove('open');
+        wrapper.classList.remove('open-top');
+      });
+    });
+
+    const activeVal = hiddenSelect ? hiddenSelect.value : '';
+    const activeText = activeVal || 'All Departments';
+    if (displayValue) displayValue.textContent = activeText;
+  }
+
+  function exportToCSV(members) {
+    if (!members || members.length === 0) {
+      showToast('No Data', 'No members found to export.', 'error');
+      return;
+    }
+
+    const headers = [
+      'Access Key', 'Name', 'Email', 'Phone', 'Department', 'Session/Batch', 
+      'Tier', 'Status', 'Borrow Limit', 'Start Date', 'Expiry Date',
+      'Student ID', 'Degree Level', 'Faculty', 'Program', 'Semester', 'Campus', 'Advisor',
+      'Date of Birth', 'Gender', 'Blood Group', 'Nationality', 'NID/Passport', 'Alt Phone', 
+      'Present Address', 'Permanent Address', 'City', 'Postcode', 'Country',
+      'Emergency Contact Name', 'Emergency Contact Relationship', 'Emergency Contact Phone', 'Emergency Contact Address',
+      'Branch', 'Borrowing Category', 'Preferred Contact Method'
+    ];
+
+    const csvRows = [headers.join(',')];
+
+    for (const m of members) {
+      const values = [
+        m.k || '',
+        m.n || '',
+        m.e || '',
+        m.phone || m.personal_info?.alt_phone || '',
+        m.d || m.student_info?.department || '',
+        m.b || m.student_info?.session || '',
+        m.tr || 'Standard',
+        m.membership_details?.status || 'Active',
+        m.l || '5',
+        m.membership_details?.start_date || '',
+        m.t || m.membership_details?.expiry_date || '',
+        m.student_info?.student_id || '',
+        m.student_info?.degree_level || '',
+        m.student_info?.faculty || '',
+        m.student_info?.program || '',
+        m.student_info?.semester || '',
+        m.student_info?.campus || '',
+        m.student_info?.advisor || '',
+        m.personal_info?.dob || '',
+        m.personal_info?.gender || '',
+        m.personal_info?.blood_group || '',
+        m.personal_info?.nationality || '',
+        m.personal_info?.nid_passport || '',
+        m.personal_info?.alt_phone || '',
+        m.a || m.personal_info?.present_address || '',
+        m.personal_info?.permanent_address || '',
+        m.personal_info?.city || '',
+        m.personal_info?.postcode || '',
+        m.personal_info?.country || '',
+        m.emergency_contact?.name || '',
+        m.emergency_contact?.relationship || '',
+        m.emergency_contact?.phone || '',
+        m.emergency_contact?.address || '',
+        m.membership_details?.branch || '',
+        m.membership_details?.category || '',
+        m.membership_details?.contact_method || ''
+      ];
+
+      const escapedValues = values.map(val => {
+        let str = String(val);
+        str = str.replace(/"/g, '""');
+        if (str.includes(',') || str.includes('\n') || str.includes('"')) {
+          return `"${str}"`;
+        }
+        return str;
+      });
+
+      csvRows.push(escapedValues.join(','));
+    }
+
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    triggerDownload(blob, 'AETHER-LMS-Directory.csv');
+    showToast('Export Complete', 'Members directory successfully exported to CSV.', 'success');
+  }
+
+  function exportToJSON(members) {
+    if (!members || members.length === 0) {
+      showToast('No Data', 'No members found to export.', 'error');
+      return;
+    }
+    const jsonContent = JSON.stringify(members, null, 2);
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    triggerDownload(blob, 'AETHER-LMS-Directory.json');
+    showToast('Export Complete', 'Members directory successfully exported to JSON.', 'success');
   }
 
   const btnAdminClose = document.getElementById('btn-admin-close');
@@ -3930,7 +4166,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       isAdminAuthenticated = false;
       sessionStorage.removeItem('isAdminAuthenticated');
-      window.location.hash = '';
+      window.location.href = '../index.html';
     });
   }
 
@@ -3941,9 +4177,120 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  
+  const filterTier = document.getElementById('filter-tier');
+  if (filterTier) {
+    filterTier.addEventListener('change', () => {
+      renderAdminDirectory();
+    });
+  }
 
-  window.addEventListener('hashchange', checkSharedLink);
+  const filterDept = document.getElementById('filter-dept');
+  if (filterDept) {
+    filterDept.addEventListener('change', () => {
+      renderAdminDirectory();
+    });
+  }
+
+  const filterStatus = document.getElementById('filter-status');
+  if (filterStatus) {
+    filterStatus.addEventListener('change', () => {
+      renderAdminDirectory();
+    });
+  }
+
+  // Export dropdown
+  const exportToggle = document.getElementById('btn-export-dropdown-toggle');
+  const exportMenu = document.getElementById('export-dropdown-menu');
+  const exportChevron = document.getElementById('export-chevron');
+
+  if (exportToggle && exportMenu) {
+    exportToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = exportMenu.style.display === 'block';
+      exportMenu.style.display = isOpen ? 'none' : 'block';
+      if (exportChevron) {
+        exportChevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+        exportChevron.style.transition = 'transform 0.2s';
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!exportToggle.contains(e.target) && !exportMenu.contains(e.target)) {
+        exportMenu.style.display = 'none';
+        if (exportChevron) {
+          exportChevron.style.transform = 'rotate(0deg)';
+        }
+      }
+    });
+  }
+
+  const btnExportCsv = document.getElementById('btn-export-csv');
+  if (btnExportCsv) {
+    btnExportCsv.addEventListener('click', () => {
+      exportToCSV(currentFilteredMembers);
+      if (exportMenu) {
+        exportMenu.style.display = 'none';
+        if (exportChevron) exportChevron.style.transform = 'rotate(0deg)';
+      }
+    });
+  }
+
+  const btnExportJson = document.getElementById('btn-export-json');
+  if (btnExportJson) {
+    btnExportJson.addEventListener('click', () => {
+      exportToJSON(currentFilteredMembers);
+      if (exportMenu) {
+        exportMenu.style.display = 'none';
+        if (exportChevron) exportChevron.style.transform = 'rotate(0deg)';
+      }
+    });
+  }
+
+  // Initialize admin custom select filters
+  if (document.getElementById('custom-select-filter-tier')) {
+    setupCustomSelect({
+      wrapperId: 'custom-select-filter-tier',
+      triggerId: 'custom-select-trigger-filter-tier',
+      valueId: 'custom-select-value-filter-tier',
+      optionsContainerId: 'custom-select-options-filter-tier',
+      hiddenSelectId: 'filter-tier',
+      placeholderText: 'All Tiers',
+      onChange: () => {
+        renderAdminDirectory();
+      }
+    });
+  }
+
+  if (document.getElementById('custom-select-filter-status')) {
+    setupCustomSelect({
+      wrapperId: 'custom-select-filter-status',
+      triggerId: 'custom-select-trigger-filter-status',
+      valueId: 'custom-select-value-filter-status',
+      optionsContainerId: 'custom-select-options-filter-status',
+      hiddenSelectId: 'filter-status',
+      placeholderText: 'All Statuses',
+      onChange: () => {
+        renderAdminDirectory();
+      }
+    });
+  }
+
+  if (document.getElementById('custom-select-filter-dept')) {
+    setupCustomSelect({
+      wrapperId: 'custom-select-filter-dept',
+      triggerId: 'custom-select-trigger-filter-dept',
+      valueId: 'custom-select-value-filter-dept',
+      optionsContainerId: 'custom-select-options-filter-dept',
+      hiddenSelectId: 'filter-dept',
+      placeholderText: 'All Departments',
+      hasSearch: true,
+      searchPlaceholder: 'Search department...',
+      onChange: () => {
+        renderAdminDirectory();
+      }
+    });
+  }
+
   checkSharedLink();
   blockAutosave = false;
 });

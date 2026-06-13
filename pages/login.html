@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AETHER LMS | Admin Authentication</title>
+  <meta name="description" content="Unlock central member directory and database control.">
+
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="stylesheet" href="../css/style.css?v=25">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/lucide/dist/umd/lucide.min.js"></script>
+  <script>
+    if (typeof lucide === 'undefined') {
+      document.write('<script src="https://unpkg.com/lucide@latest"><\/script>');
+    }
+  </script>
+
+  <style>
+    /* Premium Login Styles */
+    :root {
+      --accent-glow: color-mix(in srgb, var(--accent-primary) 15%, transparent);
+      --card-bg-dark: rgba(10, 11, 18, 0.78);
+      --card-bg-light: rgba(255, 255, 255, 0.82);
+      --card-border-dark: rgba(255, 255, 255, 0.08);
+      --card-border-light: rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Elegant Pulse Animation for Lock Icon */
+    .lock-icon-container {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent-primary) 20%, transparent);
+      margin: 0 auto 0.85rem auto;
+      transition: all 0.3s ease;
+    }
+
+    .lock-icon-container::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 1px solid color-mix(in srgb, var(--accent-primary) 10%, transparent);
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 0.5;
+      }
+
+      50% {
+        transform: scale(1.08);
+        opacity: 1;
+        border-color: color-mix(in srgb, var(--accent-primary) 25%, transparent);
+      }
+    }
+
+    /* Glassmorphic Panel Overrides */
+    .login-card {
+      background: var(--card-bg-dark);
+      border: 1px solid var(--card-border-dark);
+      border-radius: 14px;
+      backdrop-filter: blur(28px) saturate(140%);
+      -webkit-backdrop-filter: blur(28px) saturate(140%);
+      box-shadow:
+        0 30px 70px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 0 40px color-mix(in srgb, var(--accent-primary) 5%, transparent);
+      padding: 2.25rem 1.75rem;
+      max-width: 350px;
+      width: 90%;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: loginCardAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body.light-mode .login-card {
+      background: var(--card-bg-light);
+      border: 1px solid var(--card-border-light);
+      box-shadow:
+        0 30px 70px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        0 0 30px color-mix(in srgb, var(--accent-primary) 2%, transparent);
+    }
+
+    @keyframes loginCardAppear {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Glowing Titles */
+    .login-title-wrapper {
+      margin: 0;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .login-title-wrapper h2 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      font-size: 1.25rem;
+      background: linear-gradient(135deg, #ffffff 30%, rgba(255, 255, 255, 0.75) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+      text-shadow: 0 2px 10px rgba(255, 255, 255, 0.05);
+    }
+
+    body.light-mode .login-title-wrapper h2 {
+      background: linear-gradient(135deg, #05060b 30%, rgba(5, 6, 11, 0.75) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: none;
+    }
+
+    .login-tagline {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+    }
+
+    /* Sci-Fi Secure Badge */
+    .secure-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.58rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-top: 0.6rem;
+      background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
+      padding: 0.2rem 0.55rem;
+      border-radius: 50px;
+      border: 1px solid color-mix(in srgb, var(--accent-primary) 15%, transparent);
+    }
+
+    body.light-mode .secure-badge {
+      background: color-mix(in srgb, var(--accent-primary) 5%, transparent);
+      border-color: color-mix(in srgb, var(--accent-primary) 20%, transparent);
+    }
+
+    .pulse-dot {
+      width: 5px;
+      height: 5px;
+      background-color: var(--accent-primary);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-primary);
+      animation: dotPulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes dotPulse {
+
+      0%,
+      100% {
+        opacity: 0.4;
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.2);
+      }
+    }
+
+    /* Custom Input Control styling */
+    .login-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .login-input-group label {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-main);
+      opacity: 0.85;
+      padding-left: 0.2rem;
+    }
+
+    .login-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: rgba(5, 6, 11, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 0.625rem 0.85rem;
+      gap: 0.5rem;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    body.light-mode .login-input-wrapper {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .login-input-wrapper i,
+    .login-input-wrapper svg {
+      color: var(--text-muted);
+      width: 0.75rem;
+      height: 0.75rem;
+      transition: color 0.25s ease;
+    }
+
+    .login-input-wrapper input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .login-input-wrapper input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.65;
+    }
+
+    /* Input Focus Effects */
+    .login-input-wrapper:focus-within {
+      border-color: var(--accent-primary);
+      box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.3),
+        0 0 16px color-mix(in srgb, var(--accent-primary) 20%, transparent);
+      background: rgba(5, 6, 11, 0.8);
+    }
+
+    body.light-mode .login-input-wrapper:focus-within {
+      border-color: var(--accent-primary);
+      box-shadow:
+        inset 0 1px 2px rgba(0, 0, 0, 0.05),
+        0 0 16px color-mix(in srgb, var(--accent-primary) 15%, transparent);
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .login-input-wrapper:focus-within i {
+      color: var(--accent-primary);
+    }
+
+    /* Side-by-Side Actions Layout */
+    .login-actions-row {
+      margin-top: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    /* Premium White Button (matching homepage btn-primary in dark mode) */
+    .btn-login-submit {
+      padding: 0.45rem 1.25rem;
+      min-width: 110px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.05em;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.9);
+      color: #0c0d14 !important;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      box-shadow: 0 2px 8px rgba(255, 255, 255, 0.05);
+      transition: all 0.2s ease, transform 0.15s ease;
+    }
+
+    .btn-login-submit:hover {
+      background: #ffffff;
+      border-color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-login-submit:active {
+      transform: translateY(0);
+    }
+
+    .btn-login-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Premium Cancel Button (matching homepage btn-secondary in dark mode) */
+    .btn-login-cancel {
+      padding: 0.45rem 1.25rem;
+      min-width: 110px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 0.82rem;
+      letter-spacing: 0.04em;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease, transform 0.15s ease;
+    }
+
+    .btn-login-cancel:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
+    .btn-login-cancel:active {
+      transform: translateY(0);
+    }
+
+    /* Light Mode Button Overrides */
+    body.light-mode .btn-login-submit {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: #ffffff !important;
+      box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-primary) 25%, transparent);
+    }
+
+    body.light-mode .btn-login-submit:hover {
+      background: color-mix(in srgb, var(--accent-primary) 85%, #000000);
+      border-color: color-mix(in srgb, var(--accent-primary) 85%, #000000);
+      box-shadow: 0 4px 12px color-mix(in srgb, var(--accent-primary) 35%, transparent);
+    }
+
+    body.light-mode .btn-login-cancel {
+      background: #f8f8fb;
+      border-color: rgba(0, 0, 0, 0.1);
+      color: #6b7280;
+    }
+
+    body.light-mode .btn-login-cancel:hover {
+      background: #f0f0f5;
+      color: #1a1a2e;
+    }
+
+    /* Small Icons overrides */
+    .btn-login-submit i,
+    .btn-login-submit svg,
+    .btn-login-cancel i,
+    .btn-login-cancel svg {
+      width: 0.75rem;
+      height: 0.75rem;
+    }
+
+    .login-error-box {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 8px;
+      padding: 0.65rem;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: var(--accent-error);
+      font-size: 0.78rem;
+      font-weight: 500;
+      text-align: center;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+
+<body>
+
+  <svg class="beam-container" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="beam-grad-left" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="0" />
+        <stop offset="60%" stop-color="var(--accent-primary)" stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.3" />
+      </linearGradient>
+
+      <linearGradient id="beam-grad-right" x1="100%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="0" />
+        <stop offset="60%" stop-color="var(--accent-primary)" stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.3" />
+      </linearGradient>
+
+      <linearGradient id="beam-grad-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="0" />
+        <stop offset="50%" stop-color="var(--accent-primary)" stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.3" />
+      </linearGradient>
+    </defs>
+
+    <path id="beam-path-left" d="M 50 800 Q 150 400, 300 500 T 500 300 L 580 320" class="beam-path" />
+    <path id="beam-path-right" d="M 1200 50 Q 1100 300, 950 200 T 800 450 L 720 420" class="beam-path" />
+    <path id="beam-path-top" d="M 100 -100 Q 400 150, 700 50 T 1300 -50" class="beam-path" />
+    <path id="beam-path-center" d="M -100 350 Q 500 200, 600 600 T 1400 750" class="beam-path" />
+    <path id="beam-path-bottom" d="M 200 900 Q 600 700, 800 850 T 1200 950" class="beam-path" />
+  </svg>
+
+  <div class="skel-rail skel-rail-left"></div>
+  <div class="skel-rail skel-rail-right"></div>
+
+  <nav class="fixed-navbar" id="main-navbar">
+    <div class="navbar-inner">
+      <a href="../index.html" class="navbar-brand" style="text-decoration: none; color: inherit;">
+        <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="logo-grad-primary-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="1" />
+              <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.25" />
+            </linearGradient>
+            <linearGradient id="logo-grad-dark-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="rgba(0, 0, 0, 0.5)" />
+              <stop offset="100%" stop-color="rgba(0, 0, 0, 0.15)" />
+            </linearGradient>
+            <linearGradient id="logo-grad-light-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="rgba(255, 255, 255, 0.2)" />
+              <stop offset="100%" stop-color="rgba(255, 255, 255, 0.05)" />
+            </linearGradient>
+          </defs>
+          <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-nav)" />
+          <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-nav)" />
+          <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-nav)" />
+          <path d="M12 12V22" stroke="var(--accent-primary)" stroke-width="1.5" stroke-linecap="round" />
+          <path d="M12 12L2 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
+          <path d="M12 12L22 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
+        </svg>
+        <span>AETHER LMS</span>
+      </a>
+      <div class="navbar-actions">
+        <a href="../index.html" class="admin-panel-btn">
+          <i data-lucide="arrow-left"></i>
+          <span>Member Registration</span>
+        </a>
+        <button class="nav-icon-btn theme-toggle" id="theme-toggle" title="Toggle Light/Dark Mode">
+          <i data-lucide="moon" class="theme-icon-dark"></i>
+          <i data-lucide="sun" class="theme-icon-light"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="shared-card-viewer-overlay" id="admin-login-mode"
+    style="display: flex; align-items: center; justify-content: center; position: fixed; inset: 0;">
+    <div class="viewer-stars-container"></div>
+
+    <div class="login-card">
+      <div class="login-title-wrapper">
+        <div class="lock-icon-container">
+          <i data-lucide="lock" style="width: 0.95rem; height: 0.95rem; color: var(--accent-primary);"></i>
+        </div>
+        <h2>ADMIN PORTAL</h2>
+        <p class="login-tagline">Enter credentials to unlock member directory</p>
+        <div class="secure-badge">
+          <span class="pulse-dot"></span>
+          <span>Vault System Online</span>
+        </div>
+      </div>
+
+      <form id="admin-login-form" style="display: flex; flex-direction: column; gap: 1.1rem;">
+        <div class="login-input-group">
+          <label for="admin-username">Email Address</label>
+          <div class="login-input-wrapper">
+            <i data-lucide="user"></i>
+            <input type="email" id="admin-username" placeholder="admin@example.com" required autocomplete="email">
+          </div>
+        </div>
+
+        <div class="login-input-group">
+          <label for="admin-password">Password / PIN</label>
+          <div class="login-input-wrapper">
+            <i data-lucide="key-round"></i>
+            <input type="password" id="admin-password" placeholder="Password" required autocomplete="current-password">
+          </div>
+        </div>
+
+        <div id="admin-login-error" class="login-error-box">
+          <i data-lucide="alert-circle" style="width: 0.9rem; height: 0.9rem; flex-shrink: 0;"></i>
+          <span>Invalid admin credentials. Please try again.</span>
+        </div>
+
+        <div class="login-actions-row">
+          <button type="button" class="btn-login-cancel" id="btn-login-cancel"
+            onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href = '../index.html'; }">
+            <i data-lucide="x-circle"></i>
+            <span>Cancel</span>
+          </button>
+          <button type="submit" class="btn-login-submit">
+            <i data-lucide="log-in"></i>
+            <span>Unlock</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="../env.js"></script>
+  <script src="../js/script.js?v=24"></script>
+</body>
+
+</html>

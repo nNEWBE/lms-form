@@ -5,15 +5,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AETHER LMS — Verify Digital Library Card</title>
-  <meta name="description" content="Verify digital AETHER LMS library membership card with holographic 3D effects and QR codes.">
-  
+  <meta name="description"
+    content="Verify digital AETHER LMS library membership card with holographic 3D effects and QR codes.">
+
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://nnewbe.github.io/lms-form/share.html" id="og-url">
-  <meta property="og:title" content="AETHER LMS — Digital Library Card" id="og-title">
-  <meta property="og:description" content="View and verify this AETHER LMS digital library membership card." id="og-desc">
-  <meta property="og:image" content="https://nnewbe.github.io/lms-form/og-preview.jpg" id="og-image">
-  <meta property="og:image:secure_url" content="https://nnewbe.github.io/lms-form/og-preview.jpg" id="og-image-secure">
+  <meta property="og:url" content="https://nnewbe.github.io/lms-form/pages/share.html" id="og-url">
+  <meta property="og:title" content="AETHER LMS | Digital Library Card" id="og-title">
+  <meta property="og:description" content="View and verify this AETHER LMS digital library membership card."
+    id="og-desc">
+  <meta property="og:image" content="https://nnewbe.github.io/lms-form/assets/images/og-preview.jpg" id="og-image">
+  <meta property="og:image:secure_url" content="https://nnewbe.github.io/lms-form/assets/images/og-preview.jpg"
+    id="og-image-secure">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1260">
   <meta property="og:image:height" content="630">
@@ -23,12 +26,13 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@aetherlms">
   <meta name="twitter:title" content="AETHER LMS — Digital Library Card" id="tw-title">
-  <meta name="twitter:description" content="View and verify this AETHER LMS digital library membership card." id="tw-desc">
-  <meta name="twitter:image" content="https://nnewbe.github.io/lms-form/og-preview.jpg" id="tw-image">
-  
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="style.css?v=25">
-  
+  <meta name="twitter:description" content="View and verify this AETHER LMS digital library membership card."
+    id="tw-desc">
+  <meta name="twitter:image" content="https://nnewbe.github.io/lms-form/assets/images/og-preview.jpg" id="tw-image">
+
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="stylesheet" href="../css/style.css?v=25">
+
   <!-- CDNs for icons and QR generation -->
   <script src="https://cdn.jsdelivr.net/npm/lucide/dist/umd/lucide.min.js"></script>
   <script>
@@ -36,7 +40,7 @@
       document.write('<script src="https://unpkg.com/lucide@latest"><\/script>');
     }
   </script>
-  
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 
   <!-- Firebase Compact SDKs -->
@@ -45,7 +49,8 @@
 
   <style>
     /* Override body for share page - fullscreen viewer */
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
       height: 100%;
@@ -56,6 +61,7 @@
     body {
       background-color: #030407;
     }
+
     body.light-mode {
       background-color: #f0f1f5;
     }
@@ -81,12 +87,12 @@
       position: absolute;
       inset: 0;
       background-image:
-        radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)),
-        radial-gradient(1.5px 1.5px at 40px 70px, #fff, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 150px 120px, #ddd, rgba(0,0,0,0)),
-        radial-gradient(1px 1px at 200px 80px, #fff, rgba(0,0,0,0)),
-        radial-gradient(1px 1px at 300px 150px, #eee, rgba(0,0,0,0)),
-        radial-gradient(1.5px 1.5px at 100px 200px, #fff, rgba(0,0,0,0));
+        radial-gradient(1px 1px at 20px 30px, #eee, rgba(0, 0, 0, 0)),
+        radial-gradient(1.5px 1.5px at 40px 70px, #fff, rgba(0, 0, 0, 0)),
+        radial-gradient(2px 2px at 150px 120px, #ddd, rgba(0, 0, 0, 0)),
+        radial-gradient(1px 1px at 200px 80px, #fff, rgba(0, 0, 0, 0)),
+        radial-gradient(1px 1px at 300px 150px, #eee, rgba(0, 0, 0, 0)),
+        radial-gradient(1.5px 1.5px at 100px 200px, #fff, rgba(0, 0, 0, 0));
       background-size: 300px 300px;
       opacity: 0.15;
       pointer-events: none;
@@ -99,8 +105,13 @@
     }
 
     @keyframes starsDrift {
-      0%   { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
-      100% { background-position: 300px 300px, -300px 300px, 300px -300px, -300px -300px, 150px 300px, -150px -300px; }
+      0% {
+        background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+      }
+
+      100% {
+        background-position: 300px 300px, -300px 300px, 300px -300px, -300px -300px, 150px 300px, -150px -300px;
+      }
     }
 
     /* Background glow overlay */
@@ -126,8 +137,15 @@
     }
 
     @keyframes viewerFadeIn {
-      from { opacity: 0; transform: translateY(24px) scale(0.96); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
+      from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.96);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
     /* Header */
@@ -234,7 +252,8 @@
       opacity: 0.7;
     }
 
-    .share-flip-hint svg, .share-flip-hint i {
+    .share-flip-hint svg,
+    .share-flip-hint i {
       width: 0.85rem;
       height: 0.85rem;
     }
@@ -258,10 +277,13 @@
 
     <!-- Error state (shown if card not found) -->
     <div id="error-state">
-      <i data-lucide="alert-circle" style="width:48px;height:48px;color:var(--accent-primary,#06b6d4);margin-bottom:1rem;opacity:0.8;"></i>
-      <h3 style="color:#fff;margin:0 0 0.5rem;font-size:1.15rem;font-weight:600;font-family:'Outfit',sans-serif;">Verification Failed</h3>
-      <p style="font-size:0.85rem;max-width:280px;margin:0 auto;line-height:1.5;color:var(--text-muted);" id="error-msg-text">No library card was found in the database matching this ID.</p>
-      <a href="index.html" class="btn btn-secondary" style="margin-top:1.5rem;">
+      <i data-lucide="alert-circle"
+        style="width:48px;height:48px;color:var(--accent-primary,#06b6d4);margin-bottom:1rem;opacity:0.8;"></i>
+      <h3 style="color:#fff;margin:0 0 0.5rem;font-size:1.15rem;font-weight:600;font-family:'Outfit',sans-serif;">
+        Verification Failed</h3>
+      <p style="font-size:0.85rem;max-width:280px;margin:0 auto;line-height:1.5;color:var(--text-muted);"
+        id="error-msg-text">No library card was found in the database matching this ID.</p>
+      <a href="../index.html" class="btn btn-secondary" style="margin-top:1.5rem;">
         <i data-lucide="arrow-left"></i>
         <span>Return to Registration</span>
       </a>
@@ -305,7 +327,7 @@
       <div class="share-card-wrap">
         <div class="card-perspective" id="card-perspective">
           <div class="library-card" id="library-id-card">
-            
+
             <!-- Front Side -->
             <div class="library-card-side card-front">
               <div class="library-card-glow"></div>
@@ -314,8 +336,10 @@
                   <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                       <linearGradient id="logo-grad-primary-card" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="var(--user-card-theme,var(--accent-primary,#06b6d4))" stop-opacity="1" />
-                        <stop offset="100%" stop-color="var(--user-card-theme,var(--accent-primary,#06b6d4))" stop-opacity="0.25" />
+                        <stop offset="0%" stop-color="var(--user-card-theme,var(--accent-primary,#06b6d4))"
+                          stop-opacity="1" />
+                        <stop offset="100%" stop-color="var(--user-card-theme,var(--accent-primary,#06b6d4))"
+                          stop-opacity="0.25" />
                       </linearGradient>
                       <linearGradient id="logo-grad-dark-card" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stop-color="rgba(0,0,0,0.5)" />
@@ -329,7 +353,8 @@
                     <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-card)" />
                     <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-card)" />
                     <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-card)" />
-                    <path d="M12 12V22" stroke="var(--user-card-theme,var(--accent-primary,#06b6d4))" stroke-width="1.5" stroke-linecap="round" />
+                    <path d="M12 12V22" stroke="var(--user-card-theme,var(--accent-primary,#06b6d4))" stroke-width="1.5"
+                      stroke-linecap="round" />
                     <path d="M12 12L2 7" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
                     <path d="M12 12L22 7" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
                   </svg>
@@ -344,13 +369,15 @@
               <div class="card-body">
                 <div class="card-avatar-container" id="preview-avatar-container">
                   <i data-lucide="user" class="card-avatar-placeholder" id="preview-avatar-icon"></i>
-                  <img src="" alt="Avatar" class="card-avatar" id="preview-avatar" crossorigin="anonymous" style="display:none;">
+                  <img src="" alt="Avatar" class="card-avatar" id="preview-avatar" crossorigin="anonymous"
+                    style="display:none;">
                 </div>
 
                 <div class="card-info">
                   <div class="card-name" id="preview-name">Your User Name</div>
                   <div class="card-student-details">
-                    <span id="preview-dept">DEPT N/A</span> &bull; <span id="preview-batch">BATCH N/A</span> &bull; <span id="preview-semester">SEMESTER N/A</span>
+                    <span id="preview-dept">DEPT N/A</span> &bull; <span id="preview-batch">BATCH N/A</span> &bull;
+                    <span id="preview-semester">SEMESTER N/A</span>
                   </div>
                   <div class="card-email" id="preview-email">example@domain.com</div>
                   <div class="card-tel" id="preview-phone">+00 000-0000</div>
@@ -368,18 +395,30 @@
                 </div>
                 <div class="card-barcode-container">
                   <svg class="barcode-svg" id="barcode-elem" viewBox="0 0 100 20" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="0" y="0" width="3" height="20" /><rect x="5" y="0" width="1" height="20" />
-                    <rect x="8" y="0" width="2" height="20" /><rect x="12" y="0" width="4" height="20" />
-                    <rect x="18" y="0" width="1" height="20" /><rect x="21" y="0" width="3" height="20" />
-                    <rect x="26" y="0" width="2" height="20" /><rect x="30" y="0" width="1" height="20" />
-                    <rect x="33" y="0" width="4" height="20" /><rect x="39" y="0" width="2" height="20" />
-                    <rect x="43" y="0" width="1" height="20" /><rect x="46" y="0" width="3" height="20" />
-                    <rect x="51" y="0" width="2" height="20" /><rect x="55" y="0" width="1" height="20" />
-                    <rect x="58" y="0" width="4" height="20" /><rect x="64" y="0" width="1" height="20" />
-                    <rect x="67" y="0" width="3" height="20" /><rect x="72" y="0" width="2" height="20" />
-                    <rect x="76" y="0" width="1" height="20" /><rect x="79" y="0" width="4" height="20" />
-                    <rect x="85" y="0" width="2" height="20" /><rect x="89" y="0" width="1" height="20" />
-                    <rect x="92" y="0" width="3" height="20" /><rect x="97" y="0" width="3" height="20" />
+                    <rect x="0" y="0" width="3" height="20" />
+                    <rect x="5" y="0" width="1" height="20" />
+                    <rect x="8" y="0" width="2" height="20" />
+                    <rect x="12" y="0" width="4" height="20" />
+                    <rect x="18" y="0" width="1" height="20" />
+                    <rect x="21" y="0" width="3" height="20" />
+                    <rect x="26" y="0" width="2" height="20" />
+                    <rect x="30" y="0" width="1" height="20" />
+                    <rect x="33" y="0" width="4" height="20" />
+                    <rect x="39" y="0" width="2" height="20" />
+                    <rect x="43" y="0" width="1" height="20" />
+                    <rect x="46" y="0" width="3" height="20" />
+                    <rect x="51" y="0" width="2" height="20" />
+                    <rect x="55" y="0" width="1" height="20" />
+                    <rect x="58" y="0" width="4" height="20" />
+                    <rect x="64" y="0" width="1" height="20" />
+                    <rect x="67" y="0" width="3" height="20" />
+                    <rect x="72" y="0" width="2" height="20" />
+                    <rect x="76" y="0" width="1" height="20" />
+                    <rect x="79" y="0" width="4" height="20" />
+                    <rect x="85" y="0" width="2" height="20" />
+                    <rect x="89" y="0" width="1" height="20" />
+                    <rect x="92" y="0" width="3" height="20" />
+                    <rect x="97" y="0" width="3" height="20" />
                   </svg>
                 </div>
               </div>
@@ -393,8 +432,10 @@
                   <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                       <linearGradient id="logo-grad-primary-card-back" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="var(--user-card-theme,var(--accent-primary,#06b6d4))" stop-opacity="1" />
-                        <stop offset="100%" stop-color="var(--user-card-theme,var(--accent-primary,#06b6d4))" stop-opacity="0.25" />
+                        <stop offset="0%" stop-color="var(--user-card-theme,var(--accent-primary,#06b6d4))"
+                          stop-opacity="1" />
+                        <stop offset="100%" stop-color="var(--user-card-theme,var(--accent-primary,#06b6d4))"
+                          stop-opacity="0.25" />
                       </linearGradient>
                       <linearGradient id="logo-grad-dark-card-back" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stop-color="rgba(0,0,0,0.5)" />
@@ -408,7 +449,8 @@
                     <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-card-back)" />
                     <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-card-back)" />
                     <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-card-back)" />
-                    <path d="M12 12V22" stroke="var(--user-card-theme,var(--accent-primary,#06b6d4))" stroke-width="1.5" stroke-linecap="round" />
+                    <path d="M12 12V22" stroke="var(--user-card-theme,var(--accent-primary,#06b6d4))" stroke-width="1.5"
+                      stroke-linecap="round" />
                     <path d="M12 12L2 7" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
                     <path d="M12 12L22 7" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
                   </svg>
@@ -431,7 +473,8 @@
                   </ul>
                   <div class="card-back-address-block">
                     <span class="addr-label">Clearance / Address:</span>
-                    <span class="addr-value" id="preview-address">No specific special clearances or address declared.</span>
+                    <span class="addr-value" id="preview-address">No specific special clearances or address
+                      declared.</span>
                   </div>
                 </div>
 
@@ -473,7 +516,7 @@
           <i data-lucide="rotate-3d"></i>
           <span>Flip Card</span>
         </button>
-        <a href="index.html" class="btn btn-secondary" id="btn-viewer-create">
+        <a href="../index.html" class="btn btn-secondary" id="btn-viewer-create">
           <i data-lucide="user-plus"></i>
           <span>Create Your Own Card</span>
         </a>
@@ -484,7 +527,7 @@
   </div><!-- /.share-page-wrapper -->
 
   <!-- Load environment configuration -->
-  <script src="env.js"></script>
+  <script src="../env.js"></script>
 
   <!-- Core JavaScript execution -->
   <script>
@@ -499,25 +542,25 @@
       if (typeof lucide !== 'undefined') lucide.createIcons();
 
       // ── 3. DOM references ──
-      const errorState          = document.getElementById('error-state');
-      const errorMsgText        = document.getElementById('error-msg-text');
-      const viewerContentWrapper= document.getElementById('viewer-content-wrapper');
-      const libraryCard         = document.getElementById('library-id-card');
-      const cardPerspective     = document.getElementById('card-perspective');
-      const btnViewerFlip       = document.getElementById('btn-viewer-flip');
-      const previewName         = document.getElementById('preview-name');
-      const previewDept         = document.getElementById('preview-dept');
-      const previewBatch        = document.getElementById('preview-batch');
-      const previewSemester     = document.getElementById('preview-semester');
-      const previewEmail        = document.getElementById('preview-email');
-      const previewPhone        = document.getElementById('preview-phone');
-      const previewLimit        = document.getElementById('preview-limit');
-      const previewTerm         = document.getElementById('preview-term');
-      const previewCardKey      = document.getElementById('preview-card-key');
-      const previewAddress      = document.getElementById('preview-address');
-      const previewAvatar       = document.getElementById('preview-avatar');
+      const errorState = document.getElementById('error-state');
+      const errorMsgText = document.getElementById('error-msg-text');
+      const viewerContentWrapper = document.getElementById('viewer-content-wrapper');
+      const libraryCard = document.getElementById('library-id-card');
+      const cardPerspective = document.getElementById('card-perspective');
+      const btnViewerFlip = document.getElementById('btn-viewer-flip');
+      const previewName = document.getElementById('preview-name');
+      const previewDept = document.getElementById('preview-dept');
+      const previewBatch = document.getElementById('preview-batch');
+      const previewSemester = document.getElementById('preview-semester');
+      const previewEmail = document.getElementById('preview-email');
+      const previewPhone = document.getElementById('preview-phone');
+      const previewLimit = document.getElementById('preview-limit');
+      const previewTerm = document.getElementById('preview-term');
+      const previewCardKey = document.getElementById('preview-card-key');
+      const previewAddress = document.getElementById('preview-address');
+      const previewAvatar = document.getElementById('preview-avatar');
       const previewAvatarContainer = document.getElementById('preview-avatar-container');
-      const previewQr           = document.getElementById('preview-qr');
+      const previewQr = document.getElementById('preview-qr');
 
       const DEFAULTS = {
         name: 'Your User Name',
@@ -531,9 +574,9 @@
 
       // ── 4. Parse card key — supports ?id= query param (new) and #hash (legacy) ──
       const urlParams = new URLSearchParams(window.location.search);
-      const queryId  = urlParams.get('id') ? urlParams.get('id').trim() : '';
-      const hashId   = window.location.hash ? window.location.hash.substring(1).trim() : '';
-      const rawKey   = queryId || hashId;
+      const queryId = urlParams.get('id') ? urlParams.get('id').trim() : '';
+      const hashId = window.location.hash ? window.location.hash.substring(1).trim() : '';
+      const rawKey = queryId || hashId;
       if (!rawKey) {
         showError('No library card key provided in URL.');
         return;
@@ -640,32 +683,32 @@
 
       // ── 11. Render card data ──
       function renderCard(m) {
-        const semRevMap = { '1':'1st Sem','2':'2nd Sem','3':'3rd Sem','4':'4th Sem','5':'5th Sem','6':'6th Sem','7':'7th Sem','8':'8th Sem','9':'9th Sem','10':'10th Sem' };
-        const tierMap   = { 'S':'Standard','P':'Premium','V':'VIP' };
+        const semRevMap = { '1': '1st Sem', '2': '2nd Sem', '3': '3rd Sem', '4': '4th Sem', '5': '5th Sem', '6': '6th Sem', '7': '7th Sem', '8': '8th Sem', '9': '9th Sem', '10': '10th Sem' };
+        const tierMap = { 'S': 'Standard', 'P': 'Premium', 'V': 'VIP' };
 
-        const name  = m.n  || DEFAULTS.name;
-        const dept  = m.d  || 'DEPT N/A';
-        const batch = m.b  ? (String(m.b).match(/^\d+$/) ? `Batch ${m.b}` : m.b) : 'BATCH N/A';
-        const sem   = m.s  ? (semRevMap[m.s] || m.s) : 'SEMESTER N/A';
-        const email = m.e  || DEFAULTS.email;
-        const phone = m.p  || DEFAULTS.phone;
-        const limit = m.l  || `${DEFAULTS.limit} BOOKS`;
-        const term  = m.t  || DEFAULTS.term;
-        const key   = m.k  || '';
+        const name = m.n || DEFAULTS.name;
+        const dept = m.d || 'DEPT N/A';
+        const batch = m.b ? (String(m.b).match(/^\d+$/) ? `Batch ${m.b}` : m.b) : 'BATCH N/A';
+        const sem = m.s ? (semRevMap[m.s] || m.s) : 'SEMESTER N/A';
+        const email = m.e || DEFAULTS.email;
+        const phone = m.p || DEFAULTS.phone;
+        const limit = m.l || `${DEFAULTS.limit} BOOKS`;
+        const term = m.t || DEFAULTS.term;
+        const key = m.k || '';
         const theme = m.th ? (m.th.startsWith('#') ? m.th : `#${m.th}`) : DEFAULTS.theme;
-        const addr  = m.a  || 'No specific special clearances or address declared.';
-        const tier  = tierMap[m.tr] || m.tr || DEFAULTS.tier;
+        const addr = m.a || 'No specific special clearances or address declared.';
+        const tier = tierMap[m.tr] || m.tr || DEFAULTS.tier;
 
-        if (previewName)     previewName.textContent     = name;
-        if (previewDept)     previewDept.textContent     = dept;
-        if (previewBatch)    previewBatch.textContent    = batch.toUpperCase();
+        if (previewName) previewName.textContent = name;
+        if (previewDept) previewDept.textContent = dept;
+        if (previewBatch) previewBatch.textContent = batch.toUpperCase();
         if (previewSemester) previewSemester.textContent = sem.toUpperCase();
-        if (previewEmail)    previewEmail.textContent    = email;
-        if (previewPhone)    previewPhone.textContent    = phone;
-        if (previewLimit)    previewLimit.textContent    = limit;
-        if (previewTerm)     previewTerm.textContent     = term;
-        if (previewCardKey)  previewCardKey.textContent  = key;
-        if (previewAddress)  previewAddress.textContent  = addr;
+        if (previewEmail) previewEmail.textContent = email;
+        if (previewPhone) previewPhone.textContent = phone;
+        if (previewLimit) previewLimit.textContent = limit;
+        if (previewTerm) previewTerm.textContent = term;
+        if (previewCardKey) previewCardKey.textContent = key;
+        if (previewAddress) previewAddress.textContent = addr;
 
         // Theme
         if (libraryCard) libraryCard.style.setProperty('--user-card-theme', theme);
@@ -692,8 +735,8 @@
         if (previewTierEl) {
           previewTierEl.className = 'card-type';
           let iconName = 'shield', tierClass = 'tier-standard';
-          if (tier === 'Premium') { iconName = 'zap';    tierClass = 'tier-premium'; }
-          else if (tier === 'VIP')  { iconName = 'crown'; tierClass = 'tier-vip'; }
+          if (tier === 'Premium') { iconName = 'zap'; tierClass = 'tier-premium'; }
+          else if (tier === 'VIP') { iconName = 'crown'; tierClass = 'tier-vip'; }
           previewTierEl.classList.add(tierClass);
           previewTierEl.innerHTML = `<i data-lucide="${iconName}"></i><span>${tier}</span>`;
         }
@@ -713,9 +756,9 @@
         if (isFlipping) return;
         libraryCard.style.transition = 'none';
         const cardRect = container.getBoundingClientRect();
-        const x  = e.clientX - cardRect.left;
-        const y  = e.clientY - cardRect.top;
-        const px = (x / cardRect.width)  - 0.5;
+        const x = e.clientX - cardRect.left;
+        const y = e.clientY - cardRect.top;
+        const px = (x / cardRect.width) - 0.5;
         const py = (y / cardRect.height) - 0.5;
         const rotateY = px * 20;
         const rotateX = -py * 20;

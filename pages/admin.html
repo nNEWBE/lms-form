@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AETHER LMS | Admin Dashboard</title>
+  <meta name="description" content="Central Member Directory & Database Control for AETHER LMS.">
+
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="stylesheet" href="../css/style.css?v=25">
+
+  <script src="https://cdn.jsdelivr.net/npm/lucide/dist/umd/lucide.min.js"></script>
+  <script>
+    if (typeof lucide === 'undefined') {
+      document.write('<script src="https://unpkg.com/lucide@latest"><\/script>');
+    }
+  </script>
+
+  <style>
+    /* Admin specific styles */
+    .stat-card {
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--accent-primary) 35%, rgba(255, 255, 255, 0.08)) !important;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    body.light-mode .stat-card {
+      background: rgba(255, 255, 255, 0.7) !important;
+      border-color: rgba(0, 0, 0, 0.06) !important;
+    }
+
+    body.light-mode .stat-card:hover {
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+      border-color: var(--accent-primary) !important;
+    }
+
+    body.light-mode .filters-group select {
+      background: rgba(255, 255, 255, 0.75) !important;
+      border-color: rgba(0, 0, 0, 0.08) !important;
+      color: #05060b !important;
+    }
+
+    body.light-mode #export-dropdown-menu {
+      background: #ffffff !important;
+      border-color: rgba(0, 0, 0, 0.08) !important;
+    }
+
+    body.light-mode #export-dropdown-menu button {
+      color: #05060b !important;
+    }
+
+    body.light-mode #export-dropdown-menu button:hover {
+      background: rgba(0, 0, 0, 0.03) !important;
+    }
+
+    #export-dropdown-menu button:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <svg class="beam-container" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="beam-grad-left" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="0" />
+        <stop offset="60%" stop-color="var(--accent-primary)" stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.3" />
+      </linearGradient>
+
+      <linearGradient id="beam-grad-right" x1="100%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="0" />
+        <stop offset="60%" stop-color="var(--accent-primary)" stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.3" />
+      </linearGradient>
+
+      <linearGradient id="beam-grad-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="0" />
+        <stop offset="50%" stop-color="var(--accent-primary)" stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.3" />
+      </linearGradient>
+    </defs>
+
+    <path id="beam-path-left" d="M 50 800 Q 150 400, 300 500 T 500 300 L 580 320" class="beam-path" />
+    <path id="beam-path-right" d="M 1200 50 Q 1100 300, 950 200 T 800 450 L 720 420" class="beam-path" />
+    <path id="beam-path-top" d="M 100 -100 Q 400 150, 700 50 T 1300 -50" class="beam-path" />
+    <path id="beam-path-center" d="M -100 350 Q 500 200, 600 600 T 1400 750" class="beam-path" />
+    <path id="beam-path-bottom" d="M 200 900 Q 600 700, 800 850 T 1200 950" class="beam-path" />
+  </svg>
+
+  <div class="skel-rail skel-rail-left"></div>
+  <div class="skel-rail skel-rail-right"></div>
+
+  <nav class="fixed-navbar" id="main-navbar">
+    <div class="navbar-inner">
+      <a href="../index.html" class="navbar-brand" style="text-decoration: none; color: inherit;">
+        <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="logo-grad-primary-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="var(--accent-primary)" stop-opacity="1" />
+              <stop offset="100%" stop-color="var(--accent-primary)" stop-opacity="0.25" />
+            </linearGradient>
+            <linearGradient id="logo-grad-dark-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="rgba(0, 0, 0, 0.5)" />
+              <stop offset="100%" stop-color="rgba(0, 0, 0, 0.15)" />
+            </linearGradient>
+            <linearGradient id="logo-grad-light-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="rgba(255, 255, 255, 0.2)" />
+              <stop offset="100%" stop-color="rgba(255, 255, 255, 0.05)" />
+            </linearGradient>
+          </defs>
+          <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-nav)" />
+          <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-nav)" />
+          <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-nav)" />
+          <path d="M12 12V22" stroke="var(--accent-primary)" stroke-width="1.5" stroke-linecap="round" />
+          <path d="M12 12L2 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
+          <path d="M12 12L22 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
+        </svg>
+        <span>AETHER LMS</span>
+      </a>
+      <div class="navbar-actions">
+        <a href="../index.html" class="admin-panel-btn">
+          <i data-lucide="arrow-left"></i>
+          <span>Member Registration</span>
+        </a>
+        <button class="nav-icon-btn theme-toggle" id="theme-toggle" title="Toggle Light/Dark Mode">
+          <i data-lucide="moon" class="theme-icon-dark"></i>
+          <i data-lucide="sun" class="theme-icon-light"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="shared-card-viewer-overlay" id="admin-panel-mode"
+    style="display: none; align-items: flex-start; justify-content: center; position: fixed; inset: 0; padding: 5.5rem 1.5rem 2rem; overflow-y: auto;">
+    <div class="viewer-stars-container"></div>
+    <div class="viewer-content" style="max-width: 950px; width: 95%; gap: 1.25rem;">
+      <div class="viewer-header">
+        <div class="viewer-logo">
+          <svg class="custom-logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+            style="width: 2.2rem; height: 2.2rem;">
+            <path d="M12 2L22 7L12 12L2 7L12 2Z" fill="url(#logo-grad-primary-nav)" />
+            <path d="M2 7L12 12V22L2 17V7Z" fill="url(#logo-grad-dark-nav)" />
+            <path d="M22 7L12 12V22L22 17V7Z" fill="url(#logo-grad-light-nav)" />
+            <path d="M12 12V22" stroke="var(--accent-primary)" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M12 12L2 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
+            <path d="M12 12L22 7" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
+          </svg>
+          <h2>AETHER LMS | ADMIN DASHBOARD</h2>
+        </div>
+        <p class="viewer-tagline">Central Member Directory & Database Control</p>
+      </div>
+
+      <!-- KPI Stats Grid -->
+      <div class="admin-stats-grid"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; width: 100%; margin-bottom: 0.5rem;">
+
+        <div class="stat-card glass-panel"
+          style="padding: 1rem; display: flex; align-items: center; gap: 1rem; border-radius: 10px; background: rgba(5, 6, 11, 0.45); border: 1px solid rgba(255, 255, 255, 0.05);">
+          <div class="stat-icon"
+            style="background: rgba(6, 182, 212, 0.12); color: var(--accent-primary); width: 2.75rem; height: 2.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <i data-lucide="users" style="width: 1.35rem; height: 1.35rem;"></i>
+          </div>
+          <div>
+            <div
+              style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-family: 'Outfit', sans-serif;">
+              Total Directory</div>
+            <div id="stat-total-count"
+              style="font-size: 1.35rem; font-weight: 700; color: var(--text-main); font-family: 'Inter', sans-serif; line-height: 1.2; margin-top: 0.15rem;">
+              0</div>
+          </div>
+        </div>
+
+        <div class="stat-card glass-panel"
+          style="padding: 1rem; display: flex; align-items: center; gap: 1rem; border-radius: 10px; background: rgba(5, 6, 11, 0.45); border: 1px solid rgba(255, 255, 255, 0.05);">
+          <div class="stat-icon"
+            style="background: rgba(234, 179, 8, 0.12); color: #eab308; width: 2.75rem; height: 2.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <i data-lucide="crown" style="width: 1.35rem; height: 1.35rem;"></i>
+          </div>
+          <div>
+            <div
+              style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-family: 'Outfit', sans-serif;">
+              VIP Cards</div>
+            <div id="stat-vip-count"
+              style="font-size: 1.35rem; font-weight: 700; color: var(--text-main); font-family: 'Inter', sans-serif; line-height: 1.2; margin-top: 0.15rem;">
+              0</div>
+          </div>
+        </div>
+
+        <div class="stat-card glass-panel"
+          style="padding: 1rem; display: flex; align-items: center; gap: 1rem; border-radius: 10px; background: rgba(5, 6, 11, 0.45); border: 1px solid rgba(255, 255, 255, 0.05);">
+          <div class="stat-icon"
+            style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6; width: 2.75rem; height: 2.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <i data-lucide="zap" style="width: 1.35rem; height: 1.35rem;"></i>
+          </div>
+          <div>
+            <div
+              style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-family: 'Outfit', sans-serif;">
+              Premium Cards</div>
+            <div id="stat-premium-count"
+              style="font-size: 1.35rem; font-weight: 700; color: var(--text-main); font-family: 'Inter', sans-serif; line-height: 1.2; margin-top: 0.15rem;">
+              0</div>
+          </div>
+        </div>
+
+        <div class="stat-card glass-panel"
+          style="padding: 1rem; display: flex; align-items: center; gap: 1rem; border-radius: 10px; background: rgba(5, 6, 11, 0.45); border: 1px solid rgba(255, 255, 255, 0.05);">
+          <div class="stat-icon"
+            style="background: rgba(34, 197, 94, 0.12); color: #22c55e; width: 2.75rem; height: 2.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <i data-lucide="check-circle" style="width: 1.35rem; height: 1.35rem;"></i>
+          </div>
+          <div>
+            <div
+              style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-family: 'Outfit', sans-serif;">
+              Active Cards</div>
+            <div id="stat-active-count"
+              style="font-size: 1.35rem; font-weight: 700; color: var(--text-main); font-family: 'Inter', sans-serif; line-height: 1.2; margin-top: 0.15rem;">
+              0</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Controls Row: Search + Filters -->
+      <div class="admin-controls-row"
+        style="width: 100%; display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.25rem; align-items: center;">
+        <div class="search-input-wrapper"
+          style="flex: 1; min-width: 280px; display: flex; align-items: center; gap: 0.65rem; background: rgba(5, 6, 11, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 0.6rem 1rem; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);">
+          <i data-lucide="search" style="color: var(--text-muted); width: 1.1rem; height: 1.1rem; flex-shrink: 0;"></i>
+          <input type="text" id="admin-search-input"
+            placeholder="Search members by name, access key, email, or department..."
+            style="flex: 1; background: transparent; border: none; outline: none; color: var(--text-main); font-size: 0.85rem; font-family: 'Inter', sans-serif;">
+        </div>
+
+        <div class="filters-group" style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; z-index: 10;">
+          <!-- Tier Filter -->
+          <div class="custom-select-wrapper" id="custom-select-filter-tier" style="width: 125px; z-index: 20;">
+            <div class="custom-select-trigger" id="custom-select-trigger-filter-tier" style="padding: 0.55rem 0.8rem; border-radius: 8px; font-size: 0.82rem; font-family: 'Inter', sans-serif;">
+              <span id="custom-select-value-filter-tier">All Tiers</span>
+              <i data-lucide="chevron-down" class="select-arrow-icon" style="width: 0.85rem; height: 0.85rem;"></i>
+            </div>
+            <div class="custom-select-options" id="custom-select-options-filter-tier" style="background: #0b0c13; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+              <div class="custom-option" data-value="">All Tiers</div>
+              <div class="custom-option" data-value="Standard">Standard</div>
+              <div class="custom-option" data-value="Premium">Premium</div>
+              <div class="custom-option" data-value="VIP">VIP</div>
+            </div>
+            <select id="filter-tier" style="display: none;">
+              <option value="">All Tiers</option>
+              <option value="Standard">Standard</option>
+              <option value="Premium">Premium</option>
+              <option value="VIP">VIP</option>
+            </select>
+          </div>
+
+          <!-- Department Filter -->
+          <div class="custom-select-wrapper" id="custom-select-filter-dept" style="width: 175px; z-index: 20;">
+            <div class="custom-select-trigger" id="custom-select-trigger-filter-dept" style="padding: 0.55rem 0.8rem; border-radius: 8px; font-size: 0.82rem; font-family: 'Inter', sans-serif;">
+              <span id="custom-select-value-filter-dept">All Departments</span>
+              <i data-lucide="chevron-down" class="select-arrow-icon" style="width: 0.85rem; height: 0.85rem;"></i>
+            </div>
+            <div class="custom-select-options" id="custom-select-options-filter-dept" style="background: #0b0c13; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+              <div class="custom-option" data-value="">All Departments</div>
+            </div>
+            <select id="filter-dept" style="display: none;">
+              <option value="">All Departments</option>
+            </select>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="custom-select-wrapper" id="custom-select-filter-status" style="width: 135px; z-index: 20;">
+            <div class="custom-select-trigger" id="custom-select-trigger-filter-status" style="padding: 0.55rem 0.8rem; border-radius: 8px; font-size: 0.82rem; font-family: 'Inter', sans-serif;">
+              <span id="custom-select-value-filter-status">All Statuses</span>
+              <i data-lucide="chevron-down" class="select-arrow-icon" style="width: 0.85rem; height: 0.85rem;"></i>
+            </div>
+            <div class="custom-select-options" id="custom-select-options-filter-status" style="background: #0b0c13; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+              <div class="custom-option" data-value="">All Statuses</div>
+              <div class="custom-option" data-value="Active">Active</div>
+              <div class="custom-option" data-value="Blocked">Blocked</div>
+              <div class="custom-option" data-value="Expired">Expired</div>
+              <div class="custom-option" data-value="Suspended">Suspended</div>
+              <div class="custom-option" data-value="New Card">New Card</div>
+            </div>
+            <select id="filter-status" style="display: none;">
+              <option value="">All Statuses</option>
+              <option value="Active">Active</option>
+              <option value="Blocked">Blocked</option>
+              <option value="Expired">Expired</option>
+              <option value="Suspended">Suspended</option>
+              <option value="New Card">New Card</option>
+            </select>
+          </div>
+
+          <!-- Export Actions Dropdown -->
+          <div class="export-dropdown-wrapper" style="position: relative; display: inline-block;">
+            <button type="button" class="btn btn-primary" id="btn-export-dropdown-toggle"
+              style="padding: 0.6rem 1rem; font-size: 0.82rem; height: 38px; display: inline-flex; align-items: center; gap: 0.5rem; background: var(--accent-primary); border: none; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s; color: #05060b;">
+              <i data-lucide="download" style="width: 1rem; height: 1rem; stroke-width: 2.5px;"></i>
+              <span>Export</span>
+              <i data-lucide="chevron-down" id="export-chevron"
+                style="width: 0.8rem; height: 0.8rem; stroke-width: 2.5px;"></i>
+            </button>
+            <div id="export-dropdown-menu"
+              style="display: none; position: absolute; right: 0; top: 110%; background: #0b0c13; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; width: 140px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); z-index: 100; overflow: hidden; animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+              <button type="button" id="btn-export-csv"
+                style="width: 100%; padding: 0.65rem 1rem; background: transparent; border: none; text-align: left; color: var(--text-main); font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s; font-family: 'Inter', sans-serif;"><i
+                  data-lucide="file-text" style="width: 0.9rem; height: 0.9rem;"></i> Export CSV</button>
+              <button type="button" id="btn-export-json"
+                style="width: 100%; padding: 0.65rem 1rem; background: transparent; border: none; text-align: left; color: var(--text-main); font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s; font-family: 'Inter', sans-serif;"><i
+                  data-lucide="braces" style="width: 0.9rem; height: 0.9rem;"></i> Export JSON</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="admin-table-wrapper"
+        style="width: 100%; overflow-x: auto; max-height: 480px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; background: rgba(5, 6, 11, 0.65); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); -webkit-overflow-scrolling: touch;">
+        <table class="admin-members-table"
+          style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.8rem; font-family: 'Inter', sans-serif; min-width: 750px;">
+          <thead
+            style="background: rgba(10, 11, 18, 0.9); border-bottom: 1px solid rgba(255, 255, 255, 0.08); position: sticky; top: 0; z-index: 1;">
+            <tr>
+              <th
+                style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                Member</th>
+              <th
+                style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                Access Key</th>
+              <th
+                style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                Email</th>
+              <th
+                style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                Dept / Batch</th>
+              <th
+                style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                Tier</th>
+              <th
+                style="padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; text-align: center;">
+                Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-table-body">
+
+          </tbody>
+        </table>
+      </div>
+
+      <div class="viewer-actions" style="margin-top: 0.5rem; width: 100%;">
+        <button type="button" class="btn btn-secondary" id="btn-admin-close"
+          style="width: 100%; justify-content: center; padding: 0.75rem;">
+          <i data-lucide="arrow-left" style="margin-right: 0.25rem;"></i>
+          <span>Logout & Return</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="share-modal-overlay" id="admin-details-modal" style="display: none;">
+    <div class="share-modal-content" style="max-width: 650px; width: 95%;">
+      <div class="share-modal-header">
+        <h3>Member Audit Profile</h3>
+        <button type="button" class="close-modal-btn" id="btn-close-details-modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="share-modal-body"
+        style="max-height: 70vh; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem; padding-right: 0.5rem; text-align: left;">
+
+        <div
+          style="display: flex; gap: 1rem; align-items: center; background: rgba(255, 255, 255, 0.03); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);">
+          <div id="details-avatar-container"
+            style="width: 70px; height: 70px; border-radius: 8px; border: 1px solid var(--accent-primary); overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); flex-shrink: 0;">
+            <i data-lucide="user" id="details-avatar-placeholder"
+              style="width: 2rem; height: 2rem; color: var(--text-muted);"></i>
+            <img id="details-avatar" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+          </div>
+          <div>
+            <h4 id="details-full-name" style="margin: 0 0 0.25rem 0; font-size: 1.1rem; color: var(--text-main);">Full
+              Name</h4>
+            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <span>ID: <strong id="details-student-id" style="color: var(--text-main);">-</strong></span>
+              <span>•</span>
+              <span>Key: <strong id="details-key" style="color: var(--text-main);">-</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h4
+            style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.25rem;">
+            <i data-lucide="graduation-cap" style="width: 1rem; height: 1rem;"></i> Academic Records
+          </h4>
+          <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted); width: 40%;">Degree Level:</td>
+              <td id="details-degree-level" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Faculty / Department:</td>
+              <td style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">
+                <span id="details-faculty">-</span> / <span id="details-dept">-</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Program / Semester:</td>
+              <td style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">
+                <span id="details-program">-</span> / <span id="details-semester">-</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Batch / Session:</td>
+              <td id="details-session" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Campus Location:</td>
+              <td id="details-campus" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Academic Advisor:</td>
+              <td id="details-advisor" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+            </tr>
+          </table>
+        </div>
+
+        <div>
+          <h4
+            style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.25rem;">
+            <i data-lucide="user" style="width: 1rem; height: 1rem;"></i> Personal Profiles
+          </h4>
+          <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted); width: 40%;">Date of Birth / Gender:</td>
+              <td style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">
+                <span id="details-dob">-</span> &bull; <span id="details-gender">-</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Blood Group / Nationality:</td>
+              <td style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">
+                <span id="details-blood">-</span> &bull; <span id="details-nationality">-</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">NID / Passport:</td>
+              <td id="details-nid" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Alternate Phone:</td>
+              <td id="details-alt-phone" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Present Address:</td>
+              <td id="details-present-addr"
+                style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500; word-break: break-word;">-</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Permanent Address:</td>
+              <td id="details-permanent-addr"
+                style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500; word-break: break-word;">-</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">City / Postcode / Country:</td>
+              <td id="details-city-post-country" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">
+                -</td>
+            </tr>
+          </table>
+        </div>
+
+        <div>
+          <h4
+            style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.25rem;">
+            <i data-lucide="phone-call" style="width: 1rem; height: 1rem;"></i> Emergency Contact
+          </h4>
+          <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted); width: 40%;">Contact Name:</td>
+              <td id="details-emergency-name" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Relationship:</td>
+              <td id="details-emergency-relation"
+                style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Contact Phone:</td>
+              <td id="details-emergency-phone" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Contact Address:</td>
+              <td id="details-emergency-addr"
+                style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500; word-break: break-word;">-</td>
+            </tr>
+          </table>
+        </div>
+
+        <div>
+          <h4
+            style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.25rem;">
+            <i data-lucide="settings" style="width: 1rem; height: 1rem;"></i> Membership Details
+          </h4>
+          <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted); width: 40%;">Membership Type:</td>
+              <td id="details-membership-type" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Preferred Branch:</td>
+              <td id="details-branch" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Borrowing Category:</td>
+              <td id="details-category" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Research Interests:</td>
+              <td id="details-interests" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Card Status:</td>
+              <td id="details-card-status" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Preferred Contact:</td>
+              <td id="details-contact-method" style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">-
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Borrow Limit / Theme:</td>
+              <td style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">
+                Max <span id="details-borrow-limit">-</span> books &bull; Theme: <span id="details-theme-color">-</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0.35rem 0; color: var(--text-muted);">Validity Period:</td>
+              <td style="padding: 0.35rem 0; color: var(--text-main); font-weight: 500;">
+                <span id="details-start-date">-</span> to <span id="details-expiry-date">-</span>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+      </div>
+      <div class="share-modal-footer"
+        style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
+        <button type="button" class="btn btn-secondary" id="btn-close-details-footer"
+          style="padding: 0.6rem 1.2rem;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-notification" id="success-toast">
+    <div class="toast-icon-wrapper"><i data-lucide="check-circle"></i></div>
+    <div class="toast-content">
+      <span class="toast-title">Success</span>
+      <span class="toast-desc" id="toast-message">Operation successful.</span>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="../env.js"></script>
+  <script src="../js/script.js?v=24"></script>
+</body>
+
+</html>
