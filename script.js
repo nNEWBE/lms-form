@@ -2266,11 +2266,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
     const ogImage = document.getElementById('og-image');
     const twImage = document.getElementById('twitter-image');
-    if (ogImage && !ogImage.content.startsWith('http')) {
-      ogImage.content = baseUrl + ogImage.content;
+    const prodBase = 'https://nnewbe.github.io/lms-form/';
+
+    if (ogImage) {
+      const content = ogImage.getAttribute('content') || '';
+      if (!content.startsWith('http')) {
+        ogImage.setAttribute('content', baseUrl + content);
+      } else if (content.startsWith(prodBase) && window.location.origin !== 'https://nnewbe.github.io') {
+        ogImage.setAttribute('content', content.replace(prodBase, baseUrl));
+      }
     }
-    if (twImage && !twImage.content.startsWith('http')) {
-      twImage.content = baseUrl + twImage.content;
+    if (twImage) {
+      const content = twImage.getAttribute('content') || '';
+      if (!content.startsWith('http')) {
+        twImage.setAttribute('content', baseUrl + content);
+      } else if (content.startsWith(prodBase) && window.location.origin !== 'https://nnewbe.github.io') {
+        twImage.setAttribute('content', content.replace(prodBase, baseUrl));
+      }
     }
   })();
 
