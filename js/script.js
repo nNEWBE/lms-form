@@ -686,6 +686,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let isCardCreated = false;
   let originalStatus = null;
+  let originalCreatedAt = null;
 
   function updateSubmitButtonText() {
     if (!btnSubmit) return;
@@ -921,6 +922,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateQrCodeElement(matched.k);
       }
       originalStatus = matched.membership_details?.status || null;
+      originalCreatedAt = matched.created_at || null;
       isCardCreated = true;
       updateSubmitButtonText();
       updateCardActionsVisibility();
@@ -1743,9 +1745,9 @@ document.addEventListener('DOMContentLoaded', () => {
     inputAvatar.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
-        const maxSize = 1048576;
+        const maxSize = 10485760; // 10MB
         if (file.size > maxSize) {
-          showToast('File Too Large', 'Student photo must be less than 1MB.', true);
+          showToast('File Too Large', 'Student photo must be less than 10MB.', true);
           inputAvatar.value = '';
           resetAvatarPreview();
           return;
@@ -1816,9 +1818,9 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const file = e.target.files[0];
       if (file) {
-        const maxSize = 1048576;
+        const maxSize = 10485760; // 10MB
         if (file.size > maxSize) {
-          showToast('File Too Large', 'Enrollment proof must be less than 1MB.', true);
+          showToast('File Too Large', 'Enrollment proof must be less than 10MB.', true);
           inputEnrollment.value = '';
           cloudinaryEnrollmentUrl = '';
           selectedEnrollmentFile = null;
@@ -2197,6 +2199,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const memberRecord = {
         n: nameVal,
+        created_at: originalCreatedAt || Date.now(),
         d: (deptValText === 'DEPT' || deptValText === 'Select Department') ? '' : deptValText,
         b: inputBatch ? inputBatch.value : 'Batch 60',
         s: (semValText === 'SEMESTER' || semValText === 'Select Semester') ? '' : semValText,
@@ -2769,6 +2772,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Preserve status in originalStatus global variable
       originalStatus = member.membership_details?.status || 'New Card';
+      originalCreatedAt = member.created_at || null;
 
       // Mark card as created/updating
       isCardCreated = true;
@@ -2870,6 +2874,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const cached = localMembers[draft['card_key']];
       if (cached) {
         originalStatus = cached.membership_details?.status || null;
+        originalCreatedAt = cached.created_at || null;
         isCardCreated = true;
         updateSubmitButtonText();
         updateCardActionsVisibility();
@@ -4468,6 +4473,13 @@ document.addEventListener('DOMContentLoaded', () => {
       tableBody.innerHTML = '';
 
       const allMembers = Object.values(members).filter(Boolean);
+
+      // Sort: New users (based on created_at or membership_details.start_date) at the top
+      allMembers.sort((a, b) => {
+        const timeA = a.created_at || (a.membership_details?.start_date ? new Date(a.membership_details.start_date).getTime() : 0);
+        const timeB = b.created_at || (b.membership_details?.start_date ? new Date(b.membership_details.start_date).getTime() : 0);
+        return timeB - timeA;
+      });
 
       // Update KPI Statistics
       const totalEl = document.getElementById('stat-total-count');
