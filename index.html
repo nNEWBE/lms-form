@@ -34,6 +34,8 @@
   </script>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image/dist/html-to-image.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
@@ -877,7 +879,7 @@
               <div class="card-body">
                 <div class="card-avatar-container" id="preview-avatar-container">
                   <i data-lucide="user" class="card-avatar-placeholder" id="preview-avatar-icon"></i>
-                  <img src="" alt="Avatar" class="card-avatar" id="preview-avatar" style="display: none;">
+                  <img src="" alt="Avatar" class="card-avatar" id="preview-avatar" crossorigin="anonymous" style="display: none;">
                 </div>
 
                 <div class="card-info">
@@ -989,7 +991,8 @@
                   <div class="qr-container">
                     <img id="preview-qr"
                       src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=LMS-4820-91B&color=ffffff&bgcolor=12131a"
-                      alt="QR Code">
+                      alt="QR Code"
+                      crossorigin="anonymous">
                   </div>
 
                   <div class="signature-container">
@@ -1049,7 +1052,13 @@
   <div class="share-modal-overlay" id="share-modal">
     <div class="share-modal-content">
       <div class="share-modal-header">
-        <h3>Share Your Digital ID Card</h3>
+        <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+          <div class="processing-badge">
+            <span class="badge-dot"></span>
+            <span>SECURE GENERATOR</span>
+          </div>
+          <h3>Share Your Digital ID Card</h3>
+        </div>
         <button type="button" class="close-modal-btn" id="btn-close-share-modal">
           <i data-lucide="x"></i>
         </button>
@@ -1268,6 +1277,50 @@
           <i data-lucide="arrow-left" style="margin-right: 0.25rem;"></i>
           <span>Back to Registration</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full-screen processing overlay - uses NO backdrop-filter so spinner stays on compositor thread -->
+  <div class="processing-overlay" id="processing-overlay">
+    <div class="processing-panel">
+      <div class="processing-header">
+        <div class="processing-badge">
+          <span class="badge-dot"></span>
+          <span>SYSTEM ENGINE</span>
+        </div>
+        <h3 class="processing-title" id="processing-title">Compiling Digital Card</h3>
+        <p class="processing-subtitle">Please wait while we render and compile your card assets.</p>
+      </div>
+
+      <div class="processing-progress-section">
+        <div class="progress-ring-container">
+          <svg class="progress-ring" width="80" height="80">
+            <circle class="progress-ring-bg" stroke="rgba(255,255,255,0.06)" stroke-width="4" fill="transparent" r="34" cx="40" cy="40"/>
+            <circle class="progress-ring-bar" id="progress-ring-bar" stroke="var(--accent-primary)" stroke-width="4" fill="transparent" r="34" cx="40" cy="40" 
+              stroke-dasharray="213.63" stroke-dashoffset="213.63"/>
+          </svg>
+          <div class="progress-ring-text" id="progress-ring-text">0%</div>
+        </div>
+      </div>
+
+      <div class="processing-steps" id="processing-steps-list">
+        <div class="processing-step-item pending" id="step-prepare">
+          <div class="step-icon-status"></div>
+          <span class="step-label">Preparing card assets & styles</span>
+        </div>
+        <div class="processing-step-item pending" id="step-render-front">
+          <div class="step-icon-status"></div>
+          <span class="step-label">Rendering front card face</span>
+        </div>
+        <div class="processing-step-item pending" id="step-render-back">
+          <div class="step-icon-status"></div>
+          <span class="step-label">Rendering back card face</span>
+        </div>
+        <div class="processing-step-item pending" id="step-package">
+          <div class="step-icon-status"></div>
+          <span class="step-label" id="step-package-label">Generating archive bundle</span>
+        </div>
       </div>
     </div>
   </div>
@@ -1507,7 +1560,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="env.js"></script>
-  <script src="script.js?v=4"></script>
+  <script src="script.js?v=9"></script>
 </body>
 
 </html>

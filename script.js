@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  
+
   document.querySelectorAll('label').forEach(label => {
     if (label.innerHTML.includes('*')) {
       label.innerHTML = label.innerHTML.replace(/\*/g, '<span class="required-asterisk">*</span>');
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.removeAttribute('data-theme-transitioning');
       });
     } else {
-      
+
       const ripple = document.createElement('div');
       ripple.id = 'theme-ripple-overlay';
       ripple.style.cssText = `
@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const inputBorrowLimit = document.getElementById('borrow_limit');
   const labelLimitValue = document.getElementById('borrow-limit-val');
   const ticksElements = document.querySelectorAll('.slider-scale-ticks .tick');
-  const inputBatch = document.getElementById('admission_session'); 
+  const inputBatch = document.getElementById('admission_session');
 
   const inputAddress = document.getElementById('address');
   const inputAgree = document.getElementById('agree_terms');
@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!isOpen) {
         const rect = trigger.getBoundingClientRect();
         const spaceBelow = window.innerHeight - rect.bottom;
-        const dropdownHeight = 230; 
+        const dropdownHeight = 230;
         if (spaceBelow < dropdownHeight && rect.top > spaceBelow) {
           wrapper.classList.add('open-top');
         } else {
@@ -451,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!isOpen) {
         const rect = trigger.getBoundingClientRect();
         const spaceBelow = window.innerHeight - rect.bottom;
-        const dropdownHeight = 330; 
+        const dropdownHeight = 330;
         if (spaceBelow < dropdownHeight && rect.top > spaceBelow) {
           wrapper.classList.add('open-top');
         } else {
@@ -591,6 +591,28 @@ document.addEventListener('DOMContentLoaded', () => {
     theme: '#06b6d4'
   };
 
+  function updateQrCodeElement(key) {
+    const qrImage = document.getElementById('preview-qr');
+    if (!qrImage) return;
+    try {
+      if (typeof QRious !== 'undefined') {
+        const qr = new QRious({
+          value: key,
+          size: 150,
+          background: '#12131a',
+          foreground: '#ffffff',
+          level: 'H'
+        });
+        qrImage.src = qr.toDataURL();
+      } else {
+        qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(key)}&color=ffffff&bgcolor=12131a`;
+      }
+    } catch (e) {
+      console.error("Local QR generation failed, falling back to API:", e);
+      qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(key)}&color=ffffff&bgcolor=12131a`;
+    }
+  }
+
   function generateCardKey() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const randPart1 = Math.floor(1000 + Math.random() * 9000);
@@ -599,10 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const key = `LMS-${randPart1}-${randPart2}${randChar}`;
     previewCardKey.textContent = key;
 
-    const qrImage = document.getElementById('preview-qr');
-    if (qrImage) {
-      qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(key)}&color=ffffff&bgcolor=12131a`;
-    }
+    updateQrCodeElement(key);
   }
   generateCardKey();
 
@@ -642,7 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target.checked) {
         const tierData = tierMap[e.target.value] || tierMap['Standard'];
 
-        previewTier.className = 'card-type'; 
+        previewTier.className = 'card-type';
         previewTier.classList.add(tierData.class);
 
         previewTier.innerHTML = `<i data-lucide="${tierData.icon}"></i><span>${tierData.label}</span>`;
@@ -753,10 +772,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (uploadPreset) {
-      
+
       formData.append('upload_preset', uploadPreset);
     } else {
-      
+
       if (!apiKey || !apiSecret) {
         throw new Error('Neither Cloudinary upload_preset nor api_key/api_secret are configured in env.js');
       }
@@ -801,26 +820,39 @@ document.addEventListener('DOMContentLoaded', () => {
       if (titleEl) titleEl.textContent = titleText;
       toastMessage.textContent = descText;
 
+      // Manage progress bar for loading state
+      let progressBar = successToast.querySelector('.toast-progress-bar');
+      if (typeOrError === 'loading') {
+        if (!progressBar) {
+          progressBar = document.createElement('div');
+          progressBar.className = 'toast-progress-bar';
+          successToast.appendChild(progressBar);
+        }
+      } else if (progressBar) {
+        progressBar.remove();
+      }
+
       const wrapper = successToast.querySelector('.toast-icon-wrapper');
       if (wrapper) {
         let iconName = 'check-circle';
         if (typeOrError === 'loading') {
           iconName = 'loader-2';
-        } else if (typeOrError === 'error' || typeOrError === true) {
-          iconName = 'alert-circle';
+          wrapper.classList.add('spin');
+        } else {
+          wrapper.classList.remove('spin');
+          if (typeOrError === 'error' || typeOrError === true) {
+            iconName = 'alert-circle';
+          }
         }
         wrapper.innerHTML = `<i data-lucide="${iconName}"></i>`;
-        const iconEl = wrapper.querySelector('i');
-        if (typeOrError === 'loading' && iconEl) {
-          iconEl.classList.add('spin');
-        }
         if (typeof lucide !== 'undefined') {
-          lucide.createIcons();
+          lucide.createIcons({
+            node: wrapper
+          });
         }
         const svgEl = wrapper.querySelector('svg');
         if (svgEl) {
           if (typeOrError === 'loading') {
-            svgEl.classList.add('spin');
             svgEl.style.color = 'var(--accent-primary)';
             successToast.style.borderColor = 'var(--accent-primary)';
           } else if (typeOrError === 'error' || typeOrError === true) {
@@ -843,6 +875,123 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function updateToastMessage(descText) {
+    if (toastMessage) {
+      toastMessage.textContent = descText;
+    }
+  }
+
+  function yieldAndPaint(ms = 100) {
+    return new Promise(resolve => {
+      requestAnimationFrame(() => {
+        setTimeout(resolve, ms);
+      });
+    });
+  }
+
+  function breathe(ms = 80) {
+    return yieldAndPaint(ms);
+  }
+
+  // Processing overlay helpers - updates progress ring and compilation steps
+  const processingOverlay = document.getElementById('processing-overlay');
+  const processingTitle = document.getElementById('processing-title');
+  const progressRingBar = document.getElementById('progress-ring-bar');
+  const progressRingText = document.getElementById('progress-ring-text');
+
+  let currentProgressValue = 0;
+  let progressAnimationInterval = null;
+
+  function setProgressPercent(targetPercent, animate = true) {
+    if (progressRingBar) {
+      const radius = 34;
+      const circumference = 2 * Math.PI * radius; // ~213.628
+      const offset = circumference - (targetPercent / 100) * circumference;
+      
+      if (!animate) {
+        progressRingBar.style.transition = 'none';
+      } else {
+        progressRingBar.style.transition = 'stroke-dashoffset 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+      }
+      
+      progressRingBar.style.strokeDashoffset = offset;
+      
+      if (!animate) {
+        // Force reflow to clear transitons immediately
+        progressRingBar.getBoundingClientRect();
+      }
+    }
+    
+    if (progressRingText) {
+      if (progressAnimationInterval) {
+        cancelAnimationFrame(progressAnimationInterval);
+      }
+      
+      if (!animate) {
+        progressRingText.textContent = `${targetPercent}%`;
+        currentProgressValue = targetPercent;
+      } else {
+        const duration = 500; // Matches CSS transition duration
+        const startValue = currentProgressValue;
+        const startTime = performance.now();
+        
+        function updateCounter(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const ease = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
+          const currentValue = Math.round(startValue + ease * (targetPercent - startValue));
+          
+          progressRingText.textContent = `${currentValue}%`;
+          currentProgressValue = currentValue;
+          
+          if (progress < 1) {
+            progressAnimationInterval = requestAnimationFrame(updateCounter);
+          } else {
+            progressRingText.textContent = `${targetPercent}%`;
+            currentProgressValue = targetPercent;
+          }
+        }
+        
+        progressAnimationInterval = requestAnimationFrame(updateCounter);
+      }
+    } else {
+      currentProgressValue = targetPercent;
+    }
+  }
+
+  function setStepState(stepId, state) {
+    const el = document.getElementById(stepId);
+    if (!el) return;
+    el.classList.remove('pending', 'current', 'done');
+    el.classList.add(state);
+  }
+
+  function showProcessing(titleText, packageLabelText) {
+    if (processingTitle) processingTitle.textContent = titleText;
+    
+    const packageLabel = document.getElementById('step-package-label');
+    if (packageLabel && packageLabelText) {
+      packageLabel.textContent = packageLabelText;
+    }
+
+    setStepState('step-prepare', 'pending');
+    setStepState('step-render-front', 'pending');
+    setStepState('step-render-back', 'pending');
+    setStepState('step-package', 'pending');
+    
+    currentProgressValue = 0;
+    if (progressAnimationInterval) {
+      cancelAnimationFrame(progressAnimationInterval);
+    }
+    setProgressPercent(0, false); // Reset to 0% instantly without animation
+
+    if (processingOverlay) processingOverlay.classList.add('active');
+  }
+
+  function hideProcessing() {
+    if (processingOverlay) processingOverlay.classList.remove('active');
+  }
+
   let compressedAvatarBase64 = '';
   let cloudinaryAvatarUrl = '';
 
@@ -850,7 +999,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      const maxDim = 100; 
+      const maxDim = 100;
 
       const size = Math.min(img.width, img.height);
       const sourceX = (img.width - size) / 2;
@@ -932,7 +1081,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const file = dt.files[0];
     if (file && file.type.startsWith('image/')) {
       inputAvatar.files = dt.files;
-      
+
       const event = new Event('change');
       inputAvatar.dispatchEvent(event);
     }
@@ -946,7 +1095,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isViewingShared()) return;
       const file = e.target.files[0];
       if (file) {
-        const maxSize = 1048576; 
+        const maxSize = 1048576;
         if (file.size > maxSize) {
           showToast('File Too Large', 'Enrollment proof must be less than 1MB.', true);
           inputEnrollment.value = '';
@@ -1057,9 +1206,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   btnReset.addEventListener('click', () => {
-    
+
     setTimeout(() => {
-      
+
       previewName.textContent = DEFAULTS.name;
       previewEmail.textContent = DEFAULTS.email;
       previewPhone.textContent = DEFAULTS.phone;
@@ -1183,7 +1332,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (!isFormValid) {
-      
+
       const formPanel = document.getElementById('registration-form-panel');
       formPanel.style.animation = 'shake-panel 0.4s ease';
       setTimeout(() => {
@@ -1253,7 +1402,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const borrowingCategory = document.getElementById('borrowing_category') ? document.getElementById('borrowing_category').value : '';
       const preferredContact = document.getElementById('preferred_contact') ? document.getElementById('preferred_contact').value : '';
       const cardStatus = document.querySelector('input[name="card_status"]:checked')?.value || 'New Card';
-      
+
       const researchInterestsArray = [];
       document.querySelectorAll('input[name="interest"]:checked').forEach(cb => {
         researchInterestsArray.push(cb.value);
@@ -1329,7 +1478,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnSuccessView) {
         btnSuccessView.onclick = () => {
           successModal.classList.remove('open');
-          
+
           window.location.hash = `share=${payload}`;
 
           btnReset.click();
@@ -1340,7 +1489,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnSuccessClose) {
         btnSuccessClose.onclick = () => {
           successModal.classList.remove('open');
-          
+
           btnReset.click();
         };
       }
@@ -1560,7 +1709,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('click', (e) => {
     document.querySelectorAll('.custom-select-wrapper.open, .custom-datepicker-wrapper.open').forEach(wrapper => {
-      
+
       const label = wrapper.parentElement ? wrapper.parentElement.querySelector('label') : null;
       if (label && label.contains(e.target)) {
         return;
@@ -1629,6 +1778,29 @@ document.addEventListener('DOMContentLoaded', () => {
     return saved;
   }
 
+  function stripHeavyCss(container) {
+    const nukeStyle = document.createElement('style');
+    nukeStyle.textContent = `
+      *, *::before, *::after {
+        transition: none !important;
+        animation: none !important;
+        will-change: auto !important;
+        filter: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        transform-style: flat !important;
+        perspective: none !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+      }
+      .library-card-glow,
+      .library-card-side::after {
+        display: none !important;
+      }
+    `;
+    container.prepend(nukeStyle);
+  }
+
   function restoreCardAfterCapture(side, saved) {
     side.style.transform = saved.transform;
     side.style.backfaceVisibility = saved.backfaceVisibility;
@@ -1646,6 +1818,10 @@ document.addEventListener('DOMContentLoaded', () => {
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function yieldThread() {
+    return new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
   }
 
   const COLOR_PROPS = ['color', 'backgroundColor', 'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor', 'outlineColor', 'boxShadow', 'textShadow', 'fill', 'stroke'];
@@ -1756,7 +1932,9 @@ document.addEventListener('DOMContentLoaded', () => {
     scale: 2,
     useCORS: true,
     backgroundColor: null,
-    logging: false
+    logging: false,
+    imageTimeout: 0,
+    removeContainer: true
   };
 
   const btnDownloadImg = document.getElementById('btn-download-img');
@@ -1768,10 +1946,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const backSide = cardEl.querySelector('.card-back');
       if (!frontSide || !backSide) return;
 
-      showToast('Downloading Images', 'Compiling card assets...', 'loading');
-
       btnDownloadImg.style.opacity = '0.5';
       btnDownloadImg.style.pointerEvents = 'none';
+
+      // Step 1: Preparation (10%)
+      showProcessing('Downloading Images', 'Generating ZIP archive');
+      // Yield to let the browser paint the initial 0% state as the overlay fades in
+      await yieldAndPaint(400);
+
+      setStepState('step-prepare', 'current');
+      setProgressPercent(10);
+      await yieldAndPaint(600);
 
       const containerFront = document.createElement('div');
       containerFront.style.position = 'fixed';
@@ -1781,6 +1966,7 @@ document.addEventListener('DOMContentLoaded', () => {
       containerFront.style.height = getComputedStyle(cardEl).height;
       containerFront.style.opacity = '1';
       containerFront.style.visibility = 'visible';
+      containerFront.style.contain = 'strict';
 
       const containerBack = document.createElement('div');
       containerBack.style.position = 'fixed';
@@ -1790,6 +1976,7 @@ document.addEventListener('DOMContentLoaded', () => {
       containerBack.style.height = getComputedStyle(cardEl).height;
       containerBack.style.opacity = '1';
       containerBack.style.visibility = 'visible';
+      containerBack.style.contain = 'strict';
 
       const frontClone = frontSide.cloneNode(true);
       const backClone = backSide.cloneNode(true);
@@ -1806,11 +1993,55 @@ document.addEventListener('DOMContentLoaded', () => {
       const savedFront = prepareCardForCapture(frontClone);
       const savedBack = prepareCardForCapture(backClone);
 
+      stripHeavyCss(containerFront);
+      stripHeavyCss(containerBack);
+
       try {
-        const [canvasFront, canvasBack] = await Promise.all([
-          html2canvas(frontClone, renderOpts),
-          html2canvas(backClone, renderOpts)
-        ]);
+        console.time('Image Download Process');
+
+        // Step 2: Render Front (45%)
+        setStepState('step-prepare', 'done');
+        setStepState('step-render-front', 'current');
+        setProgressPercent(45);
+        await yieldAndPaint(600);
+
+        let frontBlob, backBlob;
+        try {
+          console.time('html-to-image toBlob');
+          frontBlob = await htmlToImage.toBlob(frontClone, { pixelRatio: 2, cacheBust: true, fontEmbedCSS: '' });
+
+          // Step 3: Render Back (80%)
+          setStepState('step-render-front', 'done');
+          setStepState('step-render-back', 'current');
+          setProgressPercent(80);
+          await yieldAndPaint(600);
+
+          backBlob = await htmlToImage.toBlob(backClone, { pixelRatio: 2, cacheBust: true, fontEmbedCSS: '' });
+          console.timeEnd('html-to-image toBlob');
+        } catch (e) {
+          console.warn('html-to-image failed, falling back to html2canvas:', e);
+          
+          if (!frontBlob) {
+            // Front side rendering with html2canvas fallback
+            setStepState('step-render-front', 'current');
+            setProgressPercent(45);
+            await yieldAndPaint(600);
+
+            console.time('html2canvas render front');
+            const canvasFront = await html2canvas(frontClone, renderOpts);
+            frontBlob = await new Promise(resolve => canvasFront.toBlob(resolve, 'image/png'));
+            setStepState('step-render-front', 'done');
+          }
+
+          // Back side rendering with html2canvas fallback
+          setStepState('step-render-back', 'current');
+          setProgressPercent(80);
+          await yieldAndPaint(600);
+
+          console.time('html2canvas render back');
+          const canvasBack = await html2canvas(backClone, renderOpts);
+          backBlob = await new Promise(resolve => canvasBack.toBlob(resolve, 'image/png'));
+        }
 
         restoreColorMix(snapsFront);
         restoreCardAfterCapture(frontClone, savedFront);
@@ -1820,21 +2051,32 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.removeChild(containerFront);
         document.body.removeChild(containerBack);
 
+        // Step 4: Package Zip (95%)
+        setStepState('step-render-back', 'done');
+        setStepState('step-package', 'current');
+        setProgressPercent(95);
+        await yieldAndPaint(600);
+
         const zip = new JSZip();
-
-        const [frontBlob, backBlob] = await Promise.all([
-          new Promise(resolve => canvasFront.toBlob(resolve, 'image/png')),
-          new Promise(resolve => canvasBack.toBlob(resolve, 'image/png'))
-        ]);
-
         zip.file('AETHER-LMS-Card-Front.png', frontBlob);
         zip.file('AETHER-LMS-Card-Back.png', backBlob);
 
-        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const zipBlob = await zip.generateAsync({
+          type: 'blob',
+          compression: 'STORE'
+        });
 
         triggerDownload(zipBlob, 'AETHER-LMS-Card-Images.zip');
 
-        showToast('Download Complete', 'Your card images ZIP has been saved.', 'success');
+        console.timeEnd('Image Download Process');
+
+        // Done (100%)
+        setStepState('step-package', 'done');
+        setProgressPercent(100);
+        await yieldAndPaint(800);
+
+        hideProcessing();
+        showToast('Download Started', 'Card assets compiled successfully. Check browser downloads.', 'success');
       } catch (err) {
         console.error('Image rendering failed:', err);
         if (containerFront.parentNode) {
@@ -1843,6 +2085,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (containerBack.parentNode) {
           document.body.removeChild(containerBack);
         }
+        hideProcessing();
         showToast('Download Failed', 'Could not compile card images.', 'error');
       }
       btnDownloadImg.style.opacity = '';
@@ -1859,10 +2102,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const backSide = cardEl.querySelector('.card-back');
       if (!frontSide || !backSide) return;
 
-      showToast('Downloading PDF', 'Compiling high-quality PDF...', 'loading');
-
       btnDownloadPdf.style.opacity = '0.5';
       btnDownloadPdf.style.pointerEvents = 'none';
+
+      // Step 1: Preparation (10%)
+      showProcessing('Downloading PDF', 'Generating PDF document');
+      // Yield to let the browser paint the initial 0% state as the overlay fades in
+      await yieldAndPaint(400);
+
+      setStepState('step-prepare', 'current');
+      setProgressPercent(10);
+      await yieldAndPaint(600);
 
       const containerFront = document.createElement('div');
       containerFront.style.position = 'fixed';
@@ -1872,6 +2122,7 @@ document.addEventListener('DOMContentLoaded', () => {
       containerFront.style.height = getComputedStyle(cardEl).height;
       containerFront.style.opacity = '1';
       containerFront.style.visibility = 'visible';
+      containerFront.style.contain = 'strict';
 
       const containerBack = document.createElement('div');
       containerBack.style.position = 'fixed';
@@ -1881,6 +2132,7 @@ document.addEventListener('DOMContentLoaded', () => {
       containerBack.style.height = getComputedStyle(cardEl).height;
       containerBack.style.opacity = '1';
       containerBack.style.visibility = 'visible';
+      containerBack.style.contain = 'strict';
 
       const frontClone = frontSide.cloneNode(true);
       const backClone = backSide.cloneNode(true);
@@ -1897,11 +2149,47 @@ document.addEventListener('DOMContentLoaded', () => {
       const savedFront = prepareCardForCapture(frontClone);
       const savedBack = prepareCardForCapture(backClone);
 
+      stripHeavyCss(containerFront);
+      stripHeavyCss(containerBack);
+
       try {
-        const [canvasFront, canvasBack] = await Promise.all([
-          html2canvas(frontClone, renderOpts),
-          html2canvas(backClone, renderOpts)
-        ]);
+        // Step 2: Render Front (45%)
+        setStepState('step-prepare', 'done');
+        setStepState('step-render-front', 'current');
+        setProgressPercent(45);
+        await yieldAndPaint(600);
+
+        let canvasFront, canvasBack;
+        try {
+          canvasFront = await htmlToImage.toCanvas(frontClone, { pixelRatio: 2, cacheBust: true });
+
+          // Step 3: Render Back (80%)
+          setStepState('step-render-front', 'done');
+          setStepState('step-render-back', 'current');
+          setProgressPercent(80);
+          await yieldAndPaint(600);
+
+          canvasBack = await htmlToImage.toCanvas(backClone, { pixelRatio: 2, cacheBust: true });
+        } catch (e) {
+          console.warn('html-to-image failed, falling back to html2canvas:', e);
+          
+          if (!canvasFront) {
+            // Front side rendering with html2canvas fallback
+            setStepState('step-render-front', 'current');
+            setProgressPercent(45);
+            await yieldAndPaint(600);
+
+            canvasFront = await html2canvas(frontClone, renderOpts);
+            setStepState('step-render-front', 'done');
+          }
+
+          // Back side rendering with html2canvas fallback
+          setStepState('step-render-back', 'current');
+          setProgressPercent(80);
+          await yieldAndPaint(600);
+
+          canvasBack = await html2canvas(backClone, renderOpts);
+        }
 
         restoreColorMix(snapsFront);
         restoreCardAfterCapture(frontClone, savedFront);
@@ -1911,8 +2199,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.removeChild(containerFront);
         document.body.removeChild(containerBack);
 
-        const frontImg = canvasFront.toDataURL('image/png');
-        const backImg = canvasBack.toDataURL('image/png');
+        // Step 4: Generate PDF (95%)
+        setStepState('step-render-back', 'done');
+        setStepState('step-package', 'current');
+        setProgressPercent(95);
+        await yieldAndPaint(600);
 
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF({
@@ -1926,15 +2217,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const x = (297 - cardW) / 2;
         const y = (210 - cardH) / 2;
 
-        pdf.addImage(frontImg, 'PNG', x, y, cardW, cardH);
+        pdf.addImage(canvasFront, 'PNG', x, y, cardW, cardH);
         pdf.addPage();
-        pdf.addImage(backImg, 'PNG', x, y, cardW, cardH);
+        pdf.addImage(canvasBack, 'PNG', x, y, cardW, cardH);
 
         const pdfBlob = pdf.output('blob');
 
         triggerDownload(pdfBlob, 'AETHER-LMS-Card.pdf');
 
-        showToast('Download Complete', 'Your library card PDF has been saved.', 'success');
+        // Done (100%)
+        setStepState('step-package', 'done');
+        setProgressPercent(100);
+        await yieldAndPaint(800);
+
+        hideProcessing();
+        showToast('Download Started', 'Card assets compiled successfully. Check browser downloads.', 'success');
       } catch (err) {
         console.error('PDF generation failed:', err);
         if (containerFront.parentNode) {
@@ -1943,6 +2240,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (containerBack.parentNode) {
           document.body.removeChild(containerBack);
         }
+        hideProcessing();
         showToast('Download Failed', 'Could not compile card PDF.', 'error');
       }
       btnDownloadPdf.style.opacity = '';
@@ -2017,15 +2315,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnCopyShareLink) {
     btnCopyShareLink.addEventListener('click', () => {
-      
+
       navigator.clipboard.writeText(shareLinkUrl.value).then(() => {
         btnCopyShareLink.innerHTML = `<i data-lucide="check"></i><span>Copied!</span>`;
+        btnCopyShareLink.classList.add('copied');
         if (typeof lucide !== 'undefined') {
           lucide.createIcons();
         }
 
         setTimeout(() => {
           btnCopyShareLink.innerHTML = `<i data-lucide="copy" id="copy-icon"></i><span id="copy-btn-text">Copy</span>`;
+          btnCopyShareLink.classList.remove('copied');
           if (typeof lucide !== 'undefined') {
             lucide.createIcons();
           }
@@ -2079,7 +2379,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const sharePayload = hash.replace('#share=', '');
       try {
         let decodedData = {};
-        
+
         let normalizedPayload = sharePayload.replace(/-/g, '+').replace(/_/g, '/');
         while (normalizedPayload.length % 4) {
           normalizedPayload += '=';
@@ -2088,7 +2388,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (decodedString.includes('\u001f')) {
           const parsed = decodedString.split('\u001f');
-          
+
           const tierMap = { 'S': 'Standard', 'P': 'Premium', 'V': 'VIP' };
           const semRevMap = {
             '1': '1st Sem', '2': '2nd Sem', '3': '3rd Sem', '4': '4th Sem', '5': '5th Sem',
@@ -2123,7 +2423,7 @@ document.addEventListener('DOMContentLoaded', () => {
               s: parsed[3] || 'SEMESTER N/A',
               e: parsed[4] || DEFAULTS.email,
               p: parsed[5] || DEFAULTS.phone,
-               l: parsed[6] || `${DEFAULTS.limit} BOOK${DEFAULTS.limit > 1 ? 'S' : ''}`,
+              l: parsed[6] || `${DEFAULTS.limit} BOOK${DEFAULTS.limit > 1 ? 'S' : ''}`,
               t: parsed[7] || DEFAULTS.term,
               k: parsed[8],
               th: parsed[9] || DEFAULTS.theme,
@@ -2138,7 +2438,7 @@ document.addEventListener('DOMContentLoaded', () => {
               s: parsed.s || 'SEMESTER N/A',
               e: parsed.e || DEFAULTS.email,
               p: parsed.p || DEFAULTS.phone,
-               l: parsed.l || `${DEFAULTS.limit} BOOK${DEFAULTS.limit > 1 ? 'S' : ''}`,
+              l: parsed.l || `${DEFAULTS.limit} BOOK${DEFAULTS.limit > 1 ? 'S' : ''}`,
               t: parsed.t || DEFAULTS.term,
               k: parsed.k,
               th: parsed.th || DEFAULTS.theme,
@@ -2162,19 +2462,19 @@ document.addEventListener('DOMContentLoaded', () => {
           if (previewAvatar) {
             console.log("checkSharedLink: Raw avatar data from payload =", decodedData.av);
             let avatarSrc = decodedData.av;
-            
+
             if (avatarSrc.startsWith('c:')) {
-              
+
               const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
               avatarSrc = `https://res.cloudinary.com/${cloudName}/image/upload/${avatarSrc.substring(2)}`;
             } else if (avatarSrc.startsWith('http://') || avatarSrc.startsWith('https://')) {
-              
+
             } else if (avatarSrc.includes('lms_avatars/') || avatarSrc.includes('lms-avatars/')) {
-              
+
               const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
               avatarSrc = `https://res.cloudinary.com/${cloudName}/image/upload/${avatarSrc}`;
             } else {
-              
+
               avatarSrc = 'data:image/jpeg;base64,' + avatarSrc;
             }
             console.log("checkSharedLink: Final constructed avatar URL =", avatarSrc);
@@ -2198,7 +2498,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (previewAddr) previewAddr.textContent = decodedData.a || 'No specific special clearances or address declared.';
 
         if (previewTier) {
-          previewTier.className = 'card-type'; 
+          previewTier.className = 'card-type';
           const tierVal = decodedData.tr || 'Standard';
           let iconName = 'shield';
           let tierClass = 'tier-standard';
@@ -2218,10 +2518,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         document.documentElement.style.setProperty('--accent-primary', decodedData.th);
 
-        const qrImage = document.getElementById('preview-qr');
-        if (qrImage) {
-          qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(decodedData.k)}&color=ffffff&bgcolor=12131a`;
-        }
+        updateQrCodeElement(decodedData.k);
 
         if (libraryCard && libraryCard.classList.contains('flipped')) {
           libraryCard.classList.remove('flipped');
@@ -2250,20 +2547,20 @@ document.addEventListener('DOMContentLoaded', () => {
       if (mainNavbar) mainNavbar.style.display = 'none';
       if (beamContainer) beamContainer.style.display = 'none';
       skelRails.forEach(rail => rail.style.display = 'none');
-      
+
       if (isAdminAuthenticated) {
         if (adminPanelMode) adminPanelMode.style.display = 'flex';
         renderAdminDirectory();
       } else {
         if (adminLoginMode) adminLoginMode.style.display = 'flex';
-        
+
         setTimeout(() => {
           const uInput = document.getElementById('admin-username');
           if (uInput) uInput.focus();
         }, 50);
       }
     } else {
-      
+
       if (sharedViewerMode) sharedViewerMode.style.display = 'none';
       if (adminPanelMode) adminPanelMode.style.display = 'none';
       if (appWrapper) appWrapper.style.display = '';
@@ -2360,7 +2657,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             renderAdminDirectory();
           } else if (adminPanelMode && adminPanelMode.style.display === 'flex') {
-            
+
             renderAdminDirectory();
           }
         }
@@ -2382,7 +2679,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     async saveMember(member) {
-      
+
       if (firestoreDb) {
         try {
           await firestoreDb.collection('members').doc(member.k).set(member);
@@ -2415,7 +2712,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     async deleteMember(key) {
-      
+
       if (firestoreDb) {
         try {
           await firestoreDb.collection('members').doc(key).delete();
@@ -2443,7 +2740,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     async getAllMembers() {
-      
+
       if (firestoreDb) {
         try {
           const snapshot = await firestoreDb.collection('members').get();
@@ -2586,7 +2883,7 @@ document.addEventListener('DOMContentLoaded', () => {
             resetSubmitBtn();
           });
       } else {
-        
+
         console.warn("Firebase Auth SDK not active. Falling back to local credentials.");
         const expectedUser = (window.ENV && window.ENV.ADMIN_USERNAME) || 'admin@gmail.com';
         const expectedPass = (window.ENV && window.ENV.ADMIN_PASSWORD) || 'admin1234';
@@ -2627,7 +2924,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
           src = `https://res.cloudinary.com/${cloudName}/image/upload/${src.substring(2)}`;
         } else if (src.startsWith('http://') || src.startsWith('https://')) {
-          
+
         } else if (src.includes('lms_avatars/') || src.includes('lms-avatars/')) {
           const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
           src = `https://res.cloudinary.com/${cloudName}/image/upload/${src}`;
@@ -2677,7 +2974,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (presentAddrEl) presentAddrEl.textContent = m.a || m.personal_info?.present_address || 'N/A';
     const permanentAddrEl = document.getElementById('details-permanent-addr');
     if (permanentAddrEl) permanentAddrEl.textContent = m.personal_info?.permanent_address || 'N/A';
-    
+
     const cityPostCountryEl = document.getElementById('details-city-post-country');
     if (cityPostCountryEl) {
       const city = m.personal_info?.city || 'N/A';
@@ -2701,7 +2998,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (branchEl) branchEl.textContent = m.membership_details?.branch || 'N/A';
     const categoryEl = document.getElementById('details-category');
     if (categoryEl) categoryEl.textContent = m.membership_details?.category || 'N/A';
-    
+
     const interestsEl = document.getElementById('details-interests');
     if (interestsEl) {
       const interests = m.membership_details?.interests;
@@ -2717,13 +3014,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (borrowLimitEl) borrowLimitEl.textContent = m.l || '5';
     const themeColorEl = document.getElementById('details-theme-color');
     if (themeColorEl) themeColorEl.textContent = m.th || '#06b6d4';
-    
+
     const startDateEl = document.getElementById('details-start-date');
     if (startDateEl) startDateEl.textContent = m.membership_details?.start_date || 'N/A';
     const expiryDateEl = document.getElementById('details-expiry-date');
     if (expiryDateEl) expiryDateEl.textContent = m.t || m.membership_details?.expiry_date || 'N/A';
 
     detailsModal.style.display = 'flex';
+    requestAnimationFrame(() => {
+      detailsModal.classList.add('open');
+    });
 
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
@@ -2736,7 +3036,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function closeDetailsModal() {
     if (detailsModal) {
-      detailsModal.style.display = 'none';
+      detailsModal.classList.remove('open');
+      setTimeout(() => {
+        if (!detailsModal.classList.contains('open')) {
+          detailsModal.style.display = 'none';
+        }
+      }, 350);
     }
   }
 
@@ -2769,9 +3074,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = (m.e || '').toLowerCase();
         const dept = (m.d || '').toLowerCase();
         return name.includes(query) ||
-               key.includes(query) ||
-               email.includes(query) ||
-               dept.includes(query);
+          key.includes(query) ||
+          email.includes(query) ||
+          dept.includes(query);
       });
 
       if (filtered.length === 0) {
@@ -2798,7 +3103,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
             src = `https://res.cloudinary.com/${cloudName}/image/upload/${src.substring(2)}`;
           } else if (src.startsWith('http://') || src.startsWith('https://')) {
-            
+
           } else if (src.includes('lms_avatars/') || src.includes('lms-avatars/')) {
             const cloudName = (window.ENV && window.ENV.CLOUDINARY_CLOUD_NAME) || 'dorjgyfdl';
             src = `https://res.cloudinary.com/${cloudName}/image/upload/${src}`;
@@ -2893,7 +3198,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnAdminClose) {
     btnAdminClose.addEventListener('click', (e) => {
       e.preventDefault();
-      
+
       if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth()) {
         firebase.auth().signOut()
           .then(() => {
@@ -2920,7 +3225,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnViewerCreate) {
     btnViewerCreate.addEventListener('click', (e) => {
       e.preventDefault();
-      
+
       history.replaceState(null, '', window.location.pathname);
       checkSharedLink();
     });
