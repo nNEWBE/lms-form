@@ -9,17 +9,22 @@
   
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://nnewbe.github.io/lms-form/share.html">
-  <meta property="og:title" content="AETHER LMS — Verify Digital Library Card">
-  <meta property="og:description" content="Verify digital AETHER LMS library membership card with holographic 3D effects and QR codes.">
-  <meta property="og:image" content="https://nnewbe.github.io/lms-form/og-preview.jpg?v=3">
+  <meta property="og:url" content="https://nnewbe.github.io/lms-form/share.html" id="og-url">
+  <meta property="og:title" content="AETHER LMS — Digital Library Card" id="og-title">
+  <meta property="og:description" content="View and verify this AETHER LMS digital library membership card." id="og-desc">
+  <meta property="og:image" content="https://nnewbe.github.io/lms-form/og-preview.jpg" id="og-image">
+  <meta property="og:image:secure_url" content="https://nnewbe.github.io/lms-form/og-preview.jpg" id="og-image-secure">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1260">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="AETHER LMS Portal">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://nnewbe.github.io/lms-form/share.html">
-  <meta name="twitter:title" content="AETHER LMS — Verify Digital Library Card">
-  <meta name="twitter:description" content="Verify digital AETHER LMS library membership card with holographic 3D effects and QR codes.">
-  <meta name="twitter:image" content="https://nnewbe.github.io/lms-form/og-preview.jpg?v=3">
+  <meta name="twitter:site" content="@aetherlms">
+  <meta name="twitter:title" content="AETHER LMS — Digital Library Card" id="tw-title">
+  <meta name="twitter:description" content="View and verify this AETHER LMS digital library membership card." id="tw-desc">
+  <meta name="twitter:image" content="https://nnewbe.github.io/lms-form/og-preview.jpg" id="tw-image">
   
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="style.css?v=24">
@@ -524,13 +529,16 @@
         theme: '#06b6d4'
       };
 
-      // ── 4. Parse hash key ──
-      const hash = window.location.hash ? window.location.hash.substring(1).trim() : '';
-      if (!hash) {
+      // ── 4. Parse card key — supports ?id= query param (new) and #hash (legacy) ──
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryId  = urlParams.get('id') ? urlParams.get('id').trim() : '';
+      const hashId   = window.location.hash ? window.location.hash.substring(1).trim() : '';
+      const rawKey   = queryId || hashId;
+      if (!rawKey) {
         showError('No library card key provided in URL.');
         return;
       }
-      const cardKey = hash.startsWith('LMS-') ? hash : `LMS-${hash}`;
+      const cardKey = rawKey.startsWith('LMS-') ? rawKey : `LMS-${rawKey}`;
       console.log('Loading card key:', cardKey);
 
       // ── 5. Firebase / Firestore init ──

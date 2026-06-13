@@ -3309,7 +3309,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const keyVal = previewCardKey ? previewCardKey.textContent : '';
       const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
-      const finalShareUrl = `${baseUrl}share.html#${keyVal}`;
+      const finalShareUrl = `${baseUrl}share.html?id=${encodeURIComponent(keyVal)}`;
 
       shareLinkUrl.value = finalShareUrl;
 
